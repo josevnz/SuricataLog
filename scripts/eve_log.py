@@ -7,11 +7,11 @@ import argparse
 import json
 from pathlib import Path
 
-from rich.theme import Theme
 from rich.traceback import install
 from rich import pretty
 from rich.console import Console
-from suricatalog import DEFAULT_EVE, parse_timestamp, get_alerts_from_eve, DEFAULT_TIMESTAMP_10M_AGO
+from suricatalog import parse_timestamp, DEFAULT_TIMESTAMP_10M_AGO
+from suricatalog.log import DEFAULT_EVE, get_alerts_from_eve
 from suricatalog.ui import one_shot_alert_table
 
 pretty.install()

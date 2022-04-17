@@ -1,13 +1,17 @@
+import json
 import unittest
+from pathlib import Path
 
 from suricatalog import *
+from suricatalog import parse_timestamp
+from suricatalog.log import get_alerts_from_eve
 
 BASEDIR = Path(__file__).parent
 
 
 class SuricataLogTestCase(unittest.TestCase):
     eve_list = []
-    old_date = datetime.fromisoformat('2023-02-08T16:32:14.900292')
+    old_date = datetime.fromisoformat('2021-02-08T16:32:14.900292')
 
     @classmethod
     def setUpClass(cls) -> None:
