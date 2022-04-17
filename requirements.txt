@@ -1,0 +1,5 @@
+rich==12.2.0
+build==0.7.0
+wheel==0.37.1
+setuptools==60.5.0
+twine==4.0.0
