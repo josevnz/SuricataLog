@@ -2,13 +2,13 @@
 
 In a [previous article](https://www.freecodecamp.org/news/wireless-security-using-raspberry-pi-4-kismet-and-python/) I showed you how to secure your wireless home network using [Kismet](https://www.kismetwireless.net/).
 
-Kismet is really good on detecting anomalies and certain types of attack, but what if I want to analyze the traffic and look for abnormal patterns or patterns that coud indicate an attack?
+Kismet is perfect on detecting anomalies and certain types of attack, but what if I want to analyze the traffic and look for abnormal patterns or patterns that could indicate an attack?
 
 And [Intrusion Detection System](https://en.wikipedia.org/wiki/Intrusion_detection_system) (**IDS**) is:
 
 > An intrusion detection system (IDS; also intrusion prevention system or IPS) is a device or software application that monitors a network or systems for malicious activity or policy violations
 
-I used a good IDS in the past called [Snort V2](https://snort.org/), I'm awarer than *Snort 3 is out* but there is an [pretty clear warning](https://snort.org/documents/snort-supported-oss) about running it on a machine without much memory:
+I used a good IDS in the past called [Snort V2](https://snort.org/), I'm awarer than *Snort 3 is out* but there is a [pretty clear warning](https://snort.org/documents/snort-supported-oss) about running it on a machine without much memory:
 
 > While Snort can compile on almost all *nix based machines, it is not recommended that you compile Snort on a low power or low RAM machine. Snort requires memory to run and to properly analyze as much traffic as possible.
 
@@ -469,7 +469,7 @@ For sake of example, zoom in alert id '282956779721256':
     "ack": true,
     "state": "closed"
   },
-  "host": "ras[berripi"
+  "host": "raspberrypi"
 }
 ```
 
@@ -478,7 +478,7 @@ That's quite a bit; keep in mind that while we are tuning Suricata, we can also 
 #### Ask Suricata to run in offline mode using PCAP file for SUNNYSTATION
 
 It is a very convenient way to test Suricata, as we do not inject any traffic in our network and instead let Suricata 'ingest' the contents of the PCAP
-file directly, to test the rules. Also we redirect the logs to a separate location (by default the directory where you are running the 'offline' mode), so we don't pollute a live installation.
+file directly, to test the rules. Also, we redirect the logs to a separate location (by default the directory where you are running the 'offline' mode), so we don't pollute a live installation.
 
 [![asciicast](https://asciinema.org/a/SH8bo3pjpvRt4H617GoHbPdoK.svg)](https://asciinema.org/a/SH8bo3pjpvRt4H617GoHbPdoK)
 
@@ -618,11 +618,11 @@ It is a big improvement over jq as at least we can filter by timestamp, but It w
 
 Suricata is a complex piece of software, it takes time to tame it and more time to make sense of the information it presents; But it is very rewarding to see how you can tackle a tool that will allow you to secure your network from threats.
 
-* [The OISF Suricata Youtube channel](https://www.youtube.com/c/OISFSuricata) has many interesting resources about this tool and a thriving community.
+* [The OISF Suricata YouTube channel](https://www.youtube.com/c/OISFSuricata) has many interesting resources about this tool and a thriving community.
 * Want to learn how to analyze PCAP files for bad traffic? [malware-traffic-analysis](https://www.malware-traffic-analysis.net/training-exercises.html) has perfect material for you.
 * **Writing complex software is hard**. For example, older versions of Snort are vulnerable to an [attack that can disable it, CVE-2022-20685](https://claroty.com/2022/04/14/blog-research-blinding-snort-breaking-the-modbus-ot-preprocessor/); Suricata also had [CVE-2019-1010279](https://nvd.nist.gov/vuln/detail/CVE-2019-1010279) 
 These issues were fixed but illustrates the need to keep your software current, specially the one you use to protect your network. 
 * I did not touch the IPS mode, or even hybrid modes for Suricata. Please read the official documentation to get up to speed.
 * Finally, do yourself a favor and read this [Suricata Tutorial from FloCon 2016](https://resources.sei.cmu.edu/asset_files/Presentation/2016_017_001_449890.pdf); It is very complete and will have you looking for more.
 
-Please leave your comments on the git repository and report any bugs. But more important get Suricata, [get the code of this tutorial](git@github.com:josevnz/SuricataLog.git), and start securing your home wireless infrastructure in no time.
+Please leave your comments on the git repository and report any bugs. But more important get Suricata, [get the code of this tutorial](https://github.com/josevnz/SuricataLog), and start securing your home wireless infrastructure in no time.
