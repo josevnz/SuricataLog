@@ -34,7 +34,7 @@ python3 -m pip install --upgrade pip setuptools wheel
 ## Installing from Pypi.org
 
 ```shell
-pip3 install SuricataLog-X.Y.Z-py3-none-any.whl
+pip3 install --upgrade SuricataLog
 ```
 
 ## Installing from source
