@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from datetime import datetime
 from typing import Callable, List
@@ -5,6 +6,8 @@ from typing import Callable, List
 from rich.console import Console
 from rich.table import Table
 from rich.progress import Progress
+
+from suricatalog.log import tail_eve
 
 
 def one_shot_alert_table(

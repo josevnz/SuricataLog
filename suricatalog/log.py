@@ -1,4 +1,6 @@
 import json
+import os
+import time
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Callable, Dict
@@ -32,3 +34,30 @@ def get_alerts_from_eve(
                         yield data
                 except JSONDecodeError:
                     continue  # Try to read the next record
+
+
+def tail_eve(
+        *,
+        eve_file=None,
+        decorator: Callable = json.loads
+):
+    """
+    Similar to UNIX ``tail -f eve.json``
+    :param decorator:
+    :param eve_file:
+    :return:
+    """
+    if eve_file is None:
+        eve_file = DEFAULT_EVE
+    with open(eve_file, 'rt') as eve:
+        eve.seek(0, os.SEEK_END)
+        while True:
+            try:
+                line = eve.readline()
+                if not line:
+                    time.sleep(0.1)
+                    continue
+                data = decorator(line)
+                yield data
+            except JSONDecodeError:
+                continue
