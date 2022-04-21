@@ -3,14 +3,27 @@ from pathlib import Path
 from datetime import datetime
 from typing import Callable, List
 
+from rich.columns import Columns
+from rich.panel import Panel
+from rich.syntax import Syntax
+from rich.traceback import install
+from rich import pretty
 from rich.console import Console
 from rich.table import Table
 from rich.progress import Progress
+from rich.text import Text
+from textual import events
+from textual.app import App
+from textual.widgets import ScrollView
 
-from suricatalog.log import tail_eve
+from suricatalog.log import get_alerts_from_eve
+
+pretty.install()
+install(show_locals=True)
 
 
 def one_shot_alert_table(
+        *,
         eve: List[Path],
         timestamp: datetime,
         alerts_retriever: Callable,
@@ -31,16 +44,17 @@ def one_shot_alert_table(
         title=f"Suricata alerts for {timestamp}, logs={logs}",
         highlight=True
     )
-    alerts_tbl.add_column("Timestamp", style="dim")
+    alerts_tbl.add_column("Timestamp", style="dim", no_wrap=True)
     alerts_tbl.add_column("Severity")
     alerts_tbl.add_column("Signature", style="Blue")
     alerts_tbl.add_column("Protocol", justify="right")
     alerts_tbl.add_column("Destination", justify="right")
     alerts_tbl.add_column("Source", justify="right")
-    alerts_tbl.add_column("Payload", justify="right")
+    alerts_tbl.add_column("Payload", justify="right", no_wrap=False)
     alert_cnt = 0
     with Progress(console=console, transient=False) as progress:
         task = progress.add_task(f"Parsing {logs}", total=100)
+        progress.update(task_id=task, completed=1.0)
         for alert in alerts_retriever(eve_files=eve, timestamp=timestamp):
             try:
                 dest_ip = alert['dest_ip'] if 'dest_ip' in alert else ""
@@ -66,3 +80,69 @@ def one_shot_alert_table(
         progress.update(task_id=task, completed=100.0)
     alerts_tbl.show_footer
     return alerts_tbl
+
+
+def one_shot_json(
+        *,
+        eve: List[Path],
+        timestamp: datetime,
+        alerts_retriever: Callable,
+        console: Console
+) -> str:
+    with Progress(console=console, transient=False) as progress:
+        task = progress.add_task(f"Parsing {eve}", total=100)
+        progress.update(task_id=task, completed=1.0)
+        alerts: List[str] = [
+            json.dumps(single_alert, indent=2, sort_keys=True) for single_alert in alerts_retriever(
+                eve_files=eve, timestamp=timestamp)
+        ]
+        progress.update(task_id=task, completed=100.0)
+    return "\n".join(alerts)
+
+
+class EveLogApp(App):
+
+    def __init__(
+            self,
+            *args,
+            timestamp: datetime,
+            eve_files: List[Path],
+            out_format: str,
+            **kwargs
+    ):
+        super().__init__(*args, **kwargs)
+        self.body = None
+        self.timestamp = timestamp
+        self.eve_files = eve_files
+        self.out_format = out_format
+
+    async def on_load(self, event: events.Load) -> None:
+        await self.bind("q", "quit", "Quit")
+
+    async def on_mount(self, event: events.Mount) -> None:
+
+        self.body = body = ScrollView(auto_width=True)
+
+        await self.view.dock(body)
+
+        async def add_content():
+            if self.out_format == "table":
+                tbl = one_shot_alert_table(
+                    timestamp=self.timestamp,
+                    eve=self.eve_files,
+                    console=self.console,
+                    alerts_retriever=get_alerts_from_eve
+                )
+                await body.update(tbl)
+            elif self.out_format == "json":
+                panels = one_shot_json(
+                    timestamp=self.timestamp,
+                    eve=self.eve_files,
+                    console=self.console,
+                    alerts_retriever=get_alerts_from_eve
+                )
+                await body.update(panels)
+            else:
+                raise NotImplementedError(f"I don't know how to handle {self.out_format}!")
+
+        await self.call_later(add_content)
