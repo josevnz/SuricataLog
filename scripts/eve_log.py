@@ -11,7 +11,7 @@ from suricatalog import parse_timestamp, DEFAULT_TIMESTAMP_10M_AGO
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.ui import EveLogApp
 
-FORMATS = ('json', 'table')
+FORMATS = ('json', 'table', 'brief')
 
 if __name__ == "__main__":
     CONSOLE = Console()
