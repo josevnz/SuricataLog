@@ -4,20 +4,14 @@ Show Suricata alerts
 Author: Jose Vicente Nunez (kodegeek.com@protonmail.com)
 """
 import argparse
-import json
 from pathlib import Path
 
-from rich.traceback import install
-from rich import pretty
 from rich.console import Console
 from suricatalog import parse_timestamp, DEFAULT_TIMESTAMP_10M_AGO
-from suricatalog.log import DEFAULT_EVE, get_alerts_from_eve
-from suricatalog.ui import one_shot_alert_table
+from suricatalog.log import DEFAULT_EVE
+from suricatalog.ui import EveLogApp
 
-pretty.install()
-install(show_locals=True)
-
-FORMATS = ('json', 'table')
+FORMATS = ('json', 'table', 'brief')
 
 if __name__ == "__main__":
     CONSOLE = Console()
@@ -43,18 +37,12 @@ if __name__ == "__main__":
     )
     OPTIONS = PARSER.parse_args()
     try:
-        if OPTIONS.formats == "json":
-            for alert in get_alerts_from_eve(eve_files=OPTIONS.eve, timestamp=OPTIONS.timestamp):
-                CONSOLE.print(json.dumps(alert, indent=6, sort_keys=True))
-        elif OPTIONS.formats == "table":
-            alerts_tbl = one_shot_alert_table(
-                timestamp=OPTIONS.timestamp,
-                eve=OPTIONS.eve,
-                console=CONSOLE,
-                alerts_retriever=get_alerts_from_eve
-            )
-            CONSOLE.print(alerts_tbl)
-        else:
-            raise NotImplementedError(f"I don't know how to handle {OPTIONS.format}!")
+        EveLogApp.run(
+            timestamp=OPTIONS.timestamp,
+            eve_files=OPTIONS.eve,
+            out_format=OPTIONS.formats,
+            console=CONSOLE,
+            title="Suricata alerts",
+        )
     except KeyboardInterrupt:
         CONSOLE.print("[bold]Program interrupted...[/bold]")

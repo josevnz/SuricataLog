@@ -97,4 +97,6 @@ Parsing test/eve.json ━━━━━━━━━━━━━━━━━━━�
 
 Or better see it by yourself:
 
-[![asciicast](https://asciinema.org/a/488166.svg)](https://asciinema.org/a/488166)
+```shell
+asciinema play demo-ascii.cast
+```
