@@ -13,11 +13,11 @@ from pathlib import Path
 from ipaddress import ip_address
 
 from rich.console import Console
-from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, all_events_filter
+from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, all_events_filter, AlwaysTrueFilter
 from suricatalog.log import DEFAULT_EVE, get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO
-from suricatalog.ui import EveLogApp
+from suricatalog.ui import EveLogApp, one_shot_flow_table
 
 if __name__ == "__main__":
     CONSOLE = Console()
@@ -81,14 +81,12 @@ if __name__ == "__main__":
                 data_filter=WithPrintablePayloadFilter()
             )
         elif OPTIONS.flow:
-            afr = AggregatedFlowProtoReport()
-            for event in get_events_from_eve(
-                    timestamp=DEFAULT_TIMESTAMP_10Y_AGO,
-                    eve_files=OPTIONS.eve,
-                    row_filter=all_events_filter):
-                afr.ingest_data(event)
-            CONSOLE.print(afr.port_proto_count)
-            # TODO: Make this a table!!!
+            flow_tbl = one_shot_flow_table(
+                eve=OPTIONS.eve,
+                data_filter=AlwaysTrueFilter(),
+                console=CONSOLE
+            )
+            CONSOLE.print(flow_tbl)
         elif OPTIONS.netflow:
             ip_address = OPTIONS.netflow.exploded
             hdu = HostDataUseReport()
