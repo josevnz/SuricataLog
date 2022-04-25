@@ -15,7 +15,8 @@ from textual import events
 from textual.app import App
 from textual.widgets import ScrollView
 
-from suricatalog.log import get_alerts_from_eve
+from suricatalog.filter import BaseFilter
+from suricatalog.log import get_events_from_eve
 
 pretty.install()
 install(show_locals=True)
@@ -26,10 +27,12 @@ def one_shot_alert_table(
         eve: List[Path],
         timestamp: datetime,
         alerts_retriever: Callable,
-        console: Console
+        console: Console,
+        data_filter: BaseFilter
 ) -> Table:
     """
     Read and parse all the alerts from the eve.json file. It may use lots of memory and take a while to render...
+    :param data_filter:
     :param eve:
     :param timestamp:
     :param alerts_retriever:
@@ -55,6 +58,8 @@ def one_shot_alert_table(
         task = progress.add_task(f"Parsing {logs}", total=100)
         progress.update(task_id=task, completed=1.0)
         for alert in alerts_retriever(eve_files=eve, timestamp=timestamp):
+            if not data_filter.accept(alert):
+                continue
             try:
                 dest_ip = alert['dest_ip'] if 'dest_ip' in alert else ""
                 dest_port = str(alert['dest_port']) if 'dest_port' in alert else ""
@@ -86,14 +91,15 @@ def one_shot_json(
         eve: List[Path],
         timestamp: datetime,
         alerts_retriever: Callable,
-        console: Console
+        console: Console,
+        data_filter: BaseFilter
 ) -> str:
     with Progress(console=console, transient=False) as progress:
         task = progress.add_task(f"Parsing {eve}", total=100)
         progress.update(task_id=task, completed=1.0)
         alerts: List[str] = [
             json.dumps(single_alert, indent=2, sort_keys=True) for single_alert in alerts_retriever(
-                eve_files=eve, timestamp=timestamp)
+                eve_files=eve, timestamp=timestamp) if data_filter.accept(single_alert)
         ]
         progress.update(task_id=task, completed=100.0)
     return "\n".join(alerts)
@@ -104,13 +110,16 @@ def one_shot_brief(
         eve: List[Path],
         timestamp: datetime,
         alerts_retriever: Callable,
-        console: Console
+        console: Console,
+        data_filter: BaseFilter
 ) -> Columns:
     with Progress(console=console, transient=False) as progress:
         task = progress.add_task(f"Parsing {eve}", total=100)
         progress.update(task_id=task, completed=1.0)
         alerts: List[Panel] = []
         for single_alert in alerts_retriever(eve_files=eve, timestamp=timestamp):
+            if not data_filter.accept(single_alert):
+                continue
             dest_ip = single_alert['dest_ip'] if 'dest_ip' in single_alert else ""
             dest_port = str(single_alert['dest_port']) if 'dest_port' in single_alert else ""
             src_ip = single_alert['src_ip'] if 'src_ip' in single_alert else ""
@@ -142,6 +151,7 @@ class EveLogApp(App):
             timestamp: datetime,
             eve_files: List[Path],
             out_format: str,
+            data_filter: BaseFilter,
             **kwargs
     ):
         super().__init__(*args, **kwargs)
@@ -149,6 +159,7 @@ class EveLogApp(App):
         self.timestamp = timestamp
         self.eve_files = eve_files
         self.out_format = out_format
+        self.data_filter = data_filter
 
     async def on_load(self, event: events.Load) -> None:
         await self.bind("q", "quit", "Quit")
@@ -165,7 +176,8 @@ class EveLogApp(App):
                     timestamp=self.timestamp,
                     eve=self.eve_files,
                     console=self.console,
-                    alerts_retriever=get_alerts_from_eve
+                    alerts_retriever=get_events_from_eve,
+                    data_filter=self.data_filter
                 )
                 await body.update(tbl)
             elif self.out_format == "json":
@@ -173,7 +185,8 @@ class EveLogApp(App):
                     timestamp=self.timestamp,
                     eve=self.eve_files,
                     console=self.console,
-                    alerts_retriever=get_alerts_from_eve
+                    alerts_retriever=get_events_from_eve,
+                    data_filter=self.data_filter
                 )
                 await body.update(panels)
             elif self.out_format == "brief":
@@ -181,7 +194,8 @@ class EveLogApp(App):
                     timestamp=self.timestamp,
                     eve=self.eve_files,
                     console=self.console,
-                    alerts_retriever=get_alerts_from_eve
+                    alerts_retriever=get_events_from_eve,
+                    data_filter=self.data_filter
                 )
                 await body.update(columns)
             else:

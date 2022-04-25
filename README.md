@@ -95,8 +95,14 @@ Parsing test/eve.json ━━━━━━━━━━━━━━━━━━━�
 └─────────────────────────────────┴──────────┴──────────────────────────────────────────────────────┴──────────┴────────────────────┴────────────────────┴─────────┘
 ```
 
-Or better see it by yourself:
+Better see it by yourself, show eve log records in JSON format:
 
-```shell
-asciinema play demo-ascii.cast
-```
+[![asciicast](https://asciinema.org/a/489775.svg)](https://asciinema.org/a/489775)
+
+Or brief format:
+
+[![asciicast](https://asciinema.org/a/489776.svg)](https://asciinema.org/a/489776)
+
+Or in table format:
+
+[![asciicast](https://asciinema.org/a/489777.svg)](https://asciinema.org/a/489777)
