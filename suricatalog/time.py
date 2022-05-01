@@ -1,9 +1,8 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import Union, Any
 
-from suricatalog import datetime
-
 DEFAULT_TIMESTAMP_10M_AGO = datetime = datetime.now() - timedelta(minutes=10)
+DEFAULT_TIMESTAMP_10Y_AGO = datetime = datetime.now() - timedelta(days=365*10)
 
 
 def parse_timestamp(candidate: Union[str, Any]) -> datetime:
