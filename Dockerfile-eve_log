@@ -1,0 +1,15 @@
+FROM python:3 AS builder
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir --no-warn-script-location -r requirements.txt
+FROM python:3-slim
+WORKDIR /kodegeek
+COPY --from=builder /root/.local /root/.local
+COPY ./suricatalog ./suricatalog
+COPY ./scripts/* ./
+ENV PATH=/root/.local:$PATH
+LABEL "author"="Jose Vicente Nunez (kodegeek.com@protonmail.com)"
+LABEL "description"="SuricataLog is a set of scripts to display Suricata eve files (/var/log/suricata/eve.json)"
+LABEL "description"="SuricataLog - eve_eve.py"
+LABEL "build"="BUILDKIT=1 docker build --tag suricatalog/eve_log -f Dockerfile-eve_log ."
+HEALTHCHECK NONE
+ENTRYPOINT [ "python", "./eve_log.py" ]
