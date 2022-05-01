@@ -3,6 +3,7 @@
 ## Sun Apr 24 2022 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.0.4
 - Split program demo so it can fit in Asciinema hosting
 - New eve_json.py script, mimics queries from [eve JSON examples jq](https://suricata.readthedocs.io/en/suricata-6.0.0/output/eve/eve-json-examplesjq.html)
+- Added ability to run SuricataLog from a Docker container
 
 ## Thu Apr 21 2022 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.0.3
 - Added scrolling to tables, json.

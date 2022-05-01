@@ -6,7 +6,7 @@ from json import JSONDecodeError
 from pathlib import Path
 from typing import Callable, Dict
 
-from suricatalog.filter import alert_filter
+from suricatalog.filter import timestamp_filter
 from suricatalog.time import DEFAULT_TIMESTAMP_10M_AGO
 
 DEFAULT_EVE = [Path("/var/log/suricata/eve.json")]
@@ -15,13 +15,13 @@ DEFAULT_EVE = [Path("/var/log/suricata/eve.json")]
 def get_events_from_eve(
         *,
         eve_files=None,
-        row_filter: Callable = alert_filter,
+        row_filter: Callable = timestamp_filter,
         timestamp: datetime = DEFAULT_TIMESTAMP_10M_AGO
 ) -> Dict:
     """
     Get alerts from a JSON even file
     :param eve_files:
-    :param row_filter:
+    :param row_filter: Filter events based on several criteria
     :param timestamp:
     :return:
     """

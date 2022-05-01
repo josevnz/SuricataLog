@@ -15,13 +15,19 @@ from ipaddress import ip_address
 from rich.console import Console
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, all_events_filter, AlwaysTrueFilter
 from suricatalog.log import DEFAULT_EVE, get_events_from_eve
-from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
-from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO
+from suricatalog.report import HostDataUseReport, TopUserAgents
+from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
 from suricatalog.ui import EveLogApp, one_shot_flow_table
 
 if __name__ == "__main__":
     CONSOLE = Console()
     PARSER = argparse.ArgumentParser(description=__doc__)
+    PARSER.add_argument(
+        "--timestamp",
+        type=parse_timestamp,
+        default=DEFAULT_TIMESTAMP_10Y_AGO,
+        help=f"Minimum timestamp in the past to use when filtering events ({DEFAULT_TIMESTAMP_10Y_AGO})"
+    )
     EXCLUSIVE_FLAGS = PARSER.add_mutually_exclusive_group()
     EXCLUSIVE_FLAGS.add_argument(
         "--nxdomain",
@@ -64,7 +70,7 @@ if __name__ == "__main__":
     try:
         if OPTIONS.nxdomain:
             EveLogApp.run(
-                timestamp=DEFAULT_TIMESTAMP_10Y_AGO,
+                timestamp=OPTIONS.timestamp,
                 eve_files=OPTIONS.eve,
                 out_format='json',
                 console=CONSOLE,
@@ -73,7 +79,7 @@ if __name__ == "__main__":
             )
         elif OPTIONS.payload:
             EveLogApp.run(
-                timestamp=DEFAULT_TIMESTAMP_10Y_AGO,
+                timestamp=OPTIONS.timestamp,
                 eve_files=OPTIONS.eve,
                 out_format='json',
                 console=CONSOLE,
@@ -91,7 +97,7 @@ if __name__ == "__main__":
             ip_address = OPTIONS.netflow.exploded
             hdu = HostDataUseReport()
             for event in get_events_from_eve(
-                    timestamp=DEFAULT_TIMESTAMP_10Y_AGO,
+                    timestamp=OPTIONS.timestamp,
                     eve_files=OPTIONS.eve,
                     row_filter=all_events_filter):
                 hdu.ingest_data(event, ip_address)
@@ -99,11 +105,11 @@ if __name__ == "__main__":
         elif OPTIONS.useragent:
             tua = TopUserAgents()
             for event in get_events_from_eve(
-                    timestamp=DEFAULT_TIMESTAMP_10Y_AGO,
+                    timestamp=OPTIONS.timestamp,
                     eve_files=OPTIONS.eve,
                     row_filter=all_events_filter):
                 tua.ingest_data(event)
-            # TODO: Finish!!!
+            CONSOLE.print(tua.agents)
 
     except KeyboardInterrupt:
         CONSOLE.print("[bold]Program interrupted...[/bold]")

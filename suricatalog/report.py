@@ -52,12 +52,39 @@ class HostDataUseReport:
 
 class TopUserAgents:
 
-    # TODO !!!!
+    agents: Dict[str, int] = {}
 
     def ingest_data(self, data: Dict[Any, Any]) -> None:
         """
         cat eve.json | jq -s '[.[]|.http.http_user_agent]|group_by(.)|map({key:.[0],value:(.|length)})|from_entries'
+
+        This particular rule is quite brittle, if data is incomplete you will get the following error:
+
+        ```json
+        jq: error (at <stdin>:14914): Cannot use null (null) as object key
+        ```
+
+        Instead of something like this:
+        ```json
+        {
+            "Microsoft NCSI": 5,
+            "Microsoft-CryptoAPI/6.1": 2,
+            "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; Win64; x64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729)": 2,
+            "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Win64; x64; Trident/7.0; .NET CLR 2.0.50727; SLCC2; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E)": 6,
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; rv:11.0) like Gecko": 3,
+            "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko": 2,
+            "WinHTTP loader/1.0": 4,
+            "WinHTTP sender/1.0": 2,
+            "pwtyyEKzNtGatwnJjmCcBLbOveCVpc": 2,
+            "test": 4
+        }
+        ```
         :param data:
         :return:
         """
-        pass
+        if 'event_type' in data and 'http' in data and 'http_user_agent' in data['http']:
+            agent = data['http']['http_user_agent']
+            if agent:
+                if agent not in self.agents:
+                    self.agents[agent] = 0
+                self.agents[agent] += 1

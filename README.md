@@ -106,3 +106,44 @@ Or brief format:
 Or in table format:
 
 [![asciicast](https://asciinema.org/a/489777.svg)](https://asciinema.org/a/489777)
+
+## Canned reports with eve_json.py
+
+```shell
+(suricatalog) [josevnz@dmaf5 SuricataLog]$ eve_json.py --help
+usage: eve_json.py [-h] [--nxdomain | --payload | --flow | --netflow NETFLOW | --useragent] eve [eve ...]
+
+This script is inspired by the examples provided on [15.1.3. Eve JSON ‘jq’ Examples](https://suricata.readthedocs.io/en/suricata-6.0.0/output/eve/eve-json-
+examplesjq.html) A few things: * The output uses colorized JSON
+
+positional arguments:
+  eve                Path to one or more /var/log/suricata/eve.json file to parse.
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --nxdomain         Show DNS records with NXDOMAIN
+  --payload          Show alerts with a printable payload
+  --flow             Aggregated flow report per protocol and destination port
+  --netflow NETFLOW  Get the netflow for a given IP address
+  --useragent        Top user agent in HTTP traffic
+```
+
+### NXDOMAIN
+
+[![asciicast](https://asciinema.org/a/491442.svg)](https://asciinema.org/a/491442)
+
+### PAYLOAD
+
+[![asciicast](https://asciinema.org/a/491432.svg)](https://asciinema.org/a/491432)
+
+### FLOW
+
+[![asciicast](https://asciinema.org/a/491433.svg)](https://asciinema.org/a/491433)
+
+### NETFLOW
+
+[![asciicast](https://asciinema.org/a/491435.svg)](https://asciinema.org/a/491435)
+
+### USERAGENT
+
+[![asciicast](https://asciinema.org/a/491436.svg)](https://asciinema.org/a/491436)

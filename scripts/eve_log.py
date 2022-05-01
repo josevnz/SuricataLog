@@ -10,7 +10,7 @@ from rich.console import Console
 from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10M_AGO
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.ui import EveLogApp
-from suricatalog.filter import AlwaysTrueFilter
+from suricatalog.filter import OnlyAlertsFilter
 
 FORMATS = ('json', 'table', 'brief')
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
             out_format=OPTIONS.formats,
             console=CONSOLE,
             title="Suricata alerts",
-            data_filter=AlwaysTrueFilter()
+            data_filter=OnlyAlertsFilter()
         )
     except KeyboardInterrupt:
         CONSOLE.print("[bold]Program interrupted...[/bold]")

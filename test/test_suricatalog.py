@@ -4,9 +4,9 @@ from datetime import datetime
 from pathlib import Path
 
 from suricatalog.time import parse_timestamp
-from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, alert_filter, all_events_filter
+from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, timestamp_filter, all_events_filter
 from suricatalog.log import get_events_from_eve
-from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport
+from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
 
 BASEDIR = Path(__file__).parent
 
@@ -41,6 +41,7 @@ class FilterTestCase(unittest.TestCase):
         self.assertTrue(data_filter.accept(payload))
 
     def test_nxdomain(self):
+        data_filter = NXDomainFilter()
         payload = json.loads('{"timestamp":"2022-02-23T19:04:05.606882+0000","flow_id":1452066252079368,'
                              '"pcap_cnt":85538,"event_type":"dns","src_ip":"172.16.0.170","src_port":58529,'
                              '"dest_ip":"172.16.0.52","dest_port":53,"proto":"UDP","dns":{"version":2,"type":"answer",'
@@ -50,7 +51,6 @@ class FilterTestCase(unittest.TestCase):
                              '"soa":{"mname":"sunnystation-dc.sunnystation.com","rname":"hostmaster.sunnystation.com",'
                              '"serial":32,"refresh":900,"retry":600,"expire":86400,"minimum":3600}}]},'
                              '"host":"raspberrypi"}')
-        data_filter = NXDomainFilter()
         self.assertTrue(data_filter.accept(payload))
         payload = json.loads('{"timestamp":"2022-02-08T15:08:22.266264+0000","flow_id":127219202876190,'
                              '"pcap_cnt":4196,"event_type":"tls","src_ip":"10.2.8.102","src_port":49798,'
@@ -102,6 +102,16 @@ class ReportTestCase(unittest.TestCase):
         self.assertEqual(0, hr2.bytes)
         self.assertEqual(153339, hr.bytes)
 
+    def test_top_user_agents(self):
+
+        tua = TopUserAgents()
+        for event in ReportTestCase.eve_list:
+            tua.ingest_data(event)
+
+        self.assertIsNotNone(tua.agents)
+        self.assertTrue('test' in tua.agents)
+        self.assertEqual(10, len(tua.agents))
+
 
 class SuricataLogTestCase(unittest.TestCase):
     eve_list = []
@@ -123,19 +133,19 @@ class SuricataLogTestCase(unittest.TestCase):
         except ValueError:
             pass
 
-    def test_alert_filter(self):
-        self.assertFalse(
-            alert_filter(data=SuricataLogTestCase.eve_list[0], timestamp=SuricataLogTestCase.old_date)
+    def test_timestamp_filter(self):
+        self.assertTrue(
+            timestamp_filter(data=SuricataLogTestCase.eve_list[0], timestamp=SuricataLogTestCase.old_date)
         )
         self.assertTrue(
-            alert_filter(data=SuricataLogTestCase.eve_list[132], timestamp=SuricataLogTestCase.old_date)
+            timestamp_filter(data=SuricataLogTestCase.eve_list[132], timestamp=SuricataLogTestCase.old_date)
         )
 
     def test_get_alerts(self):
         all_alerts = [x for x in get_events_from_eve(
             timestamp=SuricataLogTestCase.old_date,
             eve_files=[BASEDIR.joinpath("eve.json")]
-        )]
+        ) if x['event_type'] == 'alert']
         self.assertIsNotNone(all_alerts)
         self.assertEqual(275, len(all_alerts))
         self.assertEqual('SURICATA Applayer Detect protocol only one direction', all_alerts[90]['alert']['signature'])
