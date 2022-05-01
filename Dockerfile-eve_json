@@ -1,0 +1,8 @@
+FROM suricatalog/eve_log:latest AS builder
+ENV PATH=/root/.local:$PATH
+LABEL "author"="Jose Vicente Nunez (kodegeek.com@protonmail.com)"
+LABEL "description"="SuricataLog is a set of scripts to display Suricata eve files (/var/log/suricata/eve.json)"
+LABEL "description"="SuricataLog - eve_json.py"
+LABEL "build"="BUILDKIT=1 docker build --tag suricatalog/eve_json -f Dockerfile-eve_json ."
+HEALTHCHECK NONE
+ENTRYPOINT [ "python", "./eve_json.py" ]
