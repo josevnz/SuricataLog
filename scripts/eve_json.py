@@ -4,7 +4,8 @@ This script is inspired by the examples provided on
 [15.1.3. Eve JSON ‘jq’ Examples](https://suricata.readthedocs.io/en/suricata-6.0.0/output/eve/eve-json-examplesjq.html)
 
 A few things:
-* The output uses colorized JSON
+* The output uses colorized/ scrollable JSON
+* You can filter by timestamp
 
 """
 

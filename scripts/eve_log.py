@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Show Suricata alerts
+Show Suricata alerts in different formats
 Author: Jose Vicente Nunez (kodegeek.com@protonmail.com)
 """
 import argparse

@@ -11,7 +11,7 @@ Which is very useful, but what if I just needed to do a quick inspection of the 
 Sooner or later you will get [bored to death](https://suricata.readthedocs.io/en/suricata-6.0.0/output/eve/eve-json-examplesjq.html) doing this:
 
 ```shell
-cat eve.json | jq -r -c 'select(.event_type=="alert")|.payload'|base64 --decode
+cat eve.json | jq -r -c 'select(.event_type=="alert")|.payload'| base64 --decode
 ```
 
 SuricataLog is a set of tools/ scripts to parse and display Suricata log files (like /var/log/suricata/eve.json)
