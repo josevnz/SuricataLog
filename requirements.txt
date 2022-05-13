@@ -1,6 +1,6 @@
-rich==12.2.0
+rich==12.4.1
 build==0.7.0
 wheel==0.37.1
-setuptools==60.5.0
+setuptools
 twine==4.0.0
-textual==0.1.17
+textual==0.1.18
