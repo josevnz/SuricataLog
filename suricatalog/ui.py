@@ -128,8 +128,8 @@ class EveLogApp(App):
             timestamp: datetime,
             alerts_retriever: Callable,
             data_filter: BaseFilter
-    ) -> Columns:
-        alerts: List[Panel] = []
+    ) -> Table:
+        grid = Table.grid()
         for single_alert in alerts_retriever(eve_files=eve, timestamp=timestamp):
             if not data_filter.accept(single_alert):
                 continue
@@ -139,20 +139,20 @@ class EveLogApp(App):
             src_port = str(single_alert['src_port']) if 'src_port' in single_alert else ""
             alrt_int = single_alert['alert']['severity']
             severity = f"[yellow]{str(alrt_int)}[/yellow]" if alrt_int <= 5 else f"[yellow]{str(alrt_int)}[/yellow]"
-            alerts.append(
+            grid.add_row(
                 Panel(
-                    textwrap.dedent(
-                        f"""{single_alert['timestamp']}
-    {severity}
-    {single_alert['alert']['signature']}
-    [red]{single_alert['app_proto']}[/red]
-    [green]{dest_ip}[/green]:[bold]{dest_port}[/bold] 
-    [yellow]{src_ip}[/yellow]:[bold]{src_port}[/bold]"""
-                    ),
+                    textwrap.dedent(f"""
+    [b]Timestamp:[/b] {single_alert['timestamp']}
+    [b]Severity:[/b] {severity}
+    [b]Signature:[/b] {single_alert['alert']['signature']}
+    [b]Protocol:[/b] [red]{single_alert['app_proto']}[/red]
+    [b]Destination:[/b] [green]{dest_ip}[/green]:[bold]{dest_port}[/bold] 
+    [b]Source:[/b] [yellow]{src_ip}[/yellow]:[bold]{src_port}[/bold]"""
+                                    ),
                     expand=False
                 )
             )
-        return Columns(alerts, expand=False, equal=False, column_first=True)
+        return grid
 
     async def on_load(self, event: events.Load) -> None:
         await self.bind("q", "quit", "Quit")
