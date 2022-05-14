@@ -2,7 +2,7 @@ import json
 import textwrap
 from pathlib import Path
 from datetime import datetime
-from typing import Callable, List, Any, Dict
+from typing import Callable, List, Any
 
 from rich.columns import Columns
 from rich.panel import Panel
