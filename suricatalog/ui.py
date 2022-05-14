@@ -4,7 +4,6 @@ from pathlib import Path
 from datetime import datetime
 from typing import Callable, List, Any
 
-from rich.columns import Columns
 from rich.panel import Panel
 from rich.traceback import install
 from rich import pretty
