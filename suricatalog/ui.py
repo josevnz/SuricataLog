@@ -5,14 +5,16 @@ from datetime import datetime
 from typing import Callable, List, Any
 
 from rich.panel import Panel
+from rich.status import Status
+from rich.text import Text
 from rich.traceback import install
 from rich import pretty
-from rich.console import Console
+from rich.console import Console, RenderableType
 from rich.table import Table
 from rich.progress import Progress
 from textual import events
 from textual.app import App
-from textual.widgets import ScrollView
+from textual.widgets import ScrollView, Footer, Header
 
 from suricatalog.filter import BaseFilter, all_events_filter
 from suricatalog.log import get_events_from_eve
@@ -21,6 +23,47 @@ from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO
 
 pretty.install()
 install(show_locals=True)
+
+SURICATALOG_HEADER_FOOTER_STYLE = "white on dark_blue"
+
+
+class EvelogAppHeader(Header):
+    def render(self) -> RenderableType:
+        header_table = Table.grid(padding=(0, 1), expand=True)
+        header_table.style = self.style
+        header_table.add_column("title", justify="center", ratio=1)
+        header_table.add_column("clock", justify="right", width=8)
+        header_table.add_row(
+            self.full_title, self.get_clock() if self.clock else ""
+        )
+        header: RenderableType
+        header = Panel(header_table, style=self.style) if self.tall else header_table
+        return header
+
+
+class EvelogAppFooter(Footer):
+    def make_key_text(self) -> Text:
+        text = Text(
+            style=SURICATALOG_HEADER_FOOTER_STYLE,
+            no_wrap=True,
+            overflow="ellipsis",
+            justify="left",
+            end="",
+        )
+        for binding in self.app.bindings.shown_keys:
+            key_display = (
+                binding.key.upper()
+                if binding.key_display is None
+                else binding.key_display
+            )
+            hovered = self.highlight_key == binding.key
+            key_text = Text.assemble(
+                (f" {key_display} ", "reverse" if hovered else "default on default"),
+                f" {binding.description} ",
+                meta={"@click": f"app.press('{binding.key}')", "key": binding.key},
+            )
+            text.append_text(key_text)
+        return text
 
 
 class EveLogApp(App):
@@ -159,10 +202,15 @@ class EveLogApp(App):
     async def on_mount(self, event: events.Mount) -> None:
 
         self.body = body = ScrollView(auto_width=True)
-
+        header = EvelogAppHeader()
+        header.style = SURICATALOG_HEADER_FOOTER_STYLE
+        footer = EvelogAppFooter()
+        await self.view.dock(header, edge="top")
+        await self.view.dock(footer, edge="bottom")
         await self.view.dock(body)
 
         async def add_content():
+
             if self.out_format == "table":
                 tbl = EveLogApp.one_shot_alert_table(
                     timestamp=self.timestamp,
@@ -191,11 +239,10 @@ class EveLogApp(App):
             else:
                 raise NotImplementedError(f"I don't know how to handle {self.out_format}!")
 
-        with Progress(console=EveLogApp.__CONSOLE, transient=False) as progress:
-            task = progress.add_task(f"Parsing {self.eve_files}", total=100)
-            progress.update(task_id=task, completed=1.0)
+        with Status(f"Parsing {self.eve_files}", console=EveLogApp.__CONSOLE) as status:
+            status.start()
             await self.call_later(add_content)
-            progress.update(task_id=task, completed=100.0)
+            status.stop()
 
 
 class FlowApp:
