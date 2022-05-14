@@ -173,13 +173,13 @@ class EveLogApp(App):
                 )
                 await body.update(tbl)
             elif self.out_format == "json":
-                panels = EveLogApp.one_shot_json(
+                json_lines = EveLogApp.one_shot_json(
                     timestamp=self.timestamp,
                     eve=self.eve_files,
                     alerts_retriever=get_events_from_eve,
                     data_filter=self.data_filter
                 )
-                await body.update(panels)
+                await body.update(json_lines)
             elif self.out_format == "brief":
                 columns = EveLogApp.one_shot_brief(
                     timestamp=self.timestamp,
