@@ -13,15 +13,12 @@ import argparse
 from pathlib import Path
 from ipaddress import ip_address
 
-from rich.console import Console
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, all_events_filter, AlwaysTrueFilter
-from suricatalog.log import DEFAULT_EVE, get_events_from_eve
-from suricatalog.report import HostDataUseReport, TopUserAgents
+from suricatalog.log import DEFAULT_EVE
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
-from suricatalog.ui import EveLogApp, one_shot_flow_table
+from suricatalog.ui import EveLogApp, FlowApp
 
 if __name__ == "__main__":
-    CONSOLE = Console()
     PARSER = argparse.ArgumentParser(description=__doc__)
     PARSER.add_argument(
         "--timestamp",
@@ -74,7 +71,6 @@ if __name__ == "__main__":
                 timestamp=OPTIONS.timestamp,
                 eve_files=OPTIONS.eve,
                 out_format='json',
-                console=CONSOLE,
                 title="Suricata NXDOMAIN filter",
                 data_filter=NXDomainFilter()
             )
@@ -83,34 +79,26 @@ if __name__ == "__main__":
                 timestamp=OPTIONS.timestamp,
                 eve_files=OPTIONS.eve,
                 out_format='json',
-                console=CONSOLE,
                 title="Suricata alerts with printable payload",
                 data_filter=WithPrintablePayloadFilter()
             )
         elif OPTIONS.flow:
-            flow_tbl = one_shot_flow_table(
+            FlowApp.one_shot_flow_table(
                 eve=OPTIONS.eve,
-                data_filter=AlwaysTrueFilter(),
-                console=CONSOLE
+                data_filter=AlwaysTrueFilter()
             )
-            CONSOLE.print(flow_tbl)
         elif OPTIONS.netflow:
-            ip_address = OPTIONS.netflow.exploded
-            hdu = HostDataUseReport()
-            for event in get_events_from_eve(
-                    timestamp=OPTIONS.timestamp,
-                    eve_files=OPTIONS.eve,
-                    row_filter=all_events_filter):
-                hdu.ingest_data(event, ip_address)
-            CONSOLE.print(f"[b]Net-flow[/b]: {ip_address} = {hdu.bytes} bytes")
+            FlowApp.host_data_use(
+                timestamp=OPTIONS.timestamp,
+                eve_files=OPTIONS.eve,
+                row_filter=all_events_filter,
+                ip_address=OPTIONS.netflow.exploded
+            )
         elif OPTIONS.useragent:
-            tua = TopUserAgents()
-            for event in get_events_from_eve(
-                    timestamp=OPTIONS.timestamp,
-                    eve_files=OPTIONS.eve,
-                    row_filter=all_events_filter):
-                tua.ingest_data(event)
-            CONSOLE.print(tua.agents)
-
+            FlowApp.get_agents(
+                timestamp=OPTIONS.timestamp,
+                eve_files=OPTIONS.eve,
+                row_filter=all_events_filter
+            )
     except KeyboardInterrupt:
-        CONSOLE.print("[bold]Program interrupted...[/bold]")
+        FlowApp.print("[bold]Program interrupted...[/bold]")
