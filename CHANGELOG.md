@@ -1,5 +1,8 @@
 # SuricataLog changelog
 
+## Sun May 1 2022 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.0.6
+- More responsive UI, specially for large suricata eve files.
+
 ## Sun May 1 2022 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.0.5
 - Docker container to run all the SuricataLog scripts
 

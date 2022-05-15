@@ -49,14 +49,10 @@ class WithPrintablePayloadFilter(BaseFilter):
 
 
 def all_events_filter(
-        *,
-        timestamp: datetime = DEFAULT_TIMESTAMP_10M_AGO,
-        data: Dict[str, Any]
+        **_
 ) -> bool:
     """
     Always true filter
-    :param timestamp:
-    :param data:
     :return:
     """
     return True

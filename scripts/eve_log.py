@@ -1,27 +1,24 @@
 #!/usr/bin/env python
 """
-Show Suricata alerts
+Show Suricata alerts in different formats
 Author: Jose Vicente Nunez (kodegeek.com@protonmail.com)
 """
 import argparse
 from pathlib import Path
-
-from rich.console import Console
-from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10M_AGO
+from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10Y_AGO
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.ui import EveLogApp
 from suricatalog.filter import OnlyAlertsFilter
 
-FORMATS = ('json', 'table', 'brief')
+FORMATS = ('table', 'json', 'brief')
 
 if __name__ == "__main__":
-    CONSOLE = Console()
     PARSER = argparse.ArgumentParser(description=__doc__)
     PARSER.add_argument(
         "--timestamp",
         type=parse_timestamp,
-        default=DEFAULT_TIMESTAMP_10M_AGO,
-        help=f"Minimum timestamp in the past to use when filtering events ({DEFAULT_TIMESTAMP_10M_AGO})"
+        default=DEFAULT_TIMESTAMP_10Y_AGO,
+        help=f"Minimum timestamp in the past to use when filtering events ({DEFAULT_TIMESTAMP_10Y_AGO})"
     )
     PARSER.add_argument(
         "--formats",
@@ -42,9 +39,8 @@ if __name__ == "__main__":
             timestamp=OPTIONS.timestamp,
             eve_files=OPTIONS.eve,
             out_format=OPTIONS.formats,
-            console=CONSOLE,
             title="Suricata alerts",
             data_filter=OnlyAlertsFilter()
         )
     except KeyboardInterrupt:
-        CONSOLE.print("[bold]Program interrupted...[/bold]")
+        EveLogApp.print("[bold]Program interrupted...[/bold]")
