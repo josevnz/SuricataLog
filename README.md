@@ -73,39 +73,21 @@ OK
 
 Once everything is installed you should be able to call the scripts
 
-## Simple even log parser
+## Simple EVE log parser
 
-```shell
-(suricatalog) [josevnz@dmaf5]$ eve_log.py --format table --timestamp '2022-02-23T19:00:00' test/eve.json 
-Parsing test/eve.json ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
-                                                    Suricata alerts for 2022-02-23 19:00:00, logs=test/eve.json                                                     
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
-┃ Timestamp                       ┃ Severity ┃ Signature                                            ┃ Protocol ┃        Destination ┃             Source ┃ Payload ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━┩
-│ 2022-02-23T19:07:02.373681+0000 │ 3        │ SURICATA Applayer Detect protocol only one direction │     smtp │ 172.16.0.149:49854 │   94.177.209.30:25 │         │
-│ 2022-02-23T19:07:02.701847+0000 │ 3        │ SURICATA Applayer Detect protocol only one direction │     smtp │ 172.16.0.149:49855 │    210.131.2.36:25 │         │
-│ 2022-02-23T19:07:03.423272+0000 │ 3        │ SURICATA Applayer Detect protocol only one direction │     smtp │ 172.16.0.149:49866 │   27.34.147.95:587 │         │
-│ 2022-02-23T19:07:03.014386+0000 │ 3        │ SURICATA Applayer Detect protocol only one direction │     smtp │ 172.16.0.149:49859 │ 142.250.138.109:25 │         │
-│ 2022-02-23T19:07:03.884078+0000 │ 3        │ SURICATA Applayer Detect protocol only one direction │     smtp │ 172.16.0.149:49865 │  122.17.147.238:25 │         │
-│ 2022-02-23T19:07:01.976307+0000 │ 3        │ SURICATA Applayer Detect protocol only one direction │     smtp │ 172.16.0.149:49851 │    74.208.5.15:587 │         │
-│ 2022-02-23T19:07:03.006849+0000 │ 3        │ SURICATA Applayer Detect protocol only one direction │     smtp │ 172.16.0.149:49857 │    74.208.5.15:587 │         │
-│ 2022-02-23T19:07:02.508385+0000 │ 3        │ SURICATA Applayer Detect protocol only one direction │     smtp │ 172.16.0.149:49852 │ 116.254.112.253:25 │         │
-│ 2022-02-23T19:07:03.018953+0000 │ 3        │ SURICATA Applayer Detect protocol only one direction │     smtp │ 172.16.0.149:49860 │  40.97.120.162:587 │         │
-│ 2022-02-23T19:07:04.689953+0000 │ 3        │ SURICATA Applayer Detect protocol only one direction │     smtp │ 172.16.0.149:49862 │   192.185.4.31:587 │         │
-└─────────────────────────────────┴──────────┴──────────────────────────────────────────────────────┴──────────┴────────────────────┴────────────────────┴─────────┘
-```
+Better see it by yourself
 
-Better see it by yourself, show eve log records in JSON format:
+Table format:
+
+[![asciicast](https://asciinema.org/a/494371.svg)](https://asciinema.org/a/494371)
+
+Show records in JSON format:
 
 [![asciicast](https://asciinema.org/a/489775.svg)](https://asciinema.org/a/489775)
 
 Or brief format:
 
-[![asciicast](https://asciinema.org/a/489776.svg)](https://asciinema.org/a/489776)
-
-Or in table format:
-
-[![asciicast](https://asciinema.org/a/489777.svg)](https://asciinema.org/a/489777)
+[![asciicast](https://asciinema.org/a/494375.svg)](https://asciinema.org/a/494375)
 
 ## Canned reports with eve_json.py
 
