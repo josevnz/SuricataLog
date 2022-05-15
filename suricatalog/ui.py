@@ -2,8 +2,10 @@ import json
 import textwrap
 from pathlib import Path
 from datetime import datetime
+from timeit import default_timer as timer
 from typing import Callable, List, Any
 
+from rich.live import Live
 from rich.panel import Panel
 from rich.status import Status
 from rich.text import Text
@@ -11,7 +13,6 @@ from rich.traceback import install
 from rich import pretty
 from rich.console import Console, RenderableType
 from rich.table import Table
-from rich.progress import Progress
 from textual import events
 from textual.app import App
 from textual.widgets import ScrollView, Footer, Header
@@ -28,6 +29,16 @@ SURICATALOG_HEADER_FOOTER_STYLE = "white on dark_blue"
 
 
 class EvelogAppHeader(Header):
+
+    __start__time__ = timer()
+
+    def get_clock(self) -> str:
+        seconds = timer() - EvelogAppHeader.__start__time__
+        if seconds <= 60.0:
+            return f"{seconds:.2f} secs"
+        else:
+            return f"{seconds/60.0:.2f} min"
+
     def render(self) -> RenderableType:
         header_table = Table.grid(padding=(0, 1), expand=True)
         header_table.style = self.style
@@ -107,13 +118,7 @@ class EveLogApp(App):
         :param console:
         :return:
         """
-        logs = ' '.join(map(lambda x: str(x), eve))
-        alerts_tbl = Table(
-            show_header=True,
-            header_style="bold magenta",
-            title=f"Suricata alerts for {timestamp}, logs={logs}",
-            highlight=True
-        )
+        alerts_tbl = Table(show_header=False)
         alerts_tbl.add_column("Timestamp", style="dim", no_wrap=True)
         alerts_tbl.add_column("Severity")
         alerts_tbl.add_column("Signature", style="Blue")
@@ -146,7 +151,6 @@ class EveLogApp(App):
             except KeyError:
                 console.print(alert['alert'])
                 raise
-            alerts_tbl.show_footer
         return alerts_tbl
 
     @staticmethod
@@ -271,9 +275,7 @@ class FlowApp:
         alerts_tbl.add_column("Port")
         alerts_tbl.add_column("Count", style="Blue")
         alert_cnt = 0
-        with Progress(console=FlowApp.__CONSOLE, transient=False) as progress:
-            task = progress.add_task(f"Parsing {logs}", total=100)
-            progress.update(task_id=task, completed=1.0)
+        with Live(alerts_tbl, refresh_per_second=10):
             afr = AggregatedFlowProtoReport()
             for event in get_events_from_eve(
                     eve_files=eve,
@@ -289,7 +291,6 @@ class FlowApp:
                     str(cnt)
                 )
                 alert_cnt += 1
-            progress.update(task_id=task, completed=100.0)
         FlowApp.__CONSOLE.print(alerts_tbl)
 
     @staticmethod
