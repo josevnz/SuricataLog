@@ -16,7 +16,7 @@ from ipaddress import ip_address
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, all_events_filter, AlwaysTrueFilter
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
-from suricatalog.ui import EveLogApp, FlowApp
+from suricatalog.ui.app import EveLogApp, FlowApp
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(description=__doc__)

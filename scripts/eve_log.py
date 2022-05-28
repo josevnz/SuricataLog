@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10Y_AGO
 from suricatalog.log import DEFAULT_EVE
-from suricatalog.ui import EveLogApp
+from suricatalog.ui.app import EveLogApp
 from suricatalog.filter import OnlyAlertsFilter
 
 FORMATS = ('table', 'json', 'brief')

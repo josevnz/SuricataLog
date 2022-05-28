@@ -1,80 +1,28 @@
 import json
 import textwrap
-from pathlib import Path
 from datetime import datetime
-from timeit import default_timer as timer
-from typing import Callable, List, Any
+from pathlib import Path
+from typing import List, Any, Callable
 
+from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
 from rich.status import Status
-from rich.text import Text
-from rich.traceback import install
-from rich import pretty
-from rich.console import Console, RenderableType
 from rich.table import Table
 from textual import events
 from textual.app import App
-from textual.widgets import ScrollView, Footer, Header
+from textual.widgets import ScrollView
+from rich.traceback import install
+from rich import pretty
 
 from suricatalog.filter import BaseFilter, all_events_filter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO
+from suricatalog.ui.widgets import EvelogAppHeader, EvelogAppFooter, SURICATALOG_HEADER_FOOTER_STYLE
 
 pretty.install()
 install(show_locals=True)
-
-SURICATALOG_HEADER_FOOTER_STYLE = "white on dark_blue"
-
-
-class EvelogAppHeader(Header):
-
-    __start__time__ = timer()
-
-    def get_clock(self) -> str:
-        seconds = timer() - EvelogAppHeader.__start__time__
-        if seconds <= 60.0:
-            return f"{seconds:.2f} secs"
-        else:
-            return f"{seconds/60.0:.2f} min"
-
-    def render(self) -> RenderableType:
-        header_table = Table.grid(padding=(0, 1), expand=True)
-        header_table.style = self.style
-        header_table.add_column("title", justify="center", ratio=1)
-        header_table.add_column("clock", justify="right", width=8)
-        header_table.add_row(
-            self.full_title, self.get_clock() if self.clock else ""
-        )
-        header: RenderableType
-        header = Panel(header_table, style=self.style) if self.tall else header_table
-        return header
-
-
-class EvelogAppFooter(Footer):
-    def make_key_text(self) -> Text:
-        text = Text(
-            style=SURICATALOG_HEADER_FOOTER_STYLE,
-            no_wrap=True,
-            overflow="ellipsis",
-            justify="left",
-            end="",
-        )
-        for binding in self.app.bindings.shown_keys:
-            key_display = (
-                binding.key.upper()
-                if binding.key_display is None
-                else binding.key_display
-            )
-            hovered = self.highlight_key == binding.key
-            key_text = Text.assemble(
-                (f" {key_display} ", "reverse" if hovered else "default on default"),
-                f" {binding.description} ",
-                meta={"@click": f"app.press('{binding.key}')", "key": binding.key},
-            )
-            text.append_text(key_text)
-        return text
 
 
 class EveLogApp(App):
