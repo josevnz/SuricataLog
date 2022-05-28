@@ -81,13 +81,25 @@ Table format:
 
 [![asciicast](https://asciinema.org/a/494371.svg)](https://asciinema.org/a/494371)
 
+````shell
+eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats table test/eve.json
+````
+
 Show records in JSON format:
 
 [![asciicast](https://asciinema.org/a/489775.svg)](https://asciinema.org/a/489775)
 
+````shell
+eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats json test/eve.json
+````
+
 Or brief format:
 
 [![asciicast](https://asciinema.org/a/494375.svg)](https://asciinema.org/a/494375)
+
+````shell
+eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats brief test/eve.json
+````
 
 ## Canned reports with eve_json.py
 

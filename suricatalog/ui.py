@@ -87,6 +87,7 @@ class EveLogApp(App):
             eve_files: List[Path],
             out_format: str,
             data_filter: BaseFilter,
+            debug: bool = False,
             **kwargs
     ):
         super().__init__(*args, **kwargs)
@@ -95,6 +96,7 @@ class EveLogApp(App):
         self.eve_files = eve_files
         self.out_format = out_format
         self.data_filter = data_filter
+        self.debug = debug
 
     @staticmethod
     def print(*objects: Any):
@@ -201,10 +203,13 @@ class EveLogApp(App):
         return grid
 
     async def on_load(self, event: events.Load) -> None:
+        if self.debug:
+            self.console.print(event)
         await self.bind("q", "quit", "Quit")
 
     async def on_mount(self, event: events.Mount) -> None:
-
+        if self.debug:
+            self.console.print(event)
         self.body = body = ScrollView(auto_width=True)
         header = EvelogAppHeader()
         header.style = SURICATALOG_HEADER_FOOTER_STYLE
