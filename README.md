@@ -1,5 +1,7 @@
 # About SuricataLog
 
+[![Downloads](https://pepy.tech/badge/suricatalog)](https://pepy.tech/project/suricatalog)
+
 When I started learning how to use [Suricata](https://suricata.io/) quickly found that I needed a tool to inspect the eve.json file; Most of the tutorials 
 and documentation out there suggested installing a stack to do the following tasks:
 1. Store the logs in a central location
