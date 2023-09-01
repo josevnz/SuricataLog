@@ -1,4 +1,4 @@
-# About SuricataLog
+# SuricataLog
 
 [![Downloads](https://pepy.tech/badge/suricatalog)](https://pepy.tech/project/suricatalog)
 
@@ -23,7 +23,7 @@ so I wrote few scripts with the features I tough would be more useful for my hom
 
 As a bonus, I wrote my learning experience as a [tutorial](TUTORIAL.md) that you can use to learn about Suricata and also how to test it.
 
-# Installing from PIP
+## Installing from PIP
 
 Before you do anything else, make sure your environment is good to go:
 
@@ -33,13 +33,13 @@ python3 -m venv ~/virtualenv/suricatalog
 python3 -m pip install --upgrade pip setuptools wheel
 ```
 
-## Installing from Pypi.org
+### Installing from Pypi.org
 
 ```shell
 pip3 install --upgrade SuricataLog
 ```
 
-## Installing from source
+### Installing from source
 
 ```shell
 git clone git@github.com:josevnz/SuricataLog.git
@@ -50,7 +50,8 @@ python3 -m pip install --upgrade build
 python3 -m build
 pip3 install dist/SuricataLog-X.Y.Z-py3-none-any.whl
 ```
-## Developer installation
+
+### Developer installation
 
 ```shell
 git clone git@github.com:josevnz/SuricataLog.git
@@ -71,11 +72,11 @@ OK
 
 ```
 
-# Running the scripts
+## Running the scripts
 
 Once everything is installed you should be able to call the scripts
 
-## Simple EVE log parser
+### Simple EVE log parser
 
 Better see it by yourself
 
@@ -103,7 +104,7 @@ Or brief format:
 eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats brief test/eve.json
 ````
 
-## Canned reports with eve_json.py
+### Canned reports with eve_json.py
 
 ```shell
 (suricatalog) [josevnz@dmaf5 SuricataLog]$ eve_json.py --help
@@ -124,32 +125,32 @@ optional arguments:
   --useragent        Top user agent in HTTP traffic
 ```
 
-### NXDOMAIN
+#### NXDOMAIN
 
 [![asciicast](https://asciinema.org/a/491442.svg)](https://asciinema.org/a/491442)
 
-### PAYLOAD
+#### PAYLOAD
 
 [![asciicast](https://asciinema.org/a/491432.svg)](https://asciinema.org/a/491432)
 
-### FLOW
+#### FLOW
 
 [![asciicast](https://asciinema.org/a/491433.svg)](https://asciinema.org/a/491433)
 
-### NETFLOW
+#### NETFLOW
 
 [![asciicast](https://asciinema.org/a/491435.svg)](https://asciinema.org/a/491435)
 
-### USERAGENT
+#### USERAGENT
 
 [![asciicast](https://asciinema.org/a/491436.svg)](https://asciinema.org/a/491436)
 
-# Running using a container
+## Running using a container
 
 You only need to mount the eve.json file inside the container and call any of the scripts 
 the same way you will on bare-metal.
 
-## eve_log.json
+### eve_log.json
 
 You only need to mount the directory where the Suricata Eve files are saved
 
@@ -157,12 +158,12 @@ You only need to mount the directory where the Suricata Eve files are saved
 docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_log:latest --timestamp '2022-02-23T18:22:24.405139+0000' --formats json /logs/eve.json
 ```
 
-## eve_json.py
+### eve_json.py
 ```shell
 docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_json:latest --nxdomain /logs/eve.json
 ```
 
-## Building the Docker container
+### Building the Docker container
 
 You need to build the images in order
 

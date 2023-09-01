@@ -2,7 +2,7 @@ import json
 import textwrap
 from datetime import datetime
 from pathlib import Path
-from typing import List, Any, Callable
+from typing import List, Any, Callable, Dict
 
 from rich.console import Console
 from rich.live import Live
@@ -27,6 +27,10 @@ install(show_locals=True)
 
 class EveLogApp(App):
     __CONSOLE = Console()
+
+    @staticmethod
+    def __get_key_from_map__(map1: Dict[str, Any], key: str):
+        return map1[key] if key in map1 else ""
 
     def __init__(
             self,
@@ -81,9 +85,9 @@ class EveLogApp(App):
             if not data_filter.accept(alert):
                 continue
             try:
-                dest_ip = alert['dest_ip'] if 'dest_ip' in alert else ""
-                dest_port = str(alert['dest_port']) if 'dest_port' in alert else ""
-                src_ip = alert['src_ip'] if 'src_ip' in alert else ""
+                dest_ip = EveLogApp.__get_key_from_map__(alert, 'dest_ip')
+                dest_port = str(EveLogApp.__get_key_from_map__(alert, 'dest_port'))
+                src_ip = EveLogApp.__get_key_from_map__(alert, 'src_ip')
                 src_port = str(alert['src_port']) if 'src_port' in alert else ""
                 alrt_int = alert['alert']['severity']
                 severity = f"[yellow]{str(alrt_int)}[/yellow]" \
@@ -129,10 +133,10 @@ class EveLogApp(App):
         for single_alert in alerts_retriever(eve_files=eve, timestamp=timestamp):
             if not data_filter.accept(single_alert):
                 continue
-            dest_ip = single_alert['dest_ip'] if 'dest_ip' in single_alert else ""
-            dest_port = str(single_alert['dest_port']) if 'dest_port' in single_alert else ""
-            src_ip = single_alert['src_ip'] if 'src_ip' in single_alert else ""
-            src_port = str(single_alert['src_port']) if 'src_port' in single_alert else ""
+            dest_port = str(EveLogApp.__get_key_from_map__(single_alert, 'dest_port'))
+            src_ip = EveLogApp.__get_key_from_map__(single_alert, 'src_ip')
+            dest_ip = EveLogApp.__get_key_from_map__(single_alert, 'dest_ip')
+            src_port = EveLogApp.__get_key_from_map__(single_alert, 'src_port')
             alrt_int = single_alert['alert']['severity']
             severity = f"[yellow]{str(alrt_int)}[/yellow]" if alrt_int <= 5 else f"[yellow]{str(alrt_int)}[/yellow]"
             grid.add_row(
