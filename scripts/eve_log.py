@@ -33,6 +33,6 @@ if __name__ == "__main__":
     )
     OPTIONS = PARSER.parse_args()
     try:
-        raise NotImplementedError
+        raise NotImplementedError()
     except KeyboardInterrupt:
         raise
