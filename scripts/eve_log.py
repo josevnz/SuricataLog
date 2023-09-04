@@ -7,8 +7,6 @@ import argparse
 from pathlib import Path
 from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10Y_AGO
 from suricatalog.log import DEFAULT_EVE
-from suricatalog.ui.app import EveLogApp
-from suricatalog.filter import OnlyAlertsFilter
 
 FORMATS = ('table', 'json', 'brief')
 
@@ -35,12 +33,6 @@ if __name__ == "__main__":
     )
     OPTIONS = PARSER.parse_args()
     try:
-        EveLogApp.run(
-            timestamp=OPTIONS.timestamp,
-            eve_files=OPTIONS.eve,
-            out_format=OPTIONS.formats,
-            title="Suricata alerts",
-            data_filter=OnlyAlertsFilter()
-        )
+        raise NotImplementedError
     except KeyboardInterrupt:
-        EveLogApp.print("[bold]Program interrupted...[/bold]")
+        raise

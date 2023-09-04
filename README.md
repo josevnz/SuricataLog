@@ -58,6 +58,8 @@ git clone git@github.com:josevnz/SuricataLog.git
 cd SuricataLog
 python3 -m venv ~/virtualenv/suricatalog
 . ~/virtualenv/suricatalog/bin/activate
+python3 -m pip install --upgrade build
+python3 -m build
 python3 setup.py develop
 ```
 
@@ -176,3 +178,19 @@ BUILDKIT=1 docker build --tag suricatalog/eve_json --file Dockerfile-eve_json .
 
 Why 2 Docker build files? I don't want to spawn any Shell processes inside the container, instead each container will be
 very limited on what it can and cannot run.
+
+## Supported versions
+
+I work on this project on **my spare time** and I cannot support every version of Linux/ Python combination out there.
+This is my current test bed, and it may change without further notice
+
+| SuricataLog | Supported | OS                               | Python    | Suricata |
+|-------------|-----------|----------------------------------|-----------|----------|
+| <= 0.8      | NO        | NA                               | => 3.8    | 6.04     |
+| 0.9         | YES       | fedora 37                        | => 3.11.4 | 6.04     |
+| 0.9         | YES       | Armbian 23.02.2 Jammy            | => 3.10.6 | 6.04     |
+| 0.9         | YES       | Ubuntu 20.04.4 LTS (Focal Fossa) | => 3.8.10 | 6.04     |
+
+You are more than welcome to submit patches with new features and bug-fixes.
+
+

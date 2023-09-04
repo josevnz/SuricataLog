@@ -16,7 +16,7 @@ from ipaddress import ip_address
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, all_events_filter, AlwaysTrueFilter
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
-from suricatalog.ui.app import EveLogApp, FlowApp
+from suricatalog.ui.app import FlowApp
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(description=__doc__)
@@ -67,21 +67,9 @@ if __name__ == "__main__":
 
     try:
         if OPTIONS.nxdomain:
-            EveLogApp.run(
-                timestamp=OPTIONS.timestamp,
-                eve_files=OPTIONS.eve,
-                out_format='json',
-                title="Suricata NXDOMAIN filter",
-                data_filter=NXDomainFilter()
-            )
+            raise NotImplementedError()
         elif OPTIONS.payload:
-            EveLogApp.run(
-                timestamp=OPTIONS.timestamp,
-                eve_files=OPTIONS.eve,
-                out_format='json',
-                title="Suricata alerts with printable payload",
-                data_filter=WithPrintablePayloadFilter()
-            )
+            raise NotImplementedError()
         elif OPTIONS.flow:
             FlowApp.one_shot_flow_table(
                 eve=OPTIONS.eve,
