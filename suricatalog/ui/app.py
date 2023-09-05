@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Any, Callable
+from typing import List, Callable
 
 from rich.console import Console
 from rich.live import Live
 
 from rich.table import Table
+from textual.app import App, ComposeResult
+from textual.widgets import Header, Footer
 
 from suricatalog.filter import BaseFilter, all_events_filter
 from suricatalog.log import get_events_from_eve
@@ -16,7 +19,9 @@ from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO
 
 
 class FlowApp:
-    __CONSOLE = Console()
+    """
+    Simple one shot application, similar to queries in jq.
+    """
 
     @staticmethod
     def one_shot_flow_table(
@@ -41,8 +46,8 @@ class FlowApp:
         alerts_tbl.add_column("Port")
         alerts_tbl.add_column("Count", style="Blue")
         alert_cnt = 0
-        with Live(alerts_tbl, refresh_per_second=10):
-            afr = AggregatedFlowProtoReport()
+        afr = AggregatedFlowProtoReport()
+        with Live(alerts_tbl, refresh_per_second=10) as live:
             for event in get_events_from_eve(
                     eve_files=eve,
                     timestamp=DEFAULT_TIMESTAMP_10Y_AGO,
@@ -57,11 +62,8 @@ class FlowApp:
                     str(cnt)
                 )
                 alert_cnt += 1
-        FlowApp.__CONSOLE.print(alerts_tbl)
-
-    @staticmethod
-    def print(*objects: Any):
-        FlowApp.__CONSOLE.print(objects)
+            live.console.clear_live()
+            live.console.print(alerts_tbl)
 
     @classmethod
     def host_data_use(
@@ -77,7 +79,8 @@ class FlowApp:
                 eve_files=eve_files,
                 row_filter=row_filter):
             hdu.ingest_data(event, ip_address)
-        FlowApp.__CONSOLE.print(f"[b]Net-flow[/b]: {ip_address} = {hdu.bytes} bytes")
+        with Console() as console:
+            console.print(f"[b]Net-flow[/b]: {ip_address} = {hdu.bytes} bytes")
 
     @classmethod
     def get_agents(
@@ -92,4 +95,21 @@ class FlowApp:
                 eve_files=eve_files,
                 row_filter=row_filter):
             tua.ingest_data(event)
-        FlowApp.__CONSOLE.print(tua.agents)
+        with Console() as console:
+            console.print(tua.agents)
+
+
+class EveApp(App):
+
+    """Display multiple aspects of the eve.json log"""
+
+    BINDINGS = [
+        ("q", "quit", "Quit")
+    ]
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Footer()
+
+    def action_quit(self) -> None:
+        sys.exit(0)
