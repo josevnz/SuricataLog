@@ -21,6 +21,7 @@ from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO
 class FlowApp:
     """
     Simple one shot application, similar to queries in jq.
+    https://docs.suricata.io/en/suricata-6.0.0/output/eve/eve-json-examplesjq.html
     """
 
     @staticmethod
