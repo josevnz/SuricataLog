@@ -19,7 +19,8 @@ def get_events_from_eve(
         timestamp: datetime = DEFAULT_TIMESTAMP_10M_AGO
 ) -> Dict:
     """
-    Get alerts from a JSON even file
+    Get alerts from a JSON even file. Assumed each line is a valid
+    JSON document, otherwise reader will crash
     :param eve_files:
     :param row_filter: Filter events based on several criteria
     :param timestamp:

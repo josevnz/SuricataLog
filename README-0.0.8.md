@@ -1,5 +1,7 @@
 # SuricataLog
 
+*NOTE: This README is for version 0.0.8. Please refer to default [README(README.md) for an up-to-date file.*
+
 When I started learning how to use [Suricata](https://suricata.io/) quickly found that I needed a tool to inspect the eve.json file; Most of the tutorials 
 and documentation out there suggested installing a stack to do the following tasks:
 1. Store the logs in a central location
@@ -84,7 +86,7 @@ Better see it by yourself
 
 Table format:
 
-TODO
+[![asciicast](https://asciinema.org/a/494371.svg)](https://asciinema.org/a/494371)
 
 ````shell
 eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats table test/eve.json
@@ -92,7 +94,7 @@ eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats table test/eve.jso
 
 Show records in JSON format:
 
-TODO
+[![asciicast](https://asciinema.org/a/489775.svg)](https://asciinema.org/a/489775)
 
 ````shell
 eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats json test/eve.json
@@ -100,7 +102,7 @@ eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats json test/eve.json
 
 Or brief format:
 
-TODO
+[![asciicast](https://asciinema.org/a/494375.svg)](https://asciinema.org/a/494375)
 
 ````shell
 eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats brief test/eve.json
@@ -129,23 +131,23 @@ optional arguments:
 
 #### NXDOMAIN
 
-TODO
+[![asciicast](https://asciinema.org/a/491442.svg)](https://asciinema.org/a/491442)
 
 #### PAYLOAD
 
-TODO
+[![asciicast](https://asciinema.org/a/491432.svg)](https://asciinema.org/a/491432)
 
 #### FLOW
 
-TODO
+[![asciicast](https://asciinema.org/a/491433.svg)](https://asciinema.org/a/491433)
 
 #### NETFLOW
 
-TODO
+[![asciicast](https://asciinema.org/a/491435.svg)](https://asciinema.org/a/491435)
 
 #### USERAGENT
 
-TODO
+[![asciicast](https://asciinema.org/a/491436.svg)](https://asciinema.org/a/491436)
 
 ## Running using a container
 
