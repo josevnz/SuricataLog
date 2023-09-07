@@ -22,7 +22,7 @@ def load_css(the_file: Path):
         return "\n".join(css_data.readlines())
 
 
-def one_shot_flow_table(
+def get_one_shot_flow_table(
         *,
         eve: List[Path],
         data_filter: BaseFilter
@@ -75,7 +75,7 @@ def one_shot_flow_table(
     return flow_app
 
 
-def host_data_use(
+def get_host_data_use(
         eve_files: List[Path],
         data_filter: BaseFilter,
         ip_address: any
@@ -136,7 +136,7 @@ def get_agents(
     return top_user_app
 
 
-def one_shot_capture(
+def get_capture(
         *,
         eve: List[Path],
         retriever: Callable = get_events_from_eve,
