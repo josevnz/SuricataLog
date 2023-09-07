@@ -16,7 +16,7 @@ from ipaddress import ip_address
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, all_events_filter, AlwaysTrueFilter
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
-from suricatalog.ui.app import EveApp, one_shot_flow_table, host_data_use, get_agents
+from suricatalog.ui.app import one_shot_flow_table, host_data_use, get_agents
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(description=__doc__)
@@ -66,13 +66,14 @@ if __name__ == "__main__":
     OPTIONS = PARSER.parse_args()
 
     try:
-        eve_app = EveApp()
         if OPTIONS.nxdomain:
-            eve_app.title = "DNS records with NXDOMAIN"
+            # eve_app.title = "DNS records with NXDOMAIN"
+            pass
         elif OPTIONS.payload:
-            eve_app.title = "Inspect Alert Data (payload)"
+            # eve_app.title = "Inspect Alert Data (payload)"
+            pass
         elif OPTIONS.flow:
-            one_shot_flow_table(
+            eve_app = one_shot_flow_table(
                 eve=OPTIONS.eve,
                 data_filter=AlwaysTrueFilter()
             )

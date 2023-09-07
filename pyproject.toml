@@ -23,8 +23,9 @@ requires-python = ">=3.8"
 license = {file = "LICENSE"}
 keywords = ["suricata", "log", "eve"]
 dependencies = [
-    "requests",
+    "requests==2.31.0",
     "textual==0.35.1",
+    "rich~=13.5.2"
 ]
 [project.urls]
 Repository = "https://github.com/josevnz/SuricataLog"
