@@ -84,7 +84,7 @@ if __name__ == "__main__":
                 ip_address=OPTIONS.netflow.exploded
             )
         elif OPTIONS.useragent:
-            get_agents(
+            eve_app = get_agents(
                 timestamp=OPTIONS.timestamp,
                 eve_files=OPTIONS.eve,
                 row_filter=all_events_filter

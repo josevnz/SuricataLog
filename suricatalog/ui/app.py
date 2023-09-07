@@ -1,23 +1,30 @@
 from __future__ import annotations
 
+import json
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import List, Callable
 import locale
-locale.setlocale(locale.LC_ALL, '')
 
-from rich.console import Console
 from rich.live import Live
 
 from rich.table import Table
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, LoadingIndicator, MarkdownViewer, Digits
+from textual.widgets import Header, Footer, LoadingIndicator, Digits, Pretty
 
 from suricatalog.filter import BaseFilter, all_events_filter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO
+
+locale.setlocale(locale.LC_ALL, '')
+BASEDIR = Path(__file__).parent
+
+
+def load_css(the_file: Path):
+    with open(the_file, 'r') as css_data:
+        return "\n".join(css_data.readlines())
 
 
 def one_shot_flow_table(
@@ -79,15 +86,8 @@ def host_data_use(
         BINDINGS = [
             ("q", "quit_app", "Quit")
         ]
-        CSS = """
-            Screen {
-                align: center middle;
-            }
-            #netflow {
-                border: blank red;
-                width: auto;
-            }
-            """
+        CSS_FILE = BASEDIR.joinpath('css').joinpath('one_shot_apps.css')
+        CSS = load_css(CSS_FILE)
 
         def action_quit_app(self) -> None:
             self.exit("Exiting Net-Flow now...")
@@ -107,15 +107,31 @@ def get_agents(
         eve_files: List[Path],
         row_filter: Callable
 ) -> App:
-    tua = TopUserAgents()
+    top_user_agents = TopUserAgents()
     for event in get_events_from_eve(
             timestamp=timestamp,
             eve_files=eve_files,
             row_filter=row_filter):
-        tua.ingest_data(event)
+        top_user_agents.ingest_data(event)
 
-    with Console() as console:
-        console.print(tua.agents)
+    class TopUserApp(App):
+        BINDINGS = [
+            ("q", "quit_app", "Quit")
+        ]
+        CSS_FILE = BASEDIR.joinpath('css').joinpath('one_shot_apps.css')
+        CSS = load_css(CSS_FILE)
+
+        def action_quit_app(self) -> None:
+            self.exit("Exiting Net-Flow now...")
+
+        def compose(self) -> ComposeResult:
+            yield Header()
+            yield Pretty(top_user_agents.agents)
+            yield Footer()
+
+    top_user_app = TopUserApp()
+    top_user_app.title = f"User Agents"
+    return top_user_app
 
 
 class EveApp(App):
