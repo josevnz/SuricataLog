@@ -16,7 +16,7 @@ from ipaddress import ip_address
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, AlwaysTrueFilter, TimestampFilter
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
-from suricatalog.ui.app import one_shot_flow_table, host_data_use, get_agents
+from suricatalog.ui.app import one_shot_flow_table, host_data_use, get_agents, one_shot_capture
 
 ALWAYS_TRUE = AlwaysTrueFilter()
 
@@ -70,12 +70,17 @@ if __name__ == "__main__":
     TIMESTAMP_FILTER.timestamp = OPTIONS.timestamp
     try:
         if OPTIONS.nxdomain:
-            # eve_app.title = "DNS records with NXDOMAIN"
-            filter = NXDomainFilter()
-            pass
+            eve_app = one_shot_capture(
+                eve=OPTIONS.eve,
+                data_filter=NXDomainFilter(),
+                title="DNS records with NXDOMAIN"
+            )
         elif OPTIONS.payload:
-            # eve_app.title = "Inspect Alert Data (payload)"
-            filter = WithPrintablePayloadFilter()
+            eve_app = one_shot_capture(
+                eve=OPTIONS.eve,
+                data_filter=WithPrintablePayloadFilter(),
+                title="Inspect Alert Data (payload)"
+            )
             pass
         elif OPTIONS.flow:
             eve_app = one_shot_flow_table(
@@ -93,6 +98,8 @@ if __name__ == "__main__":
                 eve_files=OPTIONS.eve,
                 data_filter=TIMESTAMP_FILTER
             )
+        else:
+            raise ValueError("Code error, unmapped option logic!")
         eve_app.compose()
         eve_app.run()
     except KeyboardInterrupt:

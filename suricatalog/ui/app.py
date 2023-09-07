@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
-from typing import List
+from typing import List, Callable, Any
 import locale
 
 from rich.text import Text
@@ -123,7 +124,7 @@ def get_agents(
         CSS = load_css(CSS_FILE)
 
         def action_quit_app(self) -> None:
-            self.exit("Exiting Net-Flow now...")
+            self.exit("Exiting Top user now...")
 
         def compose(self) -> ComposeResult:
             yield Header()
@@ -133,3 +134,30 @@ def get_agents(
     top_user_app = TopUserApp()
     top_user_app.title = f"User Agents"
     return top_user_app
+
+
+def one_shot_capture(
+        *,
+        eve: List[Path],
+        retriever: Callable = get_events_from_eve,
+        data_filter: BaseFilter,
+        title: str
+) -> App:
+    events: List[Any] = [single_alert for single_alert in retriever(eve_files=eve, data_filter=data_filter)]
+
+    class OneShotApp(App):
+        BINDINGS = [
+            ("q", "quit_app", "Quit")
+        ]
+
+        def action_quit_app(self) -> None:
+            self.exit(f"Exiting {title} now...")
+
+        def compose(self) -> ComposeResult:
+            yield Header()
+            yield Pretty(events)
+            yield Footer()
+
+    one_shot_app = OneShotApp()
+    one_shot_app.title = f"{title}"
+    return one_shot_app
