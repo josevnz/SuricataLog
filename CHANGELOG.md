@@ -6,7 +6,7 @@
 - Fixed bug that prevented events rendering on eve_log.py for large files
 - Updated documentation
 
-## Fri Sep 1 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.0.8
+## Fri Sep 1 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.0.8, 0.0.9
 - Fixed packaging bug that prevented eve_log.py from running when installed from PyPi.org
 - Documentation fixes
 
