@@ -67,13 +67,12 @@ pip install --editable .
 
 Running unit tests is very easy after that:
 ```shell
-python -m unittest test/test_suricatalog.py
-...
+(SuricataLog) [josevnz@dmaf5 SuricataLog]$ python -m unittest test/test_suricatalog.py
+.........
 ----------------------------------------------------------------------
-Ran 3 tests in 0.134s
+Ran 9 tests in 0.334s
 
 OK
-
 ```
 
 ## Running the scripts
@@ -189,9 +188,9 @@ This is my current test bed, and it may change without further notice
 | SuricataLog | Supported | OS                               | Python    | Suricata |
 |-------------|-----------|----------------------------------|-----------|----------|
 | <= 0.8      | NO        | NA                               | => 3.8    | 6.04     |
-| 0.9         | YES       | fedora 37                        | => 3.11.4 | 6.04     |
-| 0.9         | YES       | Armbian 23.02.2 Jammy            | => 3.10.6 | 6.04     |
-| 0.9         | YES       | Ubuntu 20.04.4 LTS (Focal Fossa) | => 3.8.10 | 6.04     |
+| 0.9+        | YES       | fedora 37                        | => 3.11.4 | 6.04     |
+| 0.9+        | YES       | Armbian 23.02.2 Jammy            | => 3.10.6 | 6.04     |
+| 0.9+        | YES       | Ubuntu 20.04.4 LTS (Focal Fossa) | => 3.8.10 | 6.04     |
 
 You are more than welcome to submit patches with new features and bug-fixes.
 
