@@ -13,10 +13,12 @@ import argparse
 from pathlib import Path
 from ipaddress import ip_address
 
-from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, all_events_filter, AlwaysTrueFilter
+from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, AlwaysTrueFilter, TimestampFilter
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
 from suricatalog.ui.app import one_shot_flow_table, host_data_use, get_agents
+
+ALWAYS_TRUE = AlwaysTrueFilter()
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(description=__doc__)
@@ -64,31 +66,32 @@ if __name__ == "__main__":
         help=f"Path to one or more {DEFAULT_EVE[0]} file to parse."
     )
     OPTIONS = PARSER.parse_args()
-
+    TIMESTAMP_FILTER = TimestampFilter()
+    TIMESTAMP_FILTER.timestamp = OPTIONS.timestamp
     try:
         if OPTIONS.nxdomain:
             # eve_app.title = "DNS records with NXDOMAIN"
+            filter = NXDomainFilter()
             pass
         elif OPTIONS.payload:
             # eve_app.title = "Inspect Alert Data (payload)"
+            filter = WithPrintablePayloadFilter()
             pass
         elif OPTIONS.flow:
             eve_app = one_shot_flow_table(
                 eve=OPTIONS.eve,
-                data_filter=AlwaysTrueFilter()
+                data_filter=ALWAYS_TRUE
             )
         elif OPTIONS.netflow:
             eve_app = host_data_use(
-                timestamp=OPTIONS.timestamp,
                 eve_files=OPTIONS.eve,
-                row_filter=all_events_filter,
+                data_filter=TIMESTAMP_FILTER,
                 ip_address=OPTIONS.netflow.exploded
             )
         elif OPTIONS.useragent:
             eve_app = get_agents(
-                timestamp=OPTIONS.timestamp,
                 eve_files=OPTIONS.eve,
-                row_filter=all_events_filter
+                data_filter=TIMESTAMP_FILTER
             )
         eve_app.compose()
         eve_app.run()

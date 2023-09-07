@@ -48,31 +48,26 @@ class WithPrintablePayloadFilter(BaseFilter):
         return False
 
 
-def all_events_filter(
-        **_
-) -> bool:
-    """
-    Always true filter
-    :return:
-    """
-    return True
+class TimestampFilter(BaseFilter):
 
+    def __init__(self):
+        self.timestamp = DEFAULT_TIMESTAMP_10M_AGO
 
-def timestamp_filter(
-        *,
-        timestamp: datetime = DEFAULT_TIMESTAMP_10M_AGO,
-        data: Dict[str, Any]
-) -> bool:
-    """
-    Filter events on a given timestamp
-    :param timestamp:
-    :param data:
-    :return:
-    """
-    try:
-        event_timestamp = parse_timestamp(data['timestamp'])
-        if event_timestamp <= timestamp:
+    def set_timestamp(self, timestamp: datetime):
+        if not timestamp:
+            raise ValueError("Missing timestamp")
+        self.timestamp = timestamp
+
+    def accept(self, data: Dict[Any, Any]) -> bool:
+        """
+        Filter events on a given timestamp
+        :param data:
+        :return:
+        """
+        try:
+            event_timestamp = parse_timestamp(data['timestamp'])
+            if event_timestamp <= self.timestamp:
+                return False
+        except ValueError:
             return False
-    except ValueError:
-        return False
-    return True
+        return True

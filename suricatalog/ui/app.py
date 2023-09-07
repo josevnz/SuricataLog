@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
-from typing import List, Callable
+from typing import List
 import locale
 
 from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, Digits, Pretty, DataTable
 
-from suricatalog.filter import BaseFilter, all_events_filter
+from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
-from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO
 
 locale.setlocale(locale.LC_ALL, '')
 BASEDIR = Path(__file__).parent
@@ -59,8 +57,7 @@ def one_shot_flow_table(
             afr = AggregatedFlowProtoReport()
             for event in get_events_from_eve(
                     eve_files=eve,
-                    timestamp=DEFAULT_TIMESTAMP_10Y_AGO,
-                    row_filter=all_events_filter):
+                    data_filter=data_filter):
                 if not data_filter.accept(event):
                     continue
                 afr.ingest_data(event)
@@ -78,16 +75,14 @@ def one_shot_flow_table(
 
 
 def host_data_use(
-        timestamp: datetime,
         eve_files: List[Path],
-        row_filter: Callable,
+        data_filter: BaseFilter,
         ip_address: any
 ) -> App:
     host_data_user_report = HostDataUseReport()
     for event in get_events_from_eve(
-            timestamp=timestamp,
             eve_files=eve_files,
-            row_filter=row_filter):
+            data_filter=data_filter):
         host_data_user_report.ingest_data(event, ip_address)
 
     class HostDataUse(App):
@@ -111,15 +106,13 @@ def host_data_use(
 
 
 def get_agents(
-        timestamp: datetime,
         eve_files: List[Path],
-        row_filter: Callable
+        data_filter: BaseFilter
 ) -> App:
     top_user_agents = TopUserAgents()
     for event in get_events_from_eve(
-            timestamp=timestamp,
             eve_files=eve_files,
-            row_filter=row_filter):
+            data_filter=data_filter):
         top_user_agents.ingest_data(event)
 
     class TopUserApp(App):

@@ -1,13 +1,11 @@
 import json
 import os
 import time
-from datetime import datetime
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Callable, Dict
 
-from suricatalog.filter import timestamp_filter
-from suricatalog.time import DEFAULT_TIMESTAMP_10M_AGO
+from suricatalog.filter import BaseFilter
 
 DEFAULT_EVE = [Path("/var/log/suricata/eve.json")]
 
@@ -15,15 +13,13 @@ DEFAULT_EVE = [Path("/var/log/suricata/eve.json")]
 def get_events_from_eve(
         *,
         eve_files=None,
-        row_filter: Callable = timestamp_filter,
-        timestamp: datetime = DEFAULT_TIMESTAMP_10M_AGO
+        data_filter: BaseFilter,
 ) -> Dict:
     """
     Get alerts from a JSON even file. Assumed each line is a valid
     JSON document, otherwise reader will crash
     :param eve_files:
-    :param row_filter: Filter events based on several criteria
-    :param timestamp:
+    :param data_filter: Filter events based on several criteria
     :return:
     """
     if eve_files is None:
@@ -33,7 +29,7 @@ def get_events_from_eve(
             for line in eve:
                 try:
                     data = json.loads(line)
-                    if row_filter(data=data, timestamp=timestamp):
+                    if data_filter.accept(data):
                         yield data
                 except JSONDecodeError:
                     continue  # Try to read the next record

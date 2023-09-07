@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 from suricatalog.time import parse_timestamp
-from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, timestamp_filter, all_events_filter
+from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, TimestampFilter, AlwaysTrueFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
 
@@ -134,27 +134,31 @@ class SuricataLogTestCase(unittest.TestCase):
             pass
 
     def test_timestamp_filter(self):
+        timestamp_filter = TimestampFilter()
+        timestamp_filter.timestamp = SuricataLogTestCase.old_date
         self.assertTrue(
-            timestamp_filter(data=SuricataLogTestCase.eve_list[0], timestamp=SuricataLogTestCase.old_date)
+            timestamp_filter.accept(data=SuricataLogTestCase.eve_list[0])
         )
         self.assertTrue(
-            timestamp_filter(data=SuricataLogTestCase.eve_list[132], timestamp=SuricataLogTestCase.old_date)
+            timestamp_filter.accept(data=SuricataLogTestCase.eve_list[132])
         )
 
     def test_get_alerts(self):
+        timestamp_filter = TimestampFilter()
+        timestamp_filter.timestamp = SuricataLogTestCase.old_date
         all_alerts = [x for x in get_events_from_eve(
-            timestamp=SuricataLogTestCase.old_date,
-            eve_files=[BASEDIR.joinpath("eve.json")]
+            eve_files=[BASEDIR.joinpath("eve.json")],
+            data_filter=timestamp_filter
         ) if x['event_type'] == 'alert']
         self.assertIsNotNone(all_alerts)
         self.assertEqual(275, len(all_alerts))
         self.assertEqual('SURICATA Applayer Detect protocol only one direction', all_alerts[90]['alert']['signature'])
 
     def test_get_all_events(self):
+        always_true_filter = AlwaysTrueFilter()
         all_events = [x for x in get_events_from_eve(
-            timestamp=SuricataLogTestCase.old_date,
             eve_files=[BASEDIR.joinpath("eve.json")],
-            row_filter=all_events_filter
+            data_filter=always_true_filter
         )]
         self.assertIsNotNone(all_events)
         self.assertListEqual(SuricataLogTestCase.eve_list, all_events)
