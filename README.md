@@ -175,19 +175,6 @@ scripts/eve_json.py --useragent test/eve.json
 You only need to mount the eve.json file inside the container and call any of the scripts 
 the same way you will on bare-metal.
 
-### eve_log.json
-
-You only need to mount the directory where the Suricata Eve files are saved
-
-```shell
-docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_log:latest --timestamp '2022-02-23T18:22:24.405139+0000' --formats JSON /logs/eve.json
-```
-
-### eve_json.py
-```shell
-docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_json:latest --nxdomain /logs/eve.json
-```
-
 ### Building the Docker container
 
 You need to build the images in order
@@ -201,6 +188,21 @@ BUILDKIT=1 docker build --tag suricatalog/eve_json --file Dockerfile-eve_json .
 
 Why 2 Docker build files? I don't want to spawn any Shell processes inside the container, instead each container will be
 very limited on what it can and cannot run.
+
+### Running the containers
+
+#### eve_log.json
+
+You only need to mount the directory where the Suricata Eve files are saved
+
+```shell
+docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_log:latest --timestamp '2022-02-23T18:22:24.405139+0000' --formats JSON /logs/eve.json
+```
+
+#### eve_json.py
+```shell
+docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_json:latest --nxdomain /logs/eve.json
+```
 
 ## Supported versions
 
