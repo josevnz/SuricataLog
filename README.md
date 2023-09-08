@@ -177,7 +177,7 @@ This is my current test bed, and it may change without further notice
 
 | SuricataLog | Supported | OS                               | Python    | Suricata |
 |-------------|-----------|----------------------------------|-----------|----------|
-| <= 0.8      | NO        | NA                               | => 3.8    | 6.04     |
+| <= 0.8      | NO        | NA                               | <  3.8    | 6.04     |
 | 0.9+        | YES       | fedora 37                        | => 3.11.4 | 6.04     |
 | 0.9+        | YES       | Armbian 23.02.2 Jammy            | => 3.10.6 | 6.04     |
 | 0.9+        | YES       | Ubuntu 20.04.4 LTS (Focal Fossa) | => 3.8.10 | 6.04     |
