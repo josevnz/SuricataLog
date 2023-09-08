@@ -16,7 +16,7 @@ from ipaddress import ip_address
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, AlwaysTrueFilter, TimestampFilter
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
-from suricatalog.ui.canned import get_one_shot_flow_table, get_host_data_use, get_agents, get_capture
+from suricatalog.canned import get_one_shot_flow_table, get_host_data_use, get_agents, get_capture
 
 ALWAYS_TRUE = AlwaysTrueFilter()
 
@@ -73,13 +73,13 @@ if __name__ == "__main__":
             eve_app = get_capture(
                 eve=OPTIONS.eve,
                 data_filter=NXDomainFilter(),
-                title="DNS records with NXDOMAIN"
+                title="SuricataLog DNS records with NXDOMAIN"
             )
         elif OPTIONS.payload:
             eve_app = get_capture(
                 eve=OPTIONS.eve,
                 data_filter=WithPrintablePayloadFilter(),
-                title="Inspect Alert Data (payload)"
+                title="SuricataLog Inspect Alert Data (payload)"
             )
             pass
         elif OPTIONS.flow:

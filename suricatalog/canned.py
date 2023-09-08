@@ -11,14 +11,10 @@ from textual.widgets import Header, Footer, Digits, Pretty, DataTable
 from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
+from suricatalog.utility import load_css
 
 locale.setlocale(locale.LC_ALL, '')
 BASEDIR = Path(__file__).parent
-
-
-def load_css(the_file: Path):
-    with open(the_file, 'r') as css_data:
-        return "\n".join(css_data.readlines())
 
 
 def get_one_shot_flow_table(
@@ -70,7 +66,7 @@ def get_one_shot_flow_table(
                 alert_cnt += 1
 
     flow_app = FlowApp()
-    flow_app.title = f"Suricata FLOW protocol, logs={logs}"
+    flow_app.title = f"SuricataLog FLOW protocol, logs={logs}"
     return flow_app
 
 
@@ -89,7 +85,7 @@ def get_host_data_use(
         BINDINGS = [
             ("q", "quit_app", "Quit")
         ]
-        CSS_FILE = BASEDIR.joinpath('css').joinpath('one_shot_apps.css')
+        CSS_FILE = BASEDIR.joinpath('css').joinpath('canned.css')
         CSS = load_css(CSS_FILE)
 
         def action_quit_app(self) -> None:
@@ -101,7 +97,7 @@ def get_host_data_use(
             yield Footer()
 
     hdu = HostDataUse()
-    hdu.title = f"Net-Flow for: {ip_address}"
+    hdu.title = f"SuricataLog Net-Flow for: {ip_address}"
     return hdu
 
 
@@ -119,7 +115,7 @@ def get_agents(
         BINDINGS = [
             ("q", "quit_app", "Quit")
         ]
-        CSS_FILE = BASEDIR.joinpath('css').joinpath('one_shot_apps.css')
+        CSS_FILE = BASEDIR.joinpath('css').joinpath('canned.css')
         CSS = load_css(CSS_FILE)
 
         def action_quit_app(self) -> None:
@@ -131,7 +127,7 @@ def get_agents(
             yield Footer()
 
     top_user_app = TopUserApp()
-    top_user_app.title = f"User Agents"
+    top_user_app.title = f"SuricataLog User Agents"
     return top_user_app
 
 

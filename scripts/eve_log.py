@@ -6,9 +6,10 @@ Author: Jose Vicente Nunez (kodegeek.com@protonmail.com)
 import argparse
 from pathlib import Path
 
+from suricatalog.alert import JsonAlert, TableAlert, BriefAlert
 from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10Y_AGO
 from suricatalog.log import DEFAULT_EVE
-from ui.utility import Formats, get_format, FORMATS
+from suricatalog.utility import Formats, get_format, FORMATS
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(description=__doc__)
@@ -34,10 +35,15 @@ if __name__ == "__main__":
     OPTIONS = PARSER.parse_args()
     try:
         if OPTIONS.formats == Formats.TABLE:
-            raise NotImplementedError()
+            app = TableAlert()
         elif OPTIONS.formats == Formats.BRIEF:
-            raise NotImplementedError()
+            app = BriefAlert()
+        elif OPTIONS.formats == Formats.JSON:
+            app = JsonAlert()
         else:
-            raise NotImplementedError()
+            raise ValueError(f"Application error, don't know how to handle: {OPTIONS.formats}")
+        app.title = f"SuricataLog Alerts (filter='>={OPTIONS.timestamp}') for {','.join([eve.name for eve in OPTIONS.eve])} (format={OPTIONS.formats.name})"
+        app.compose()
+        app.run()
     except KeyboardInterrupt:
         raise
