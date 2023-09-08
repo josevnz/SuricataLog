@@ -16,7 +16,7 @@ from ipaddress import ip_address
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, AlwaysTrueFilter, TimestampFilter
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
-from suricatalog.ui.app import get_one_shot_flow_table, get_host_data_use, get_agents, get_capture
+from suricatalog.ui.mini import get_one_shot_flow_table, get_host_data_use, get_agents, get_capture
 
 ALWAYS_TRUE = AlwaysTrueFilter()
 

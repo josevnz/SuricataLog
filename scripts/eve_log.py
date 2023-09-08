@@ -5,10 +5,10 @@ Author: Jose Vicente Nunez (kodegeek.com@protonmail.com)
 """
 import argparse
 from pathlib import Path
+
 from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10Y_AGO
 from suricatalog.log import DEFAULT_EVE
-
-FORMATS = ('table', 'json', 'brief')
+from ui.utility import Formats, get_format, FORMATS
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(description=__doc__)
@@ -20,10 +20,10 @@ if __name__ == "__main__":
     )
     PARSER.add_argument(
         "--formats",
-        type=str,
-        default=FORMATS[0],
+        type=get_format,
+        default=Formats.TABLE,
         choices=FORMATS,
-        help=f"Choose the output format ({' '.join(FORMATS)})"
+        help="Choose the output format"
     )
     PARSER.add_argument(
         'eve',
@@ -33,6 +33,11 @@ if __name__ == "__main__":
     )
     OPTIONS = PARSER.parse_args()
     try:
-        raise NotImplementedError()
+        if OPTIONS.formats == Formats.TABLE:
+            raise NotImplementedError()
+        elif OPTIONS.formats == Formats.BRIEF:
+            raise NotImplementedError()
+        else:
+            raise NotImplementedError()
     except KeyboardInterrupt:
         raise
