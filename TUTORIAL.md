@@ -280,7 +280,7 @@ Interface #0 info:
                      Number of packets = 30023
 ```
 
-Will use a [small wrapper](scripts/replay_pcap_file.sh) around _tcpreplay_ to replay our PCAP file:
+Will use a [small wrapper](etc/replay_pcap_file.sh) around _tcpreplay_ to replay our PCAP file:
 
 ```shell
 #!/bin/bash

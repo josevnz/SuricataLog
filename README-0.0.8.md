@@ -174,7 +174,7 @@ You need to build the images in order
 ```shell
 git clone git@github.com:josevnz/SuricataLog.git
 cd SuricataLog
-BUILDKIT=1 docker build --tag suricatalog/eve_log --file Dockerfile-eve_log .
+BUILDKIT=1 docker build --tag suricatalog/eve_log --file Dockerfile .
 BUILDKIT=1 docker build --tag suricatalog/eve_json --file Dockerfile-eve_json .
 ```
 

@@ -12,7 +12,8 @@ from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10Y_AGO
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.utility import Formats, get_format, FORMATS
 
-if __name__ == "__main__":
+
+def main():
     PARSER = argparse.ArgumentParser(description=__doc__)
     PARSER.add_argument(
         "--timestamp",
@@ -54,3 +55,7 @@ if __name__ == "__main__":
         app.run()
     except KeyboardInterrupt:
         raise
+
+
+if __name__ == "__main__":
+    main()

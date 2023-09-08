@@ -88,7 +88,7 @@ Better see it by yourself (remember, use --help to learn what options are suppor
 ![suricatalog-eve_log-table.png](suricatalog-eve_log-table.png)
 
 ````shell
-eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
+eve_log --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
 ````
 
 #### Show records in JSON format:
@@ -96,7 +96,7 @@ eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.jso
 ![suricatalog-eve_log-json.png](suricatalog-eve_log-json.png)
 
 ````shell
-eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats JSON test/eve.json
+eve_log --timestamp '2015-01-01 10:41:21.642899' --formats JSON test/eve.json
 ````
 
 #### Brief format:
@@ -104,14 +104,14 @@ eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats JSON test/eve.json
 ![suricatalog-eve_log-brief.png](suricatalog-eve_log-brief.png)
 
 ````shell
-eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats BRIEF test/eve.json
+eve_log --timestamp '2015-01-01 10:41:21.642899' --formats BRIEF test/eve.json
 ````
 
 ### Canned reports with eve_json.py
 
 ```shell
-(suricatalog) [josevnz@dmaf5 SuricataLog]$ eve_json.py --help
-usage: eve_json.py [-h] [--nxdomain | --payload | --flow | --netflow NETFLOW | --useragent] eve [eve ...]
+(suricatalog) [josevnz@dmaf5 SuricataLog]$ eve_json --help
+usage: eve_json [-h] [--nxdomain | --payload | --flow | --netflow NETFLOW | --useragent] eve [eve ...]
 
 This script is inspired by the examples provided on [15.1.3. Eve JSON ‘jq’ Examples](https://suricata.readthedocs.io/en/suricata-6.0.0/output/eve/eve-json-
 examplesjq.html) A few things: * The output uses colorized JSON
@@ -135,7 +135,7 @@ Take a look at some examples below:
 ![suricatalog-eve_json-nxdomain.png](suricatalog-eve_json-nxdomain.png)
 
 ```shell
-scripts/eve_json.py --nxdomain test/eve.json
+eve_json --nxdomain test/eve.json
 ```
 
 #### PAYLOAD
@@ -143,7 +143,7 @@ scripts/eve_json.py --nxdomain test/eve.json
 ![suricatalog-eve_json-payload.png](suricatalog-eve_json-payload.png)
 
 ```shell
-scripts/eve_json.py --payload ~/Downloads/eve.json
+eve_json --payload ~/Downloads/eve.json
 ```
 
 #### FLOW
@@ -151,7 +151,7 @@ scripts/eve_json.py --payload ~/Downloads/eve.json
 ![suricatalog_eve_json-flow.png](suricatalog_eve_json-flow.png)
 
 ```shell
-scripts/eve_json.py --flow test/eve_udp_flow.json
+eve_json --flow test/eve_udp_flow.json
 ```
 
 #### NETFLOW
@@ -159,7 +159,7 @@ scripts/eve_json.py --flow test/eve_udp_flow.json
 ![suricatalog_eve_json-netflow.png](suricatalog_eve_json-netflow.png)
 
 ```shell
-scripts/eve_json.py --netflow 224.0.0.251 test/eve_udp_flow.json
+eve_json --netflow 224.0.0.251 test/eve_udp_flow.json
 ```
 
 #### USERAGENT
@@ -167,41 +167,7 @@ scripts/eve_json.py --netflow 224.0.0.251 test/eve_udp_flow.json
 ![suricatalog-eve_json-useragent.png](suricatalog-eve_json-useragent.png)
 
 ```shell
-scripts/eve_json.py --useragent test/eve.json
-```
-
-## Running using a container
-
-You only need to mount the eve.json file inside the container and call any of the scripts 
-the same way you will on bare-metal.
-
-### Building the Docker container
-
-You need to build the images in order
-
-```shell
-git clone git@github.com:josevnz/SuricataLog.git
-cd SuricataLog
-BUILDKIT=1 docker build --tag suricatalog/eve_log --file Dockerfile-eve_log .
-BUILDKIT=1 docker build --tag suricatalog/eve_json --file Dockerfile-eve_json .
-```
-
-Why 2 Docker build files? I don't want to spawn any Shell processes inside the container, instead each container will be
-very limited on what it can and cannot run.
-
-### Running the containers
-
-#### eve_log.json
-
-You only need to mount the directory where the Suricata Eve files are saved
-
-```shell
-docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_log:latest --timestamp '2022-02-23T18:22:24.405139+0000' --formats JSON /logs/eve.json
-```
-
-#### eve_json.py
-```shell
-docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_json:latest --nxdomain /logs/eve.json
+eve_json --useragent test/eve.json
 ```
 
 ## Supported versions

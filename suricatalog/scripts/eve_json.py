@@ -20,7 +20,8 @@ from suricatalog.canned import get_one_shot_flow_table, get_host_data_use, get_a
 
 ALWAYS_TRUE = AlwaysTrueFilter()
 
-if __name__ == "__main__":
+
+def main():
     PARSER = argparse.ArgumentParser(description=__doc__)
     PARSER.add_argument(
         "--timestamp",
@@ -104,3 +105,7 @@ if __name__ == "__main__":
         eve_app.run()
     except KeyboardInterrupt:
         pass
+
+
+if __name__ == "__main__":
+    main()

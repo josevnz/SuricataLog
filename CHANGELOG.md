@@ -1,9 +1,10 @@
 # SuricataLog changelog
 
 ## Fri Sep 15 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.0
-- Major packaging refactoring, no more setup.py/ setup.cfg support
-- Dropped support of Rich and migrated to the newest version of Textualize, uniform UI code
-- Fixed bug that prevented events rendering on eve_log.py for large files
+- Packaging refactoring, no more setup.py/ setup.cfg support
+- Migrated to the newest version of Textualize, uniform UI code
+- Fixed bug that prevented events rendering on eve_log for large files
+- Removed Docker support. Functionality not used, will add again if users demand for it.
 - Updated documentation
 
 ## Fri Sep 1 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.0.8, 0.0.9
