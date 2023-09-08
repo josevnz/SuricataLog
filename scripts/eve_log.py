@@ -41,6 +41,7 @@ if __name__ == "__main__":
             app = TableAlert()
         elif OPTIONS.formats == Formats.BRIEF:
             app = RawAlert()
+            app.set_is_brief(True)
         elif OPTIONS.formats == Formats.JSON:
             app = RawAlert()
             app.set_is_brief(False)

@@ -4,7 +4,7 @@ from typing import Type, List, Any, Dict
 
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Footer, ListView, Header, ListItem, Pretty
+from textual.widgets import Footer, ListView, Header, ListItem, Pretty, DataTable
 
 from suricatalog.log import get_events_from_eve
 from suricatalog.filter import BaseFilter
@@ -40,6 +40,29 @@ class BaseAlert(App):
                 break
         return val
 
+    @staticmethod
+    def __extract__from_alert__(alert: Dict[str, Any]) -> Dict[str, Any]:
+        timestamp = alert['timestamp']
+        dest_port = str(BaseAlert.__get_key_from_map__(alert, ['dest_port']))
+        dest_ip = BaseAlert.__get_key_from_map__(alert, ['dest_ip'])
+        src_ip = BaseAlert.__get_key_from_map__(alert, ['src_ip'])
+        src_port = str(BaseAlert.__get_key_from_map__(alert, ['src_port']))
+        protocol = BaseAlert.__get_key_from_map__(alert, ['app_proto', 'proto'])
+        severity = alert['alert']['severity']
+        signature = alert['alert']['signature'],
+        payload_printable = alert['payload_printable'] if 'payload_printable' in alert else ""
+        return {
+            "timestamp": timestamp,
+            "dest_port": dest_port,
+            "src_ip": src_ip,
+            "dest_ip": dest_ip,
+            "src_port": src_port,
+            "protocol": protocol,
+            "severity": severity,
+            "signature": signature,
+            "payload_printable": payload_printable
+        }
+
     def set_filter(self, the_filter: BaseFilter):
         if not the_filter:
             raise ValueError("Filter is required")
@@ -49,19 +72,6 @@ class BaseAlert(App):
         if not eve_files:
             raise ValueError("One or more eve files is required")
         self.eve_files = eve_files
-
-
-class TableAlert(BaseAlert):
-    BINDINGS = [
-        ("q", "quit_app", "Quit")
-    ]
-
-    def compose(self) -> ComposeResult:
-        yield Header()
-        yield Footer()
-
-    def action_quit_app(self) -> None:
-        self.exit("Exiting Alerts now...")
 
 
 class RawAlert(BaseAlert):
@@ -99,20 +109,57 @@ class RawAlert(BaseAlert):
                 continue
 
             if self.is_brief:
-                dest_port = str(BaseAlert.__get_key_from_map__(event, ['dest_port']))
-                src_ip = BaseAlert.__get_key_from_map__(event, ['src_ip'])
-                dest_ip = BaseAlert.__get_key_from_map__(event, ['dest_ip'])
-                src_port = BaseAlert.__get_key_from_map__(event, ['src_port'])
-                protocol = BaseAlert.__get_key_from_map__(event, ['app_proto', 'proto'])
-                severity = event['alert']['severity']
+                brief_data = BaseAlert.__extract__from_alert__(event)
                 brief = {
-                    "Timestamp": f"{event['timestamp']}",
-                    "Severity": f"{severity}",
-                    "Signature": f"{event['alert']['signature']}",
-                    "Protocol": protocol,
-                    "Destination": f"{dest_ip}:{dest_port}",
-                    "Source": f"{src_ip}:{src_port}"
+                    "Timestamp": brief_data['timestamp'],
+                    "Severity": brief_data['severity'],
+                    "Signature": brief_data['signature'],
+                    "Protocol": brief_data['protocol'],
+                    "Destination": f"{brief_data['dest_ip']}:{brief_data['dest_port']}",
+                    "Source": f"{brief_data['src_ip']}:{brief_data['src_port']}"
                 }
                 list_view.append(ListItem(Pretty(brief)))
             else:
                 list_view.append(ListItem(Pretty(event)))
+
+
+class TableAlert(BaseAlert):
+    BINDINGS = [
+        ("q", "quit_app", "Quit")
+    ]
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield DataTable()
+        yield Footer()
+
+    def on_mount(self) -> None:
+        alerts_tbl = self.query_one(DataTable)
+        alerts_tbl.add_column("Timestamp")
+        alerts_tbl.add_column("Severity")
+        alerts_tbl.add_column("Signature")
+        alerts_tbl.add_column("Protocol")
+        alerts_tbl.add_column("Destination")
+        alerts_tbl.add_column("Source")
+        alerts_tbl.add_column("Payload")
+        alert_cnt = 0
+        for event in get_events_from_eve(
+                data_filter=self.filter,
+                eve_files=self.eve_files
+        ):
+            if not self.filter.accept(event):
+                continue
+            brief_data = BaseAlert.__extract__from_alert__(event)
+            alerts_tbl.add_row(
+                brief_data['timestamp'],
+                brief_data['severity'],
+                brief_data['signature'],
+                brief_data['protocol'],
+                f"{brief_data['dest_ip']}:{brief_data['dest_port']}",
+                f"{brief_data['src_ip']}:{brief_data['src_port']}",
+                brief_data['payload_printable']
+            )
+            alert_cnt += 1
+
+    def action_quit_app(self) -> None:
+        self.exit("Exiting Alerts now...")

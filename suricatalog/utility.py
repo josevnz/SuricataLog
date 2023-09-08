@@ -16,7 +16,7 @@ class Formats(Enum):
 
 def get_format(val: str) -> Union[Formats, None]:
     try:
-        return Formats[str.upper(val)]
+        return Formats[val]
     except KeyError:
         return None
 
