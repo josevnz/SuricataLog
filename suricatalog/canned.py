@@ -22,12 +22,6 @@ def get_one_shot_flow_table(
         eve: List[Path],
         data_filter: BaseFilter
 ) -> App:
-    """
-    Read and parse all the alerts from the eve.json file. It may use lots of memory and take a while to render...
-    :param data_filter:
-    :param eve:
-    :return:
-    """
     logs = ' '.join(map(lambda x: str(x), eve))
 
     class FlowApp(App):
