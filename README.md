@@ -81,30 +81,30 @@ Once everything is installed you should be able to call the scripts
 
 ### Simple EVE log parser
 
-Better see it by yourself
+Better see it by yourself (remember, use --help to learn what options are supported)
 
-Table format:
+#### Table format:
 
-TODO
+![suricatalog-eve_log-table.png](suricatalog-eve_log-table.png)
 
 ````shell
-eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats table test/eve.json
+eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
 ````
 
-Show records in JSON format:
+#### Show records in JSON format:
 
-TODO
+![suricatalog-eve_log-json.png](suricatalog-eve_log-json.png)
 
 ````shell
-eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats json test/eve.json
+eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats JSON test/eve.json
 ````
 
-Or brief format:
+#### Brief format:
 
-TODO
+![suricatalog-eve_log-brief.png](suricatalog-eve_log-brief.png)
 
 ````shell
-eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats brief test/eve.json
+eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats BRIEF test/eve.json
 ````
 
 ### Canned reports with eve_json.py
@@ -128,25 +128,47 @@ optional arguments:
   --useragent        Top user agent in HTTP traffic
 ```
 
+Take a look at some examples below:
+
 #### NXDOMAIN
 
-TODO
+![suricatalog-eve_json-nxdomain.png](suricatalog-eve_json-nxdomain.png)
+
+```shell
+scripts/eve_json.py --nxdomain test/eve.json
+```
 
 #### PAYLOAD
 
-TODO
+![suricatalog-eve_json-payload.png](suricatalog-eve_json-payload.png)
+
+```shell
+scripts/eve_json.py --payload ~/Downloads/eve.json
+```
 
 #### FLOW
 
-TODO
+![suricatalog_eve_json-flow.png](suricatalog_eve_json-flow.png)
+
+```shell
+scripts/eve_json.py --flow test/eve_udp_flow.json
+```
 
 #### NETFLOW
 
-TODO
+![suricatalog_eve_json-netflow.png](suricatalog_eve_json-netflow.png)
+
+```shell
+scripts/eve_json.py --netflow 224.0.0.251 test/eve_udp_flow.json
+```
 
 #### USERAGENT
 
-TODO
+![suricatalog-eve_json-useragent.png](suricatalog-eve_json-useragent.png)
+
+```shell
+scripts/eve_json.py --useragent test/eve.json
+```
 
 ## Running using a container
 
@@ -158,7 +180,7 @@ the same way you will on bare-metal.
 You only need to mount the directory where the Suricata Eve files are saved
 
 ```shell
-docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_log:latest --timestamp '2022-02-23T18:22:24.405139+0000' --formats json /logs/eve.json
+docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_log:latest --timestamp '2022-02-23T18:22:24.405139+0000' --formats JSON /logs/eve.json
 ```
 
 ### eve_json.py
@@ -192,6 +214,8 @@ This is my current test bed, and it may change without further notice
 | 0.9+        | YES       | Armbian 23.02.2 Jammy            | => 3.10.6 | 6.04     |
 | 0.9+        | YES       | Ubuntu 20.04.4 LTS (Focal Fossa) | => 3.8.10 | 6.04     |
 
-You are more than welcome to submit patches with new features and bug-fixes.
+*You are more than welcome to*:
+* Submit patches with new features and bug-fixes.
+* Open bug reports. Be as detailed as possible, otherwise I will have no choice but to close it.
 
 
