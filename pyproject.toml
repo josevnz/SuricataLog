@@ -38,4 +38,4 @@ include-package-data = true
 
 [project.scripts]
 eve_json = "suricatalog.scripts.eve_json:main"
-eve_log = "suricatalog.scripts.eve_json:eve_log"
+eve_log = "suricatalog.scripts.eve_log:main"

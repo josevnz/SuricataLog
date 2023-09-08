@@ -101,7 +101,6 @@ def main():
             )
         else:
             raise ValueError("Code error, unmapped option logic!")
-        eve_app.compose()
         eve_app.run()
     except KeyboardInterrupt:
         pass

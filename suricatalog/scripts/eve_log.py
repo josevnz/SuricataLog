@@ -51,7 +51,6 @@ def main():
         app.title = f"SuricataLog Alerts (filter='>={OPTIONS.timestamp}') for {','.join([eve.name for eve in OPTIONS.eve])} (format={OPTIONS.formats.name})"
         app.set_filter(timestamp_filter)
         app.set_eve_files(OPTIONS.eve)
-        app.compose()
         app.run()
     except KeyboardInterrupt:
         raise
