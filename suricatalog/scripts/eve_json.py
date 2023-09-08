@@ -13,12 +13,15 @@ import argparse
 from pathlib import Path
 from ipaddress import ip_address
 
-from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, all_events_filter, AlwaysTrueFilter
+from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, AlwaysTrueFilter, TimestampFilter
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
-from suricatalog.ui.app import EveLogApp, FlowApp
+from suricatalog.canned import get_one_shot_flow_table, get_host_data_use, get_agents, get_capture
 
-if __name__ == "__main__":
+ALWAYS_TRUE = AlwaysTrueFilter()
+
+
+def main():
     PARSER = argparse.ArgumentParser(description=__doc__)
     PARSER.add_argument(
         "--timestamp",
@@ -64,41 +67,45 @@ if __name__ == "__main__":
         help=f"Path to one or more {DEFAULT_EVE[0]} file to parse."
     )
     OPTIONS = PARSER.parse_args()
-
+    TIMESTAMP_FILTER = TimestampFilter()
+    TIMESTAMP_FILTER.timestamp = OPTIONS.timestamp
     try:
         if OPTIONS.nxdomain:
-            EveLogApp.run(
-                timestamp=OPTIONS.timestamp,
-                eve_files=OPTIONS.eve,
-                out_format='json',
-                title="Suricata NXDOMAIN filter",
-                data_filter=NXDomainFilter()
+            eve_app = get_capture(
+                eve=OPTIONS.eve,
+                data_filter=NXDomainFilter(),
+                title="SuricataLog DNS records with NXDOMAIN"
             )
         elif OPTIONS.payload:
-            EveLogApp.run(
-                timestamp=OPTIONS.timestamp,
-                eve_files=OPTIONS.eve,
-                out_format='json',
-                title="Suricata alerts with printable payload",
-                data_filter=WithPrintablePayloadFilter()
-            )
-        elif OPTIONS.flow:
-            FlowApp.one_shot_flow_table(
+            eve_app = get_capture(
                 eve=OPTIONS.eve,
-                data_filter=AlwaysTrueFilter()
+                data_filter=WithPrintablePayloadFilter(),
+                title="SuricataLog Inspect Alert Data (payload)"
+            )
+            pass
+        elif OPTIONS.flow:
+            eve_app = get_one_shot_flow_table(
+                eve=OPTIONS.eve,
+                data_filter=ALWAYS_TRUE
             )
         elif OPTIONS.netflow:
-            FlowApp.host_data_use(
-                timestamp=OPTIONS.timestamp,
+            eve_app = get_host_data_use(
                 eve_files=OPTIONS.eve,
-                row_filter=all_events_filter,
+                data_filter=TIMESTAMP_FILTER,
                 ip_address=OPTIONS.netflow.exploded
             )
         elif OPTIONS.useragent:
-            FlowApp.get_agents(
-                timestamp=OPTIONS.timestamp,
+            eve_app = get_agents(
                 eve_files=OPTIONS.eve,
-                row_filter=all_events_filter
+                data_filter=TIMESTAMP_FILTER
             )
+        else:
+            raise ValueError("Code error, unmapped option logic!")
+        eve_app.compose()
+        eve_app.run()
     except KeyboardInterrupt:
-        FlowApp.print("[bold]Program interrupted...[/bold]")
+        pass
+
+
+if __name__ == "__main__":
+    main()

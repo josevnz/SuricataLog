@@ -1,6 +1,6 @@
 # SuricataLog
 
-[![Downloads](https://pepy.tech/badge/suricatalog)](https://pepy.tech/project/suricatalog)
+*NOTE: This README is for version 0.0.8. Please refer to default [README(README.md) for an up-to-date file.*
 
 When I started learning how to use [Suricata](https://suricata.io/) quickly found that I needed a tool to inspect the eve.json file; Most of the tutorials 
 and documentation out there suggested installing a stack to do the following tasks:
@@ -67,12 +67,13 @@ pip install --editable .
 
 Running unit tests is very easy after that:
 ```shell
-(SuricataLog) [josevnz@dmaf5 SuricataLog]$ python -m unittest test/test_suricatalog.py
-.........
+python -m unittest test/test_suricatalog.py
+...
 ----------------------------------------------------------------------
-Ran 9 tests in 0.334s
+Ran 3 tests in 0.134s
 
 OK
+
 ```
 
 ## Running the scripts
@@ -81,37 +82,37 @@ Once everything is installed you should be able to call the scripts
 
 ### Simple EVE log parser
 
-Better see it by yourself (remember, use --help to learn what options are supported)
+Better see it by yourself
 
-#### Table format:
+Table format:
 
-![suricatalog-eve_log-table.png](suricatalog-eve_log-table.png)
+[![asciicast](https://asciinema.org/a/494371.svg)](https://asciinema.org/a/494371)
 
 ````shell
-eve_log --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
+eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats table test/eve.json
 ````
 
-#### Show records in JSON format:
+Show records in JSON format:
 
-![suricatalog-eve_log-json.png](suricatalog-eve_log-json.png)
+[![asciicast](https://asciinema.org/a/489775.svg)](https://asciinema.org/a/489775)
 
 ````shell
-eve_log --timestamp '2015-01-01 10:41:21.642899' --formats JSON test/eve.json
+eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats json test/eve.json
 ````
 
-#### Brief format:
+Or brief format:
 
-![suricatalog-eve_log-brief.png](suricatalog-eve_log-brief.png)
+[![asciicast](https://asciinema.org/a/494375.svg)](https://asciinema.org/a/494375)
 
 ````shell
-eve_log --timestamp '2015-01-01 10:41:21.642899' --formats BRIEF test/eve.json
+eve_log.py --timestamp '2015-01-01 10:41:21.642899' --formats brief test/eve.json
 ````
 
 ### Canned reports with eve_json.py
 
 ```shell
-(suricatalog) [josevnz@dmaf5 SuricataLog]$ eve_json --help
-usage: eve_json [-h] [--nxdomain | --payload | --flow | --netflow NETFLOW | --useragent] eve [eve ...]
+(suricatalog) [josevnz@dmaf5 SuricataLog]$ eve_json.py --help
+usage: eve_json.py [-h] [--nxdomain | --payload | --flow | --netflow NETFLOW | --useragent] eve [eve ...]
 
 This script is inspired by the examples provided on [15.1.3. Eve JSON ‘jq’ Examples](https://suricata.readthedocs.io/en/suricata-6.0.0/output/eve/eve-json-
 examplesjq.html) A few things: * The output uses colorized JSON
@@ -128,47 +129,57 @@ optional arguments:
   --useragent        Top user agent in HTTP traffic
 ```
 
-Take a look at some examples below:
-
 #### NXDOMAIN
 
-![suricatalog-eve_json-nxdomain.png](suricatalog-eve_json-nxdomain.png)
-
-```shell
-eve_json --nxdomain test/eve.json
-```
+[![asciicast](https://asciinema.org/a/491442.svg)](https://asciinema.org/a/491442)
 
 #### PAYLOAD
 
-![suricatalog-eve_json-payload.png](suricatalog-eve_json-payload.png)
-
-```shell
-eve_json --payload ~/Downloads/eve.json
-```
+[![asciicast](https://asciinema.org/a/491432.svg)](https://asciinema.org/a/491432)
 
 #### FLOW
 
-![suricatalog_eve_json-flow.png](suricatalog_eve_json-flow.png)
-
-```shell
-eve_json --flow test/eve_udp_flow.json
-```
+[![asciicast](https://asciinema.org/a/491433.svg)](https://asciinema.org/a/491433)
 
 #### NETFLOW
 
-![suricatalog_eve_json-netflow.png](suricatalog_eve_json-netflow.png)
-
-```shell
-eve_json --netflow 224.0.0.251 test/eve_udp_flow.json
-```
+[![asciicast](https://asciinema.org/a/491435.svg)](https://asciinema.org/a/491435)
 
 #### USERAGENT
 
-![suricatalog-eve_json-useragent.png](suricatalog-eve_json-useragent.png)
+[![asciicast](https://asciinema.org/a/491436.svg)](https://asciinema.org/a/491436)
+
+## Running using a container
+
+You only need to mount the eve.json file inside the container and call any of the scripts 
+the same way you will on bare-metal.
+
+### eve_log.json
+
+You only need to mount the directory where the Suricata Eve files are saved
 
 ```shell
-eve_json --useragent test/eve.json
+docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_log:latest --timestamp '2022-02-23T18:22:24.405139+0000' --formats json /logs/eve.json
 ```
+
+### eve_json.py
+```shell
+docker run --rm --interactive --tty --mount type=bind,source=/var/log/suricata/,destination=/logs,readonly suricatalog/eve_json:latest --nxdomain /logs/eve.json
+```
+
+### Building the Docker container
+
+You need to build the images in order
+
+```shell
+git clone git@github.com:josevnz/SuricataLog.git
+cd SuricataLog
+BUILDKIT=1 docker build --tag suricatalog/eve_log --file Dockerfile .
+BUILDKIT=1 docker build --tag suricatalog/eve_json --file Dockerfile-eve_json .
+```
+
+Why 2 Docker build files? I don't want to spawn any Shell processes inside the container, instead each container will be
+very limited on what it can and cannot run.
 
 ## Supported versions
 
@@ -177,13 +188,11 @@ This is my current test bed, and it may change without further notice
 
 | SuricataLog | Supported | OS                               | Python    | Suricata |
 |-------------|-----------|----------------------------------|-----------|----------|
-| <= 0.8      | NO        | NA                               | <  3.8    | 6.04     |
-| 0.9+        | YES       | fedora 37                        | => 3.11.4 | 6.04     |
-| 0.9+        | YES       | Armbian 23.02.2 Jammy            | => 3.10.6 | 6.04     |
-| 0.9+        | YES       | Ubuntu 20.04.4 LTS (Focal Fossa) | => 3.8.10 | 6.04     |
+| <= 0.8      | NO        | NA                               | => 3.8    | 6.04     |
+| 0.9         | YES       | fedora 37                        | => 3.11.4 | 6.04     |
+| 0.9         | YES       | Armbian 23.02.2 Jammy            | => 3.10.6 | 6.04     |
+| 0.9         | YES       | Ubuntu 20.04.4 LTS (Focal Fossa) | => 3.8.10 | 6.04     |
 
-*You are more than welcome to*:
-* Submit patches with new features and bug-fixes.
-* Open bug reports. Be as detailed as possible, otherwise I will have no choice but to close it.
+You are more than welcome to submit patches with new features and bug-fixes.
 
 

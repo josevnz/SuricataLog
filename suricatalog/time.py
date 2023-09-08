@@ -1,8 +1,9 @@
 from datetime import timedelta, datetime
 from typing import Union, Any
+from timeit import default_timer as timer
 
 DEFAULT_TIMESTAMP_10M_AGO = datetime = datetime.now() - timedelta(minutes=10)
-DEFAULT_TIMESTAMP_10Y_AGO = datetime = datetime.now() - timedelta(days=365*10)
+DEFAULT_TIMESTAMP_10Y_AGO = datetime = datetime.now() - timedelta(days=365 * 10)
 
 
 def parse_timestamp(candidate: Union[str, Any]) -> datetime:
@@ -21,3 +22,11 @@ def parse_timestamp(candidate: Union[str, Any]) -> datetime:
         return candidate
     else:
         raise ValueError(f"I don't know how to handle {candidate}")
+
+
+def get_clock(start_time: float) -> str:
+    seconds = timer() - start_time
+    if seconds <= 60.0:
+        return f"{seconds:.2f} secs"
+    else:
+        return f"{seconds / 60.0:.2f} min"

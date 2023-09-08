@@ -1,0 +1,8 @@
+Screen {
+    align: center middle;
+}
+
+#netflow {
+    border: blank red;
+    width: auto;
+}

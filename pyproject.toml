@@ -1,6 +1,41 @@
 [build-system]
 requires = [
-  "setuptools >= 40.9.0",
+  "setuptools >=61.0",
   "wheel"
 ]
 build-backend = "setuptools.build_meta"
+[project]
+name = "SuricataLog"
+version = "0.1.0"
+authors = [
+    {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
+]
+maintainers = [
+    {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python"
+]
+description = "Scripts to display contents of Suricata eve.json log"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+keywords = ["suricata", "log", "eve"]
+dependencies = [
+    "requests==2.31.0",
+    "textual==0.35.1",
+    "rich~=13.5.2"
+]
+[project.urls]
+Repository = "https://github.com/josevnz/SuricataLog"
+
+
+[tool.setuptools.packages]
+find = {}
+[tool.setuptools]
+include-package-data = true
+
+[project.scripts]
+eve_json = "suricatalog.scripts.eve_json:main"
+eve_log = "suricatalog.scripts.eve_json:eve_log"

@@ -19,10 +19,24 @@ class AlwaysTrueFilter(BaseFilter):
 
 class OnlyAlertsFilter(BaseFilter):
 
+    def __init__(self):
+        self.timestamp = DEFAULT_TIMESTAMP_10M_AGO
+
+    def set_timestamp(self, timestamp: datetime):
+        if not timestamp:
+            raise ValueError("Missing timestamp")
+        self.timestamp = timestamp
+
     def accept(self, data: Dict[Any, Any]) -> bool:
-        if 'event_type' in data and 'alert' == data['event_type']:
-            return True
-        return False
+        try:
+            event_timestamp = parse_timestamp(data['timestamp'])
+            if event_timestamp <= self.timestamp:
+                return False
+            if 'event_type' in data and 'alert' == data['event_type']:
+                return True
+            return False
+        except ValueError:
+            return False
 
 
 class NXDomainFilter(BaseFilter):
@@ -43,36 +57,31 @@ class WithPrintablePayloadFilter(BaseFilter):
         :param data:
         :return:
         """
-        if 'event_type' in data and 'alert' == data['event_type'] and data['payload_printable']:
+        if 'event_type' in data and 'alert' == data['event_type'] and 'payload_printable' in data and data['payload_printable']:
             return True
         return False
 
 
-def all_events_filter(
-        **_
-) -> bool:
-    """
-    Always true filter
-    :return:
-    """
-    return True
+class TimestampFilter(BaseFilter):
 
+    def __init__(self):
+        self.timestamp = DEFAULT_TIMESTAMP_10M_AGO
 
-def timestamp_filter(
-        *,
-        timestamp: datetime = DEFAULT_TIMESTAMP_10M_AGO,
-        data: Dict[str, Any]
-) -> bool:
-    """
-    Filter events on a given timestamp
-    :param timestamp:
-    :param data:
-    :return:
-    """
-    try:
-        event_timestamp = parse_timestamp(data['timestamp'])
-        if event_timestamp <= timestamp:
+    def set_timestamp(self, timestamp: datetime):
+        if not timestamp:
+            raise ValueError("Missing timestamp")
+        self.timestamp = timestamp
+
+    def accept(self, data: Dict[Any, Any]) -> bool:
+        """
+        Filter events on a given timestamp
+        :param data:
+        :return:
+        """
+        try:
+            event_timestamp = parse_timestamp(data['timestamp'])
+            if event_timestamp <= self.timestamp:
+                return False
+        except ValueError:
             return False
-    except ValueError:
-        return False
-    return True
+        return True

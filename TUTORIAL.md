@@ -1,5 +1,7 @@
 # Suricata, RaspberryPI4 and Python to secure your home network
 
+(Original article published on freecodecamp.org: [Home Network Security – How to Use Suricata, RaspberryPI4, and Python to Make Your Network Safe](https://www.freecodecamp.org/news/home-network-security-with-suricata-raspberrypi4-python/))
+
 In a [previous article](https://www.freecodecamp.org/news/wireless-security-using-raspberry-pi-4-kismet-and-python/) I showed you how to secure your wireless home network using [Kismet](https://www.kismetwireless.net/).
 
 Kismet is perfect on detecting anomalies and certain types of attack, but what if I want to analyze the traffic and look for abnormal patterns or patterns that could indicate an attack?
@@ -278,7 +280,7 @@ Interface #0 info:
                      Number of packets = 30023
 ```
 
-Will use a [small wrapper](scripts/replay_pcap_file.sh) around _tcpreplay_ to replay our PCAP file:
+Will use a [small wrapper](etc/replay_pcap_file.sh) around _tcpreplay_ to replay our PCAP file:
 
 ```shell
 #!/bin/bash
