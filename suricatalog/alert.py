@@ -27,13 +27,18 @@ class BaseAlert(App):
 
     @staticmethod
     def __get_key_from_map__(map1: Dict[str, Any], keys: List[str]):
+        """
+        Return the first matching key from a map
+        :param map1:
+        :param keys:
+        :return: Nothing ig none of the keys are in the map
+        """
         val = ""
         for key in keys:
             if key in map1:
                 val = map1[key]
                 break
         return val
-
 
     def set_filter(self, the_filter: BaseFilter):
         if not the_filter:
