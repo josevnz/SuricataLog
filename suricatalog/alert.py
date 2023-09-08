@@ -8,7 +8,6 @@ from textual.widgets import Footer, ListView, Header, ListItem, Pretty
 
 from suricatalog.log import get_events_from_eve
 from suricatalog.filter import BaseFilter
-from suricatalog.utility import load_css
 
 locale.setlocale(locale.LC_ALL, '')
 BASEDIR = Path(__file__).parent
