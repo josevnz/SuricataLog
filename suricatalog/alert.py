@@ -3,7 +3,7 @@ import textwrap
 from pathlib import Path
 from typing import Type, List, Any, Dict, Union
 
-from textual import on
+from textual import on, work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.screen import ModalScreen
@@ -69,7 +69,7 @@ class BaseAlert(App):
         return val
 
     @staticmethod
-    def __extract__from_alert__(alert: Dict[str, Any]) -> Dict[str, Any]:
+    async def __extract__from_alert__(alert: Dict[str, Any]) -> Dict[str, Any]:
         timestamp = alert['timestamp']
         dest_port = str(BaseAlert.__get_key_from_map__(alert, ['dest_port']))
         dest_ip = BaseAlert.__get_key_from_map__(alert, ['dest_ip'])
@@ -137,16 +137,18 @@ class TableAlert(BaseAlert):
         yield alerts_tbl
         yield Footer()
 
-    def on_mount(self) -> None:
+    @work(exclusive=False)
+    async def on_mount(self) -> None:
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
+        alerts_tbl.loading = False
         for event in get_events_from_eve(
                 data_filter=self.filter,
                 eve_files=self.eve_files
         ):
             if not self.filter.accept(event):
                 continue
-            brief_data = BaseAlert.__extract__from_alert__(event)
+            brief_data = await BaseAlert.__extract__from_alert__(event)
             timestamp = brief_data['timestamp']
             alerts_tbl.add_row(
                 timestamp,
@@ -159,7 +161,6 @@ class TableAlert(BaseAlert):
             )
             alert_cnt += 1
             self.events[timestamp] = event
-        alerts_tbl.loading = False
         alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
 
     @on(DataTable.HeaderSelected)
