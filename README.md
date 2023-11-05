@@ -107,14 +107,6 @@ Better see it by yourself (remember, use --help to learn what options are suppor
 eve_log --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
 ````
 
-#### Brief format:
-
-![suricatalog-eve_log-brief.png](suricatalog-eve_log-brief.png)
-
-````shell
-eve_log --timestamp '2015-01-01 10:41:21.642899' --formats BRIEF test/eve.json
-````
-
 ### Canned reports with eve_json.py
 
 ```shell

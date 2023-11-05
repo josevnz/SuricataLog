@@ -7,7 +7,7 @@ from textual import on
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.screen import ModalScreen
-from textual.widgets import Footer, ListView, Header, ListItem, Pretty, DataTable, Button
+from textual.widgets import Footer, Header, Pretty, DataTable, Button
 
 from suricatalog.log import get_events_from_eve
 from suricatalog.filter import BaseFilter
@@ -102,62 +102,11 @@ class BaseAlert(App):
         self.eve_files = eve_files
 
 
-class RawAlert(BaseAlert):
-    BINDINGS = [
-        ("q", "quit_app", "Quit")
-    ]
-    CSS_PATH = BASEDIR.joinpath('css').joinpath('alert.tcss')
-
-    def __init__(
-            self,
-            driver_class: Type[Driver] | None = None,
-            css_path: CSSPathType | None = None,
-            watch_css: bool = False,
-    ):
-        super().__init__(driver_class, css_path, watch_css)
-        self.events: Union[Dict[Dict[str, any]]] = {}
-
-    def compose(self) -> ComposeResult:
-        yield Header()
-        list_view = ListView()
-        yield list_view
-        yield Footer()
-
-    def action_quit_app(self) -> None:
-        self.exit("Exiting Alerts now...")
-
-    def on_mount(self) -> None:
-        list_view = self.query_one(ListView)
-        list_view.tooltip = textwrap.dedent("""
-        Suricata alert details. Select a item to get full details.
-        """)
-        for event in get_events_from_eve(
-                data_filter=self.filter,
-                eve_files=self.eve_files
-        ):
-            list_view.loading = False
-            if not self.filter.accept(event):
-                self.log.debug(f"Discarded event with filter: {event}")
-                continue
-
-            brief_data = BaseAlert.__extract__from_alert__(event)
-            timestamp = brief_data['timestamp']
-            brief = {
-                "Timestamp": timestamp,
-                "Severity": brief_data['severity'],
-                "Signature": brief_data['signature'],
-                "Protocol": brief_data['protocol'],
-                "Destination": f"{brief_data['dest_ip']}:{brief_data['dest_port']}",
-                "Source": f"{brief_data['src_ip']}:{brief_data['src_port']}"
-            }
-            list_view.append(ListItem(Pretty(brief)))
-            self.events[timestamp] = event
-
-
 class TableAlert(BaseAlert):
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
+    ENABLE_COMMAND_PALETTE = False
 
     def __init__(
             self,
