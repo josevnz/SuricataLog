@@ -3,6 +3,7 @@
 ## Nov Sun 5 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.1
 - Removed old README file. Nobody will ever look into that
 - Added compressed eve_large.zip added to on test directory, for more realistic performance testing.
+- Removed the JSON format from event_log. It is too much data to display at the same time. Instead, select a row to get full details.
 - UI improvements
 
 ## Fri Sep 15 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.0

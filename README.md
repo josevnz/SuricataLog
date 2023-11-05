@@ -107,14 +107,6 @@ Better see it by yourself (remember, use --help to learn what options are suppor
 eve_log --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
 ````
 
-#### Show records in JSON format:
-
-![suricatalog-eve_log-json.png](suricatalog-eve_log-json.png)
-
-````shell
-eve_log --timestamp '2015-01-01 10:41:21.642899' --formats JSON test/eve.json
-````
-
 #### Brief format:
 
 ![suricatalog-eve_log-brief.png](suricatalog-eve_log-brief.png)

@@ -1,18 +1,44 @@
 import locale
 import textwrap
 from pathlib import Path
-from typing import Type, List, Any, Dict
+from typing import Type, List, Any, Dict, Union
 
 from textual import on
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Footer, ListView, Header, ListItem, Pretty, DataTable
+from textual.screen import ModalScreen
+from textual.widgets import Footer, ListView, Header, ListItem, Pretty, DataTable, Button
 
 from suricatalog.log import get_events_from_eve
 from suricatalog.filter import BaseFilter
 
 locale.setlocale(locale.LC_ALL, '')
 BASEDIR = Path(__file__).parent
+
+
+class DetailScreen(ModalScreen):
+    ENABLE_COMMAND_PALETTE = False
+    CSS_PATH = BASEDIR.joinpath('css').joinpath('details_screen.tcss')
+
+    def __init__(
+            self,
+            name: str | None = None,
+            ident: str | None = None,
+            classes: str | None = None,
+            data: str = None
+    ):
+        super().__init__(name, ident, classes)
+        self.data = data
+
+    def compose(self) -> ComposeResult:
+        yield Pretty(self.data)
+        button = Button("Close", variant="primary", id="close")
+        button.tooltip = "Go back to main screen"
+        yield button
+
+    @on(Button.Pressed, "#close")
+    def on_button_pressed(self, _) -> None:
+        self.app.pop_screen()
 
 
 class BaseAlert(App):
@@ -89,10 +115,7 @@ class RawAlert(BaseAlert):
             watch_css: bool = False,
     ):
         super().__init__(driver_class, css_path, watch_css)
-        self.is_brief = None
-
-    def set_is_brief(self, is_brief: bool = True):
-        self.is_brief = is_brief
+        self.events: Union[Dict[Dict[str, any]]] = {}
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -105,41 +128,45 @@ class RawAlert(BaseAlert):
 
     def on_mount(self) -> None:
         list_view = self.query_one(ListView)
-        if self.is_brief:
-            list_view.tooltip = textwrap.dedent("""
-            Alert details, essential details only
-            """)
-        else:
-            list_view.tooltip = textwrap.dedent("""
-            Alert details, full details
-            """)
+        list_view.tooltip = textwrap.dedent("""
+        Suricata alert details. Select a item to get full details.
+        """)
         for event in get_events_from_eve(
                 data_filter=self.filter,
                 eve_files=self.eve_files
         ):
             list_view.loading = False
             if not self.filter.accept(event):
+                self.log.debug(f"Discarded event with filter: {event}")
                 continue
 
-            if self.is_brief:
-                brief_data = BaseAlert.__extract__from_alert__(event)
-                brief = {
-                    "Timestamp": brief_data['timestamp'],
-                    "Severity": brief_data['severity'],
-                    "Signature": brief_data['signature'],
-                    "Protocol": brief_data['protocol'],
-                    "Destination": f"{brief_data['dest_ip']}:{brief_data['dest_port']}",
-                    "Source": f"{brief_data['src_ip']}:{brief_data['src_port']}"
-                }
-                list_view.append(ListItem(Pretty(brief)))
-            else:
-                list_view.append(ListItem(Pretty(event)))
+            brief_data = BaseAlert.__extract__from_alert__(event)
+            timestamp = brief_data['timestamp']
+            brief = {
+                "Timestamp": timestamp,
+                "Severity": brief_data['severity'],
+                "Signature": brief_data['signature'],
+                "Protocol": brief_data['protocol'],
+                "Destination": f"{brief_data['dest_ip']}:{brief_data['dest_port']}",
+                "Source": f"{brief_data['src_ip']}:{brief_data['src_port']}"
+            }
+            list_view.append(ListItem(Pretty(brief)))
+            self.events[timestamp] = event
 
 
 class TableAlert(BaseAlert):
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
+
+    def __init__(
+            self,
+            driver_class: Type[Driver] | None = None,
+            css_path: CSSPathType | None = None,
+            watch_css: bool = False,
+    ):
+        super().__init__(driver_class, css_path, watch_css)
+        self.events: Union[Dict[Dict[str, any]]] = {}
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -156,7 +183,7 @@ class TableAlert(BaseAlert):
         alerts_tbl.loading = True
         alerts_tbl.cursor_type = 'row'
         alerts_tbl.tooltip = textwrap.dedent("""
-        Suricata alert details
+        Suricata alert details. Select a row to get full details.
         """)
         yield alerts_tbl
         yield Footer()
@@ -171,8 +198,9 @@ class TableAlert(BaseAlert):
             if not self.filter.accept(event):
                 continue
             brief_data = BaseAlert.__extract__from_alert__(event)
+            timestamp = brief_data['timestamp']
             alerts_tbl.add_row(
-                brief_data['timestamp'],
+                timestamp,
                 brief_data['severity'],
                 brief_data['signature'],
                 brief_data['protocol'],
@@ -181,6 +209,7 @@ class TableAlert(BaseAlert):
                 brief_data['payload_printable']
             )
             alert_cnt += 1
+            self.events[timestamp] = event
         alerts_tbl.loading = False
 
     @on(DataTable.HeaderSelected)
@@ -188,6 +217,15 @@ class TableAlert(BaseAlert):
         alerts_tbl: DataTable = event.data_table
         if event.column_index < 2:
             alerts_tbl.sort(event.column_key)
+
+    @on(DataTable.RowSelected)
+    def on_row_clicked(self, event: DataTable.RowSelected) -> None:
+        table = event.data_table
+        row_key = event.row_key
+        row = table.get_row(row_key)
+        data = self.events[row[0]]
+        runner_detail = DetailScreen(data=data)
+        self.push_screen(runner_detail)
 
     def action_quit_app(self) -> None:
         self.exit("Exiting Alerts now...")

@@ -42,10 +42,6 @@ def main():
             app = TableAlert()
         elif OPTIONS.formats == Formats.BRIEF:
             app = RawAlert()
-            app.set_is_brief(True)
-        elif OPTIONS.formats == Formats.JSON:
-            app = RawAlert()
-            app.set_is_brief(False)
         else:
             raise ValueError(f"Application error, don't know how to handle: {OPTIONS.formats}")
         app.title = f"SuricataLog Alerts (filter='>={OPTIONS.timestamp}') for {','.join([eve.name for eve in OPTIONS.eve])} (format={OPTIONS.formats.name})"

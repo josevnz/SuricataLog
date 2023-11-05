@@ -6,7 +6,6 @@ from typing import Union
 
 class Formats(Enum):
     TABLE = "TABLE"
-    JSON = "JSON"
     BRIEF = "BRIEF"
 
     def __str__(self):

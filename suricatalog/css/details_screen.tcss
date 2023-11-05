@@ -1,0 +1,11 @@
+MarkdownViewer {
+    dock: top;
+    width: 100%;
+    height: auto;
+}
+
+Button {
+    dock: bottom;
+    width: 100%;
+    height: auto;
+}
