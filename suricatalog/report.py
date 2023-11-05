@@ -37,7 +37,7 @@ class AggregatedFlowProtoReport:
 class HostDataUseReport:
     bytes: int = 0
 
-    def ingest_data(self, data: Dict[Any, Any], dest: str) -> None:
+    async def ingest_data(self, data: Dict[Any, Any], dest: str) -> None:
         """
         tail -n500000 /var/log/suricata/eve.json | \
         jq -s 'map(select(.event_type=="netflow" and .dest_ip=="224.0.0.251").netflow.bytes)|add'| /bin/numfmt --to=iec

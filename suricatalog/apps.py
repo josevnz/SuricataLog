@@ -117,7 +117,7 @@ class HostDataUse(App):
         for event in get_events_from_eve(
                 eve_files=self.eve,
                 data_filter=self.data_filter):
-            host_data_user_report.ingest_data(event, self.ip_address)
+            await host_data_user_report.ingest_data(event, self.ip_address)
         digits = self.query_one('#netflow', Digits)
         digits.update(f"{host_data_user_report.bytes:n} bytes")
         digits.loading = False
