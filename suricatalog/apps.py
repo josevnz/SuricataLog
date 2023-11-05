@@ -2,7 +2,6 @@ import textwrap
 from pathlib import Path
 from typing import Type, List, Any
 
-from rich.text import Text
 from textual import on
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
@@ -66,7 +65,7 @@ class FlowApp(App):
             alerts_tbl.add_row(
                 dest_ip_port[0],
                 str(dest_ip_port[1]),
-                Text(str(cnt), style="italic #03AC13", justify="right")
+                str(cnt)
             )
             alert_cnt += 1
         alerts_tbl.loading = False
@@ -74,8 +73,7 @@ class FlowApp(App):
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
         alerts_tbl: DataTable = event.data_table
-        if event.column_index < 2:
-            alerts_tbl.sort(event.column_key)
+        alerts_tbl.sort(event.column_key)
 
 
 class HostDataUse(App):
