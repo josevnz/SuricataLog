@@ -1,7 +1,9 @@
 import locale
+import textwrap
 from pathlib import Path
 from typing import Type, List, Any, Dict
 
+from textual import on
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.widgets import Footer, ListView, Header, ListItem, Pretty, DataTable
@@ -130,11 +132,8 @@ class TableAlert(BaseAlert):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield DataTable()
-        yield Footer()
-
-    def on_mount(self) -> None:
-        alerts_tbl = self.query_one(DataTable)
+        alerts_tbl = DataTable()
+        alerts_tbl.show_header = True
         alerts_tbl.add_column("Timestamp")
         alerts_tbl.add_column("Severity")
         alerts_tbl.add_column("Signature")
@@ -142,6 +141,17 @@ class TableAlert(BaseAlert):
         alerts_tbl.add_column("Destination")
         alerts_tbl.add_column("Source")
         alerts_tbl.add_column("Payload")
+        alerts_tbl.zebra_stripes = True
+        alerts_tbl.loading = True
+        alerts_tbl.cursor_type = 'row'
+        alerts_tbl.tooltip = textwrap.dedent("""
+        Suricata alert details
+        """)
+        yield alerts_tbl
+        yield Footer()
+
+    def on_mount(self) -> None:
+        alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
         for event in get_events_from_eve(
                 data_filter=self.filter,
@@ -160,6 +170,12 @@ class TableAlert(BaseAlert):
                 brief_data['payload_printable']
             )
             alert_cnt += 1
+
+    @on(DataTable.HeaderSelected)
+    def on_header_clicked(self, event: DataTable.HeaderSelected):
+        alerts_tbl: DataTable = event.data_table
+        if event.column_index < 2:
+            alerts_tbl.sort(event.column_key)
 
     def action_quit_app(self) -> None:
         self.exit("Exiting Alerts now...")

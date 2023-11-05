@@ -86,16 +86,12 @@ def get_host_data_use(
         ip_address: any
 ) -> App:
     host_data_user_report = HostDataUseReport()
-    for event in get_events_from_eve(
-            eve_files=eve_files,
-            data_filter=data_filter):
-        host_data_user_report.ingest_data(event, ip_address)
 
     class HostDataUse(App):
         BINDINGS = [
             ("q", "quit_app", "Quit")
         ]
-        CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.css')
+        CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.tcss')
         ENABLE_COMMAND_PALETTE = False
 
         def action_quit_app(self) -> None:
@@ -103,8 +99,22 @@ def get_host_data_use(
 
         def compose(self) -> ComposeResult:
             yield Header()
-            yield Digits(f"{host_data_user_report.bytes:n} bytes", id="netflow")
+            digits = Digits(id="netflow")
+            digits.loading = True
+            digits.tooltip = textwrap.dedent("""
+            Net FLow in bytes.
+            """)
+            yield digits
             yield Footer()
+
+        def on_mount(self) -> None:
+            for event in get_events_from_eve(
+                    eve_files=eve_files,
+                    data_filter=data_filter):
+                host_data_user_report.ingest_data(event, ip_address)
+            digits = self.query_one('#netflow', Digits)
+            digits.update(f"{host_data_user_report.bytes:n} bytes")
+            digits.loading = False
 
     hdu = HostDataUse()
     hdu.title = f"SuricataLog Net-Flow for: {ip_address}"
@@ -116,16 +126,12 @@ def get_agents(
         data_filter: BaseFilter
 ) -> App:
     top_user_agents = TopUserAgents()
-    for event in get_events_from_eve(
-            eve_files=eve_files,
-            data_filter=data_filter):
-        top_user_agents.ingest_data(event)
 
     class TopUserApp(App):
         BINDINGS = [
             ("q", "quit_app", "Quit")
         ]
-        CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.css')
+        CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.tcss')
         ENABLE_COMMAND_PALETTE = False
 
         def action_quit_app(self) -> None:
@@ -133,8 +139,19 @@ def get_agents(
 
         def compose(self) -> ComposeResult:
             yield Header()
-            yield Pretty(top_user_agents.agents)
+            pretty = Pretty("", id="agent")
+            pretty.loading = True
+            yield pretty
             yield Footer()
+
+        def on_mount(self) -> None:
+            pretty = self.query_one("#agent", Pretty)
+            for event in get_events_from_eve(
+                    eve_files=eve_files,
+                    data_filter=data_filter):
+                top_user_agents.ingest_data(event)
+            pretty.update(top_user_agents.agents)
+            pretty.loading = False
 
     top_user_app = TopUserApp()
     top_user_app.title = f"SuricataLog User Agents"
@@ -148,8 +165,6 @@ def get_capture(
         data_filter: BaseFilter,
         title: str
 ) -> App:
-    events: List[Any] = [single_alert for single_alert in retriever(eve_files=eve, data_filter=data_filter)]
-
     class OneShotApp(App):
         BINDINGS = [
             ("q", "quit_app", "Quit")
@@ -161,8 +176,16 @@ def get_capture(
 
         def compose(self) -> ComposeResult:
             yield Header()
-            yield Pretty(events)
+            pretty = Pretty("", id='events')
+            pretty.loading = True
+            yield pretty
             yield Footer()
+
+        def on_mount(self):
+            pretty = self.query_one('#events', Pretty)
+            events: List[Any] = [single_alert for single_alert in retriever(eve_files=eve, data_filter=data_filter)]
+            pretty.update(events)
+            pretty.loading = False
 
     one_shot_app = OneShotApp()
     one_shot_app.title = f"{title}"
