@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 [project]
 name = "SuricataLog"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
@@ -24,7 +24,7 @@ license = {file = "LICENSE"}
 keywords = ["suricata", "log", "eve"]
 dependencies = [
     "requests==2.31.0",
-    "textual==0.35.1",
+    "textual~=0.41.0",
     "rich~=13.5.2"
 ]
 [project.urls]

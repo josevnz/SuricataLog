@@ -53,6 +53,8 @@ pip3 install dist/SuricataLog-X.Y.Z-py3-none-any.whl
 
 ### Developer installation
 
+So you want to contribute? Or found a bug and think you can submit a patch? Nice! Here is what you can dd to run on development mode:
+
 ```shell
 git clone git@github.com:josevnz/SuricataLog.git
 cd SuricataLog
@@ -60,8 +62,7 @@ python3 -m venv ~/virtualenv/suricatalog
 . ~/virtualenv/suricatalog/bin/activate
 pip install --upgrade pip
 python -m pip install --upgrade build
-python -m build
-# python setup.py develop
+pip install textual-dev
 pip install --editable .
 ```
 
@@ -74,6 +75,21 @@ Ran 9 tests in 0.334s
 
 OK
 ```
+
+If the unit tests fails, then this is most likely the first place to fix a problem.
+
+I do recommend also running the textualize console and watch for the console messages:
+
+```shell
+textual console
+```
+
+Then on another terminal:
+
+```shell
+textual run --dev --command eve_log --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
+```
+
 
 ## Running the scripts
 
@@ -89,22 +105,6 @@ Better see it by yourself (remember, use --help to learn what options are suppor
 
 ````shell
 eve_log --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
-````
-
-#### Show records in JSON format:
-
-![suricatalog-eve_log-json.png](suricatalog-eve_log-json.png)
-
-````shell
-eve_log --timestamp '2015-01-01 10:41:21.642899' --formats JSON test/eve.json
-````
-
-#### Brief format:
-
-![suricatalog-eve_log-brief.png](suricatalog-eve_log-brief.png)
-
-````shell
-eve_log --timestamp '2015-01-01 10:41:21.642899' --formats BRIEF test/eve.json
 ````
 
 ### Canned reports with eve_json.py

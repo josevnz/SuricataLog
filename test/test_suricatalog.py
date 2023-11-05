@@ -1,5 +1,6 @@
 import json
 import unittest
+from unittest import IsolatedAsyncioTestCase, TestCase
 from datetime import datetime
 from pathlib import Path
 
@@ -9,9 +10,10 @@ from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
 
 BASEDIR = Path(__file__).parent
+events = []
 
 
-class FilterTestCase(unittest.TestCase):
+class FilterTestCase(TestCase):
 
     def test_with_printable_payload_filter(self):
         payload = json.loads('{"timestamp":"2022-02-08T16:32:14.900292+0000","flow_id":879564658970874,'
@@ -68,7 +70,7 @@ class FilterTestCase(unittest.TestCase):
         self.assertFalse(data_filter.accept(payload))
 
 
-class ReportTestCase(unittest.TestCase):
+class ReportTestCase(IsolatedAsyncioTestCase):
     eve_list = []
     netflow_eve_list = []
 
@@ -81,32 +83,33 @@ class ReportTestCase(unittest.TestCase):
             for event in eve_file:
                 ReportTestCase.netflow_eve_list.append(json.loads(event))
 
-    def test_aggregated_flow_proto_report(self):
+    async def test_aggregated_flow_proto_report(self):
+        events.append("test_aggregated_flow_proto_report")
         can_rep = AggregatedFlowProtoReport()
         for alert in ReportTestCase.eve_list:
-            can_rep.ingest_data(alert)
+            await can_rep.ingest_data(alert)
         self.assertIsNotNone(can_rep.port_proto_count)
         self.assertEqual(119, len(can_rep.port_proto_count.keys()))
         self.assertEqual(336, can_rep.port_proto_count[('TCP', 443)])
 
-    def test_host_data_use_report(self):
-
+    async def test_host_data_use_report(self):
+        events.append("test_host_data_use_report")
         hr = HostDataUseReport()
         for netflow_event in ReportTestCase.netflow_eve_list:
-            hr.ingest_data(netflow_event, '224.0.0.251')
+            await hr.ingest_data(netflow_event, '224.0.0.251')
         self.assertEqual(153339, hr.bytes)
         hr2 = HostDataUseReport()
         for netflow_event in ReportTestCase.netflow_eve_list:
-            hr2.ingest_data(netflow_event, '127.0.0.1')
-            hr.ingest_data(netflow_event, '127.0.0.1')
+            await hr2.ingest_data(netflow_event, '127.0.0.1')
+            await hr.ingest_data(netflow_event, '127.0.0.1')
         self.assertEqual(0, hr2.bytes)
         self.assertEqual(153339, hr.bytes)
 
-    def test_top_user_agents(self):
-
+    async def test_top_user_agents(self):
+        events.append("test_top_user_agents")
         tua = TopUserAgents()
         for event in ReportTestCase.eve_list:
-            tua.ingest_data(event)
+            await tua.ingest_data(event)
 
         self.assertIsNotNone(tua.agents)
         self.assertTrue('test' in tua.agents)
