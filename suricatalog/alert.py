@@ -95,7 +95,8 @@ class RawAlert(BaseAlert):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield ListView()
+        list_view = ListView()
+        yield list_view
         yield Footer()
 
     def action_quit_app(self) -> None:
@@ -103,10 +104,19 @@ class RawAlert(BaseAlert):
 
     def on_mount(self) -> None:
         list_view = self.query_one(ListView)
+        if self.is_brief:
+            list_view.tooltip = textwrap.dedent("""
+            Alert details, essential details only
+            """)
+        else:
+            list_view.tooltip = textwrap.dedent("""
+            Alert details, full details
+            """)
         for event in get_events_from_eve(
                 data_filter=self.filter,
                 eve_files=self.eve_files
         ):
+            list_view.loading = False
             if not self.filter.accept(event):
                 continue
 
