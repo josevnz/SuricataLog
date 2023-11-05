@@ -10,6 +10,7 @@ A few things:
 """
 
 import argparse
+import sys
 from pathlib import Path
 from ipaddress import ip_address
 
@@ -82,7 +83,6 @@ def main():
                 data_filter=WithPrintablePayloadFilter(),
                 title="SuricataLog Inspect Alert Data (payload)"
             )
-            pass
         elif OPTIONS.flow:
             eve_app = get_one_shot_flow_table(
                 eve=OPTIONS.eve,
@@ -100,7 +100,8 @@ def main():
                 data_filter=TIMESTAMP_FILTER
             )
         else:
-            raise ValueError("Code error, unmapped option logic!")
+            PARSER.print_usage()
+            sys.exit(0)
         eve_app.run()
     except KeyboardInterrupt:
         pass
