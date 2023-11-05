@@ -1,11 +1,11 @@
 import textwrap
 from pathlib import Path
-from typing import Type, List, Any
+from typing import Type, List
 
 from textual import on
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Header, DataTable, Footer, Digits, Pretty
+from textual.widgets import Header, DataTable, Footer, Digits, Pretty, RichLog
 
 from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
@@ -185,13 +185,19 @@ class OneShotApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        pretty = Pretty("", id='events')
-        pretty.loading = True
-        yield pretty
+        log = RichLog(id='events')
+        log.loading = True
+        yield log
         yield Footer()
 
-    def on_mount(self):
-        pretty = self.query_one('#events', Pretty)
-        events: List[Any] = [single_alert for single_alert in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter)]
-        pretty.update(events)
-        pretty.loading = False
+    async def pump_events(self, log: RichLog):
+        loaded = 0
+        for single_alert in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
+            log.loading = False
+            log.write(single_alert)
+            loaded += 1
+
+    async def on_mount(self):
+        log = self.query_one('#events', RichLog)
+        await self.pump_events(log)
+
