@@ -170,6 +170,8 @@ class TableAlert(BaseAlert):
                 brief_data['payload_printable']
             )
             alert_cnt += 1
+        alerts_tbl.loading = False
+
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
