@@ -24,7 +24,7 @@ license = {file = "LICENSE"}
 keywords = ["suricata", "log", "eve"]
 dependencies = [
     "requests==2.31.0",
-    "textual==0.35.1",
+    "textual~=0.41.0",
     "rich~=13.5.2"
 ]
 [project.urls]

@@ -1,17 +1,18 @@
 from __future__ import annotations
 
+import textwrap
 from pathlib import Path
 from typing import List, Callable, Any
 import locale
 
 from rich.text import Text
+from textual import on
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, Digits, Pretty, DataTable
 
 from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
-from suricatalog.utility import load_css
 
 locale.setlocale(locale.LC_ALL, '')
 BASEDIR = Path(__file__).parent
@@ -28,21 +29,29 @@ def get_one_shot_flow_table(
         BINDINGS = [
             ("q", "quit_app", "Quit")
         ]
+        ENABLE_COMMAND_PALETTE = False
 
         def action_quit_app(self) -> None:
             self.exit("Exiting Net-Flow now...")
 
         def compose(self) -> ComposeResult:
             yield Header()
-            yield DataTable()
-            yield Footer()
-
-        def on_mount(self) -> None:
-            alerts_tbl = self.query_one(DataTable)
+            alerts_tbl = DataTable()
             alerts_tbl.show_header = True
             alerts_tbl.add_column("Destination IP")
             alerts_tbl.add_column("Port")
             alerts_tbl.add_column("Count")
+            alerts_tbl.zebra_stripes = True
+            alerts_tbl.loading = True
+            alerts_tbl.cursor_type = 'row'
+            alerts_tbl.tooltip = textwrap.dedent("""
+            Network flow details
+            """)
+            yield alerts_tbl
+            yield Footer()
+
+        def on_mount(self) -> None:
+            alerts_tbl = self.query_one(DataTable)
             alert_cnt = 0
             afr = AggregatedFlowProtoReport()
             for event in get_events_from_eve(
@@ -58,6 +67,13 @@ def get_one_shot_flow_table(
                     Text(str(cnt), style="italic #03AC13", justify="right")
                 )
                 alert_cnt += 1
+            alerts_tbl.loading = False
+
+        @on(DataTable.HeaderSelected)
+        def on_header_clicked(self, event: DataTable.HeaderSelected):
+            alerts_tbl: DataTable = event.data_table
+            if event.column_index < 2:
+                alerts_tbl.sort(event.column_key)
 
     flow_app = FlowApp()
     flow_app.title = f"SuricataLog FLOW protocol, logs={logs}"
@@ -79,8 +95,8 @@ def get_host_data_use(
         BINDINGS = [
             ("q", "quit_app", "Quit")
         ]
-        CSS_FILE = BASEDIR.joinpath('css').joinpath('canned.css')
-        CSS = load_css(CSS_FILE)
+        CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.css')
+        ENABLE_COMMAND_PALETTE = False
 
         def action_quit_app(self) -> None:
             self.exit("Exiting Net-Flow now...")
@@ -109,8 +125,8 @@ def get_agents(
         BINDINGS = [
             ("q", "quit_app", "Quit")
         ]
-        CSS_FILE = BASEDIR.joinpath('css').joinpath('canned.css')
-        CSS = load_css(CSS_FILE)
+        CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.css')
+        ENABLE_COMMAND_PALETTE = False
 
         def action_quit_app(self) -> None:
             self.exit("Exiting Top user now...")
@@ -138,6 +154,7 @@ def get_capture(
         BINDINGS = [
             ("q", "quit_app", "Quit")
         ]
+        ENABLE_COMMAND_PALETTE = False
 
         def action_quit_app(self) -> None:
             self.exit(f"Exiting {title} now...")
