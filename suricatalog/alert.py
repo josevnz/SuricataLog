@@ -160,6 +160,7 @@ class TableAlert(BaseAlert):
             alert_cnt += 1
             self.events[timestamp] = event
         alerts_tbl.loading = False
+        alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
