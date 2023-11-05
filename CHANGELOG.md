@@ -1,12 +1,12 @@
 # SuricataLog changelog
 
-## Nov Sun 5 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.1
+## Nov Sun 5 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.2
 - Removed old README file. Nobody will ever look into that
 - Added compressed eve_large.zip added to on test directory, for more realistic performance testing.
 - Removed the JSON, BRIEF format from event_log. It is too much data to display at the same time. Instead, select a row to get full details.
 - UI improvements
 
-## Fri Sep 15 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.0
+## Fri Sep 15 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.0, 0.1.1
 - Packaging refactoring, no more setup.py/ setup.cfg support
 - Migrated to the newest version of Textualize, uniform UI code
 - Fixed bug that prevented events rendering on eve_log for large files
