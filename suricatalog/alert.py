@@ -172,7 +172,6 @@ class TableAlert(BaseAlert):
             alert_cnt += 1
         alerts_tbl.loading = False
 
-
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
         alerts_tbl: DataTable = event.data_table
