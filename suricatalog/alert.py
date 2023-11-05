@@ -80,6 +80,7 @@ class RawAlert(BaseAlert):
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
+    CSS_PATH = BASEDIR.joinpath('css').joinpath('alert.tcss')
 
     def __init__(
             self,
