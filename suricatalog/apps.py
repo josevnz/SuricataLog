@@ -2,10 +2,10 @@ import textwrap
 from pathlib import Path
 from typing import Type, List
 
-from textual import on
+from textual import on, work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Header, DataTable, Footer, Digits, Pretty, RichLog
+from textual.widgets import Header, DataTable, Footer, Digits, RichLog
 
 from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
@@ -51,7 +51,7 @@ class FlowApp(App):
         yield alerts_tbl
         yield Footer()
 
-    def on_mount(self) -> None:
+    async def on_mount(self) -> None:
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
         afr = AggregatedFlowProtoReport()
@@ -60,7 +60,8 @@ class FlowApp(App):
                 data_filter=self.data_filter):
             if not self.data_filter.accept(event):
                 continue
-            afr.ingest_data(event)
+            await afr.ingest_data(event)
+        alerts_tbl.loading = False
         for (dest_ip_port, cnt) in afr.port_proto_count.items():
             alerts_tbl.add_row(
                 dest_ip_port[0],
@@ -68,7 +69,6 @@ class FlowApp(App):
                 str(cnt)
             )
             alert_cnt += 1
-        alerts_tbl.loading = False
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
@@ -111,7 +111,8 @@ class HostDataUse(App):
         yield digits
         yield Footer()
 
-    def on_mount(self) -> None:
+    @work(exclusive=False)
+    async def on_mount(self) -> None:
         host_data_user_report = HostDataUseReport()
         for event in get_events_from_eve(
                 eve_files=self.eve,
@@ -146,20 +147,21 @@ class TopUserApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        pretty = Pretty("", id="agent")
+        pretty = RichLog(id="agent")
         pretty.loading = True
         yield pretty
         yield Footer()
 
-    def on_mount(self) -> None:
+    @work(exclusive=False)
+    async def on_mount(self) -> None:
         top_user_agents = TopUserAgents()
-        pretty = self.query_one("#agent", Pretty)
+        log = self.query_one("#agent", RichLog)
+        log.loading = False
         for event in get_events_from_eve(
                 eve_files=self.eve_files,
                 data_filter=self.data_filter):
-            top_user_agents.ingest_data(event)
-        pretty.update(top_user_agents.agents)
-        pretty.loading = False
+            await top_user_agents.ingest_data(event)
+        log.write(top_user_agents.agents)
 
 
 class OneShotApp(App):
@@ -197,7 +199,7 @@ class OneShotApp(App):
             log.write(single_alert)
             loaded += 1
 
+    @work(exclusive=False)
     async def on_mount(self):
         log = self.query_one('#events', RichLog)
         await self.pump_events(log)
-

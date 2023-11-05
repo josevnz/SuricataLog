@@ -6,7 +6,7 @@ from typing import Dict, Any, Tuple
 class AggregatedFlowProtoReport:
     port_proto_count: Dict[Tuple[str, int], int] = dataclasses.field(default_factory=dict)
 
-    def ingest_data(self, data: Dict[Any, Any]) -> None:
+    async def ingest_data(self, data: Dict[Any, Any]) -> None:
         """
         ports=$(cat $PWD/test/eve.json|jq -c 'select(.event_type=="flow")|[.proto, .dest_port]'|sort |uniq -c)
         echo $ports
@@ -54,7 +54,7 @@ class TopUserAgents:
 
     agents: Dict[str, int] = {}
 
-    def ingest_data(self, data: Dict[Any, Any]) -> None:
+    async def ingest_data(self, data: Dict[Any, Any]) -> None:
         """
         cat eve.json | jq -s '[.[]|.http.http_user_agent]|group_by(.)|map({key:.[0],value:(.|length)})|from_entries'
 
