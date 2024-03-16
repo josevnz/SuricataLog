@@ -17,7 +17,7 @@ maintainers = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
 classifiers = [
-  "Development Status :: 5 - Production",
+  "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python"
 ]
 dynamic = ["dependencies"]
