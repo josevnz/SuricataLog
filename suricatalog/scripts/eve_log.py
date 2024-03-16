@@ -21,7 +21,7 @@ def main():
         help=f"Minimum timestamp in the past to use when filtering events ({DEFAULT_TIMESTAMP_10Y_AGO})"
     )
     PARSER.add_argument(
-        'eve',
+        'eve_file',
         type=Path,
         nargs="+",
         help=f"Path to one or more {DEFAULT_EVE[0]} file to parse."
@@ -31,9 +31,9 @@ def main():
     timestamp_filter.timestamp = OPTIONS.timestamp
     try:
         app = TableAlert()
-        app.title = f"SuricataLog Alerts (filter='>={OPTIONS.timestamp}') for {','.join([eve.name for eve in OPTIONS.eve])}"
+        app.title = f"SuricataLog Alerts (filter='>={OPTIONS.timestamp}') for {','.join([eve.name for eve in OPTIONS.eve_file])}"
         app.set_filter(timestamp_filter)
-        app.set_eve_files(OPTIONS.eve)
+        app.set_eve_files(OPTIONS.eve_file)
         app.run()
     except KeyboardInterrupt:
         raise
