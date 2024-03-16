@@ -1,5 +1,15 @@
 # SuricataLog changelog
 
+## Mar Sat 16 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.5
+- Better error handling
+- Minor bug-fixes on table data presentation
+- Code refactoring to allow new components
+- eve_json can now search by data present on the table (Press Ctrl + \ and start typing)
+- SuricataLog officially no longer beta. Next release will focus on speed improvements on large files.
+
+## Jan Mon 1 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.3, 0.1.4
+- Packaging fixes
+
 ## Nov Sun 5 2023 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.2
 - Removed old README file. Nobody will ever look into that
 - Added compressed eve_large.zip added to on test directory, for more realistic performance testing.
