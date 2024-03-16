@@ -1,6 +1,8 @@
 import unittest
 from pathlib import Path
 
+from textual.widgets import MarkdownViewer, DataTable
+
 from suricatalog.alert_apps import TableAlertApp
 from suricatalog.filter import BaseFilter, OnlyAlertsFilter
 
@@ -8,16 +10,17 @@ BASEDIR = Path(__file__).parent
 EVE_FILE = BASEDIR.joinpath("eve.json")
 
 
-class AlertAppsTestCase(unittest.TestCase):
+class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
     async def test_eve_log(self):
-        timestamp_filter: BaseFilter = OnlyAlertsFilter()
         app = TableAlertApp()
-        app.title = "Dummy title"
-        app.set_filter(timestamp_filter)
         app.set_eve_files([EVE_FILE])
+        app.set_filter(OnlyAlertsFilter())
+        app.title = "Dummy title"
         self.assertIsNotNone(app)
         async with app.run_test() as pilot:
-            pass
+            await pilot.pause()
+            # Quit the app by pressing q
+            await pilot.press("q")
 
 
 if __name__ == '__main__':
