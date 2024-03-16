@@ -10,7 +10,7 @@ from textual.widgets import Footer, Header, DataTable
 from suricatalog.log import get_events_from_eve
 from suricatalog.filter import BaseFilter
 from suricatalog.providers import TableAlertProvider
-from suricatalog.screens import DetailScreen
+from suricatalog.screens import DetailScreen, ErrorScreen
 
 
 class BaseAlertApp(App):
@@ -114,7 +114,6 @@ class TableAlertApp(BaseAlertApp):
     async def on_mount(self) -> None:
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
-        alerts_tbl.loading = False
         for event in get_events_from_eve(
                 data_filter=self.filter,
                 eve_files=self.eve_files
@@ -135,6 +134,11 @@ class TableAlertApp(BaseAlertApp):
             alert_cnt += 1
             self.events[timestamp] = event
         alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
+        if alert_cnt:
+            alerts_tbl.loading = False
+        else:
+            error_src = ErrorScreen()
+            await self.push_screen(error_src)
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
