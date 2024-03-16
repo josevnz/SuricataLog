@@ -1,5 +1,9 @@
 # SuricataLog changelog
 
+## Mar Sat 22 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 1.0
+- Match version to stable version
+- Added unit tests for TUI
+
 ## Mar Sat 16 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 0.1.5
 - Better error handling
 - Minor bug-fixes on table data presentation
