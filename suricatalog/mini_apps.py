@@ -7,11 +7,10 @@ from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.widgets import Header, DataTable, Footer, Digits, RichLog
 
+from suricatalog import BASEDIR
 from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
-
-BASEDIR = Path(__file__).parent
 
 
 class FlowApp(App):

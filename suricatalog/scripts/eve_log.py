@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 
 from suricatalog.filter import BaseFilter, OnlyAlertsFilter
-from suricatalog.alert import TableAlert
+from suricatalog.alert_apps import TableAlertApp
 from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10Y_AGO
 from suricatalog.log import DEFAULT_EVE
 
@@ -30,7 +30,7 @@ def main():
     timestamp_filter: BaseFilter = OnlyAlertsFilter()
     timestamp_filter.timestamp = OPTIONS.timestamp
     try:
-        app = TableAlert()
+        app = TableAlertApp()
         app.title = f"SuricataLog Alerts (filter='>={OPTIONS.timestamp}') for {','.join([eve.name for eve in OPTIONS.eve_file])}"
         app.set_filter(timestamp_filter)
         app.set_eve_files(OPTIONS.eve_file)

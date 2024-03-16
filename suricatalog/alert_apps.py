@@ -1,4 +1,3 @@
-import locale
 import textwrap
 from pathlib import Path
 from typing import Type, List, Any, Dict, Union
@@ -6,42 +5,15 @@ from typing import Type, List, Any, Dict, Union
 from textual import on, work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.screen import ModalScreen
-from textual.widgets import Footer, Header, Pretty, DataTable, Button
+from textual.widgets import Footer, Header, DataTable
 
 from suricatalog.log import get_events_from_eve
 from suricatalog.filter import BaseFilter
-
-locale.setlocale(locale.LC_ALL, '')
-BASEDIR = Path(__file__).parent
-
-
-class DetailScreen(ModalScreen):
-    ENABLE_COMMAND_PALETTE = False
-    CSS_PATH = BASEDIR.joinpath('css').joinpath('details_screen.tcss')
-
-    def __init__(
-            self,
-            name: str | None = None,
-            ident: str | None = None,
-            classes: str | None = None,
-            data: str = None
-    ):
-        super().__init__(name, ident, classes)
-        self.data = data
-
-    def compose(self) -> ComposeResult:
-        yield Pretty(self.data)
-        button = Button("Close", variant="primary", id="close")
-        button.tooltip = "Go back to main screen"
-        yield button
-
-    @on(Button.Pressed, "#close")
-    def on_button_pressed(self, _) -> None:
-        self.app.pop_screen()
+from suricatalog.providers import TableAlertProvider
+from suricatalog.screens import DetailScreen
 
 
-class BaseAlert(App):
+class BaseAlertApp(App):
 
     def __init__(
             self,
@@ -71,11 +43,11 @@ class BaseAlert(App):
     @staticmethod
     async def __extract__from_alert__(alert: Dict[str, Any]) -> Dict[str, Any]:
         timestamp = alert['timestamp']
-        dest_port = str(BaseAlert.__get_key_from_map__(alert, ['dest_port']))
-        dest_ip = BaseAlert.__get_key_from_map__(alert, ['dest_ip'])
-        src_ip = BaseAlert.__get_key_from_map__(alert, ['src_ip'])
-        src_port = str(BaseAlert.__get_key_from_map__(alert, ['src_port']))
-        protocol = BaseAlert.__get_key_from_map__(alert, ['app_proto', 'proto'])
+        dest_port = str(BaseAlertApp.__get_key_from_map__(alert, ['dest_port']))
+        dest_ip = BaseAlertApp.__get_key_from_map__(alert, ['dest_ip'])
+        src_ip = BaseAlertApp.__get_key_from_map__(alert, ['src_ip'])
+        src_port = str(BaseAlertApp.__get_key_from_map__(alert, ['src_port']))
+        protocol = BaseAlertApp.__get_key_from_map__(alert, ['app_proto', 'proto'])
         severity = alert['alert']['severity']
         signature = alert['alert']['signature'],
         payload_printable = alert['payload_printable'] if 'payload_printable' in alert else ""
@@ -102,11 +74,12 @@ class BaseAlert(App):
         self.eve_files = eve_files
 
 
-class TableAlert(BaseAlert):
+class TableAlertApp(BaseAlertApp):
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
-    ENABLE_COMMAND_PALETTE = False
+    ENABLE_COMMAND_PALETTE = True
+    COMMANDS = App.COMMANDS | {TableAlertProvider}
 
     def __init__(
             self,
@@ -115,7 +88,7 @@ class TableAlert(BaseAlert):
             watch_css: bool = False,
     ):
         super().__init__(driver_class, css_path, watch_css)
-        self.events: Union[Dict[Dict[str, any]]] = {}
+        self.events: Union[Dict[Dict[str, any]], Dict] = {}
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -148,7 +121,7 @@ class TableAlert(BaseAlert):
         ):
             if not self.filter.accept(event):
                 continue
-            brief_data = await BaseAlert.__extract__from_alert__(event)
+            brief_data = await BaseAlertApp.__extract__from_alert__(event)
             timestamp = brief_data['timestamp']
             alerts_tbl.add_row(
                 timestamp,
