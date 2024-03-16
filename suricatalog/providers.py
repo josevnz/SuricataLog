@@ -1,3 +1,4 @@
+from enum import Enum
 from functools import partial
 from typing import Any
 
@@ -7,6 +8,16 @@ from textual.screen import Screen
 from textual.widgets import DataTable
 
 from suricatalog.screens import DetailScreen
+
+
+class TableColumns(Enum):
+    Timestamp = 0
+    Severity = 1
+    Signature = 2
+    Protocol = 3
+    Destination = 4
+    Source = 5
+    Payload = 6
 
 
 class TableAlertProvider(Provider):
@@ -24,13 +35,20 @@ class TableAlertProvider(Provider):
         for row_key in self.alerts_tbl.rows:
             row = self.alerts_tbl.get_row(row_key)
             my_app.log.info(f"Searching {row_key}:{row}")
-            searchable = row[1]
-            score = matcher.match(searchable)
-            if score > 0:
-                runner_detail = DetailScreen(data=row)
-                yield Hit(
-                    score,
-                    matcher.highlight(f"{searchable}"),
-                    partial(my_app.push_screen, runner_detail),
-                    help=f"Show details about {searchable}"
-                )
+            for column in [
+                TableColumns.Signature,
+                TableColumns.Protocol,
+                TableColumns.Destination,
+                TableColumns.Source,
+                TableColumns.Payload
+            ]:
+                searchable = row[column.value]
+                score = matcher.match(searchable)
+                if score > 0:
+                    runner_detail = DetailScreen(data=row)
+                    yield Hit(
+                        score,
+                        matcher.highlight(f"{searchable}"),
+                        partial(my_app.push_screen, runner_detail),
+                        help=f"Show details about {searchable}"
+                    )

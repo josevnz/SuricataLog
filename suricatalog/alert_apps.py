@@ -10,7 +10,7 @@ from textual.widgets import Footer, Header, DataTable
 
 from suricatalog.log import get_events_from_eve
 from suricatalog.filter import BaseFilter
-from suricatalog.providers import TableAlertProvider
+from suricatalog.providers import TableAlertProvider, TableColumns
 from suricatalog.screens import DetailScreen, ErrorScreen
 
 
@@ -103,13 +103,13 @@ class TableAlertApp(BaseAlertApp):
         yield Header()
         alerts_tbl = DataTable()
         alerts_tbl.show_header = True
-        alerts_tbl.add_column("Timestamp")
-        alerts_tbl.add_column("Severity")
-        alerts_tbl.add_column("Signature")
-        alerts_tbl.add_column("Protocol")
-        alerts_tbl.add_column("Destination")
-        alerts_tbl.add_column("Source")
-        alerts_tbl.add_column("Payload")
+        alerts_tbl.add_column(TableColumns.Timestamp.name)
+        alerts_tbl.add_column(TableColumns.Severity.name)
+        alerts_tbl.add_column(TableColumns.Signature.name)
+        alerts_tbl.add_column(TableColumns.Protocol.name)
+        alerts_tbl.add_column(TableColumns.Destination.name)
+        alerts_tbl.add_column(TableColumns.Source.name)
+        alerts_tbl.add_column(TableColumns.Payload.name)
         alerts_tbl.zebra_stripes = True
         alerts_tbl.loading = True
         alerts_tbl.cursor_type = 'row'
