@@ -9,7 +9,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 [project]
 name = "SuricataLog"
-version = "0.1.4"
+version = "0.1.5"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
@@ -17,7 +17,7 @@ maintainers = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python"
 ]
 dynamic = ["dependencies"]

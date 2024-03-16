@@ -504,7 +504,7 @@ Here is a sample session:
 
 Suricata will save lots of details when it detects an anomaly; You can tell than using jq to go through the alerts may not be desirable.
 
-For a bigger setup, you may want to use an [Elastic Stack](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-suricata.html) (Filebeat, Logstash, Elastic Search, Kibana):
+For a bigger setup, you may want to use an [Elastic Stack](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-suricata.html) (Filebeat, Logstash, Elasticsearch, Kibana):
 * Get the logs
 * Store historically and normalize the logs
 * Visualize their contents

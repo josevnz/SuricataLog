@@ -6,7 +6,7 @@ import locale
 
 from textual.app import App
 
-from suricatalog.apps import FlowApp, HostDataUse, TopUserApp, OneShotApp
+from suricatalog.mini_apps import FlowApp, HostDataUse, TopUserApp, OneShotApp
 from suricatalog.filter import BaseFilter
 
 locale.setlocale(locale.LC_ALL, '')

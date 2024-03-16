@@ -3,11 +3,18 @@ import os
 import time
 from json import JSONDecodeError
 from pathlib import Path
+import logging
 from typing import Callable, Dict
 
 from suricatalog.filter import BaseFilter
 
 DEFAULT_EVE = [Path("/var/log/suricata/eve.json")]
+_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s")
+_sc = logging.StreamHandler()
+_sc.setFormatter(_fmt)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
+LOGGER.addHandler(_sc)
 
 
 def get_events_from_eve(
@@ -25,14 +32,18 @@ def get_events_from_eve(
     if eve_files is None:
         eve_files = DEFAULT_EVE
     for eve_file in eve_files:
-        with open(eve_file, 'rt') as eve:
-            for line in eve:
-                try:
-                    data = json.loads(line)
-                    if data_filter.accept(data):
-                        yield data
-                except JSONDecodeError:
-                    continue  # Try to read the next record
+        try:
+            with open(eve_file, 'rt') as eve:
+                for line in eve:
+                    try:
+                        data = json.loads(line)
+                        if data_filter.accept(data):
+                            yield data
+                    except JSONDecodeError:
+                        continue  # Try to read the next record
+        except (FileExistsError, UnicodeDecodeError) as err:
+            LOGGER.error(f"I cannot use {eve_file}. Ignoring it.", err)
+            raise
 
 
 def tail_eve(
@@ -48,15 +59,19 @@ def tail_eve(
     """
     if eve_file is None:
         eve_file = DEFAULT_EVE
-    with open(eve_file, 'rt') as eve:
-        eve.seek(0, os.SEEK_END)
-        while True:
-            try:
-                line = eve.readline()
-                if not line:
-                    time.sleep(0.1)
+    try:
+        with open(eve_file, 'rt') as eve:
+            eve.seek(0, os.SEEK_END)
+            while True:
+                try:
+                    line = eve.readline()
+                    if not line:
+                        time.sleep(0.1)
+                        continue
+                    data = decorator(line)
+                    yield data
+                except JSONDecodeError:
                     continue
-                data = decorator(line)
-                yield data
-            except JSONDecodeError:
-                continue
+    except (FileExistsError, UnicodeDecodeError) as err:
+        LOGGER.error(f"I cannot use {eve_file}. Ignoring it.", err)
+        raise

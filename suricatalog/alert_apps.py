@@ -1,47 +1,20 @@
-import locale
 import textwrap
+import traceback
 from pathlib import Path
 from typing import Type, List, Any, Dict, Union
 
 from textual import on, work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.screen import ModalScreen
-from textual.widgets import Footer, Header, Pretty, DataTable, Button
+from textual.widgets import Footer, Header, DataTable
 
 from suricatalog.log import get_events_from_eve
 from suricatalog.filter import BaseFilter
-
-locale.setlocale(locale.LC_ALL, '')
-BASEDIR = Path(__file__).parent
-
-
-class DetailScreen(ModalScreen):
-    ENABLE_COMMAND_PALETTE = False
-    CSS_PATH = BASEDIR.joinpath('css').joinpath('details_screen.tcss')
-
-    def __init__(
-            self,
-            name: str | None = None,
-            ident: str | None = None,
-            classes: str | None = None,
-            data: str = None
-    ):
-        super().__init__(name, ident, classes)
-        self.data = data
-
-    def compose(self) -> ComposeResult:
-        yield Pretty(self.data)
-        button = Button("Close", variant="primary", id="close")
-        button.tooltip = "Go back to main screen"
-        yield button
-
-    @on(Button.Pressed, "#close")
-    def on_button_pressed(self, _) -> None:
-        self.app.pop_screen()
+from suricatalog.providers import TableAlertProvider, TableColumns
+from suricatalog.screens import DetailScreen, ErrorScreen
 
 
-class BaseAlert(App):
+class BaseAlertApp(App):
 
     def __init__(
             self,
@@ -71,13 +44,13 @@ class BaseAlert(App):
     @staticmethod
     async def __extract__from_alert__(alert: Dict[str, Any]) -> Dict[str, Any]:
         timestamp = alert['timestamp']
-        dest_port = str(BaseAlert.__get_key_from_map__(alert, ['dest_port']))
-        dest_ip = BaseAlert.__get_key_from_map__(alert, ['dest_ip'])
-        src_ip = BaseAlert.__get_key_from_map__(alert, ['src_ip'])
-        src_port = str(BaseAlert.__get_key_from_map__(alert, ['src_port']))
-        protocol = BaseAlert.__get_key_from_map__(alert, ['app_proto', 'proto'])
+        dest_port = str(BaseAlertApp.__get_key_from_map__(alert, ['dest_port']))
+        dest_ip = BaseAlertApp.__get_key_from_map__(alert, ['dest_ip'])
+        src_ip = BaseAlertApp.__get_key_from_map__(alert, ['src_ip'])
+        src_port = str(BaseAlertApp.__get_key_from_map__(alert, ['src_port']))
+        protocol = BaseAlertApp.__get_key_from_map__(alert, ['app_proto', 'proto'])
         severity = alert['alert']['severity']
-        signature = alert['alert']['signature'],
+        signature = alert['alert']['signature']
         payload_printable = alert['payload_printable'] if 'payload_printable' in alert else ""
         return {
             "timestamp": timestamp,
@@ -102,11 +75,12 @@ class BaseAlert(App):
         self.eve_files = eve_files
 
 
-class TableAlert(BaseAlert):
+class TableAlertApp(BaseAlertApp):
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
-    ENABLE_COMMAND_PALETTE = False
+    ENABLE_COMMAND_PALETTE = True
+    COMMANDS = App.COMMANDS | {TableAlertProvider}
 
     def __init__(
             self,
@@ -115,19 +89,27 @@ class TableAlert(BaseAlert):
             watch_css: bool = False,
     ):
         super().__init__(driver_class, css_path, watch_css)
-        self.events: Union[Dict[Dict[str, any]]] = {}
+        self.events: Union[Dict[Dict[str, any]], Dict] = {}
+
+    async def show_error(
+            self,
+            trace: Union[traceback.StackSummary, None],
+            reason: Union[str, None]
+    ) -> None:
+        error_src = ErrorScreen(trace=trace, reason=reason)
+        await self.push_screen(error_src)
 
     def compose(self) -> ComposeResult:
         yield Header()
         alerts_tbl = DataTable()
         alerts_tbl.show_header = True
-        alerts_tbl.add_column("Timestamp")
-        alerts_tbl.add_column("Severity")
-        alerts_tbl.add_column("Signature")
-        alerts_tbl.add_column("Protocol")
-        alerts_tbl.add_column("Destination")
-        alerts_tbl.add_column("Source")
-        alerts_tbl.add_column("Payload")
+        alerts_tbl.add_column(TableColumns.Timestamp.name)
+        alerts_tbl.add_column(TableColumns.Severity.name)
+        alerts_tbl.add_column(TableColumns.Signature.name)
+        alerts_tbl.add_column(TableColumns.Protocol.name)
+        alerts_tbl.add_column(TableColumns.Destination.name)
+        alerts_tbl.add_column(TableColumns.Source.name)
+        alerts_tbl.add_column(TableColumns.Payload.name)
         alerts_tbl.zebra_stripes = True
         alerts_tbl.loading = True
         alerts_tbl.cursor_type = 'row'
@@ -141,27 +123,36 @@ class TableAlert(BaseAlert):
     async def on_mount(self) -> None:
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
-        alerts_tbl.loading = False
-        for event in get_events_from_eve(
-                data_filter=self.filter,
-                eve_files=self.eve_files
-        ):
-            if not self.filter.accept(event):
-                continue
-            brief_data = await BaseAlert.__extract__from_alert__(event)
-            timestamp = brief_data['timestamp']
-            alerts_tbl.add_row(
-                timestamp,
-                brief_data['severity'],
-                brief_data['signature'],
-                brief_data['protocol'],
-                f"{brief_data['dest_ip']}:{brief_data['dest_port']}",
-                f"{brief_data['src_ip']}:{brief_data['src_port']}",
-                brief_data['payload_printable']
-            )
-            alert_cnt += 1
-            self.events[timestamp] = event
-        alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
+        try:
+            for event in get_events_from_eve(
+                    data_filter=self.filter,
+                    eve_files=self.eve_files
+            ):
+                if not self.filter.accept(event):
+                    continue
+                brief_data = await BaseAlertApp.__extract__from_alert__(event)
+                timestamp = brief_data['timestamp']
+                alerts_tbl.add_row(
+                    timestamp,
+                    brief_data['severity'],
+                    brief_data['signature'],
+                    brief_data['protocol'],
+                    f"{brief_data['dest_ip']}:{brief_data['dest_port']}",
+                    f"{brief_data['src_ip']}:{brief_data['src_port']}",
+                    brief_data['payload_printable']
+                )
+                alert_cnt += 1
+                self.events[timestamp] = event
+            alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
+            if alert_cnt:
+                alerts_tbl.loading = False
+            else:
+                await self.show_error(reason=None, trace=None)
+        except (FileExistsError, UnicodeDecodeError) as ve:
+            self.log.info(f"Fatal error: {ve.reason}")
+            tb = traceback.extract_stack()
+            self.log.info(tb)
+            await self.show_error(trace=tb, reason=ve.reason)
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):

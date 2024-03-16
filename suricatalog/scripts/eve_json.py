@@ -62,7 +62,7 @@ def main():
         help=f"Top user agent in HTTP traffic"
     )
     PARSER.add_argument(
-        'eve',
+        'eve_file',
         type=Path,
         nargs="+",
         help=f"Path to one or more {DEFAULT_EVE[0]} file to parse."
@@ -73,30 +73,30 @@ def main():
     try:
         if OPTIONS.nxdomain:
             eve_app = get_capture(
-                eve=OPTIONS.eve,
+                eve=OPTIONS.eve_file,
                 data_filter=NXDomainFilter(),
                 title="SuricataLog DNS records with NXDOMAIN"
             )
         elif OPTIONS.payload:
             eve_app = get_capture(
-                eve=OPTIONS.eve,
+                eve=OPTIONS.eve_file,
                 data_filter=WithPrintablePayloadFilter(),
                 title="SuricataLog Inspect Alert Data (payload)"
             )
         elif OPTIONS.flow:
             eve_app = get_one_shot_flow_table(
-                eve=OPTIONS.eve,
+                eve=OPTIONS.eve_file,
                 data_filter=ALWAYS_TRUE
             )
         elif OPTIONS.netflow:
             eve_app = get_host_data_use(
-                eve_files=OPTIONS.eve,
+                eve_files=OPTIONS.eve_file,
                 data_filter=TIMESTAMP_FILTER,
                 ip_address=OPTIONS.netflow.exploded
             )
         elif OPTIONS.useragent:
             eve_app = get_agents(
-                eve_files=OPTIONS.eve,
+                eve_files=OPTIONS.eve_file,
                 data_filter=TIMESTAMP_FILTER
             )
         else:
