@@ -1,4 +1,5 @@
 import sys
+from traceback import FrameSummary
 
 from textual import on
 from textual.app import ComposeResult
@@ -42,14 +43,25 @@ class ErrorScreen(ModalScreen):
             name: str | None = None,
             ident: str | None = None,
             classes: str | None = None,
-            data: str = None
+            data: str = None,
+            trace: FrameSummary = None,
+            reason: str = None
     ):
         super().__init__(name, ident, classes)
         self.data = data
+        self.trace = trace
+        self.reason = reason
 
     def compose(self) -> ComposeResult:
+        if self.trace:
+            yield Pretty(
+                {
+                    'reason': self.reason,
+                    'traceback': self.trace
+                }
+            )
         button = Button.error("Exit application", id="close")
-        button.tooltip = "Unable to load any of the files, program will exit!"
+        button.tooltip = "Unable to load data, program will exit!"
         yield button
 
     @on(Button.Pressed, "#close")

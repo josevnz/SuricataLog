@@ -1,4 +1,5 @@
 import textwrap
+import traceback
 from pathlib import Path
 from typing import Type, List, Any, Dict, Union
 
@@ -90,6 +91,14 @@ class TableAlertApp(BaseAlertApp):
         super().__init__(driver_class, css_path, watch_css)
         self.events: Union[Dict[Dict[str, any]], Dict] = {}
 
+    async def show_error(
+            self,
+            trace: traceback.StackSummary,
+            reason: str
+    ) -> None:
+        error_src = ErrorScreen(trace=trace, reason=reason)
+        await self.push_screen(error_src)
+
     def compose(self) -> ComposeResult:
         yield Header()
         alerts_tbl = DataTable()
@@ -114,31 +123,36 @@ class TableAlertApp(BaseAlertApp):
     async def on_mount(self) -> None:
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
-        for event in get_events_from_eve(
-                data_filter=self.filter,
-                eve_files=self.eve_files
-        ):
-            if not self.filter.accept(event):
-                continue
-            brief_data = await BaseAlertApp.__extract__from_alert__(event)
-            timestamp = brief_data['timestamp']
-            alerts_tbl.add_row(
-                timestamp,
-                brief_data['severity'],
-                brief_data['signature'],
-                brief_data['protocol'],
-                f"{brief_data['dest_ip']}:{brief_data['dest_port']}",
-                f"{brief_data['src_ip']}:{brief_data['src_port']}",
-                brief_data['payload_printable']
-            )
-            alert_cnt += 1
-            self.events[timestamp] = event
-        alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
-        if alert_cnt:
-            alerts_tbl.loading = False
-        else:
-            error_src = ErrorScreen()
-            await self.push_screen(error_src)
+        try:
+            for event in get_events_from_eve(
+                    data_filter=self.filter,
+                    eve_files=self.eve_files
+            ):
+                if not self.filter.accept(event):
+                    continue
+                brief_data = await BaseAlertApp.__extract__from_alert__(event)
+                timestamp = brief_data['timestamp']
+                alerts_tbl.add_row(
+                    timestamp,
+                    brief_data['severity'],
+                    brief_data['signature'],
+                    brief_data['protocol'],
+                    f"{brief_data['dest_ip']}:{brief_data['dest_port']}",
+                    f"{brief_data['src_ip']}:{brief_data['src_port']}",
+                    brief_data['payload_printable']
+                )
+                alert_cnt += 1
+                self.events[timestamp] = event
+            alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
+            if alert_cnt:
+                alerts_tbl.loading = False
+            else:
+                await self.show_error()
+        except (FileExistsError, UnicodeDecodeError) as ve:
+            self.log.info(f"Fatal error: {ve.reason}")
+            tb = traceback.extract_stack()
+            self.log.info(tb)
+            await self.show_error(trace=tb, reason=ve.reason)
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
