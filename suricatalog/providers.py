@@ -50,5 +50,5 @@ class TableAlertProvider(Provider):
                         score,
                         matcher.highlight(f"{searchable}"),
                         partial(my_app.push_screen, runner_detail),
-                        help=f"Show details about {searchable}"
+                        help=f"{column.name}: {searchable}"
                     )
