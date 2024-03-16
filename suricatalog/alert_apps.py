@@ -50,7 +50,7 @@ class BaseAlertApp(App):
         src_port = str(BaseAlertApp.__get_key_from_map__(alert, ['src_port']))
         protocol = BaseAlertApp.__get_key_from_map__(alert, ['app_proto', 'proto'])
         severity = alert['alert']['severity']
-        signature = alert['alert']['signature'],
+        signature = alert['alert']['signature']
         payload_printable = alert['payload_printable'] if 'payload_printable' in alert else ""
         return {
             "timestamp": timestamp,
