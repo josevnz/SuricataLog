@@ -53,7 +53,7 @@ class ErrorScreen(ModalScreen):
         self.reason = reason
 
     def compose(self) -> ComposeResult:
-        if self.trace:
+        if self.trace and self.reason:
             yield Pretty(
                 {
                     'reason': self.reason,
