@@ -18,7 +18,7 @@ class FlowApp(App):
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
-    ENABLE_COMMAND_PALETTE = True
+    ENABLE_COMMAND_PALETTE = False
 
     def __init__(
             self,
@@ -81,7 +81,7 @@ class HostDataUse(App):
         ("q", "quit_app", "Quit")
     ]
     CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.tcss')
-    ENABLE_COMMAND_PALETTE = True
+    ENABLE_COMMAND_PALETTE = False
 
     def __init__(
             self,
@@ -128,7 +128,7 @@ class TopUserApp(App):
         ("q", "quit_app", "Quit")
     ]
     CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.tcss')
-    ENABLE_COMMAND_PALETTE = True
+    ENABLE_COMMAND_PALETTE = False
 
     def __init__(
             self,
@@ -168,7 +168,7 @@ class OneShotApp(App):
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
-    ENABLE_COMMAND_PALETTE = True
+    ENABLE_COMMAND_PALETTE = False
 
     def __init__(
             self,
