@@ -93,8 +93,8 @@ class TableAlertApp(BaseAlertApp):
 
     async def show_error(
             self,
-            trace: traceback.StackSummary,
-            reason: str
+            trace: Union[traceback.StackSummary, None],
+            reason: Union[str, None]
     ) -> None:
         error_src = ErrorScreen(trace=trace, reason=reason)
         await self.push_screen(error_src)
@@ -147,7 +147,7 @@ class TableAlertApp(BaseAlertApp):
             if alert_cnt:
                 alerts_tbl.loading = False
             else:
-                await self.show_error()
+                await self.show_error(reason=None, trace=None)
         except (FileExistsError, UnicodeDecodeError) as ve:
             self.log.info(f"Fatal error: {ve.reason}")
             tb = traceback.extract_stack()
