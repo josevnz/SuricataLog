@@ -38,7 +38,7 @@ class FlowApp(App):
         yield Header()
         alerts_tbl = DataTable()
         alerts_tbl.show_header = True
-        alerts_tbl.add_column("Destination IP")
+        alerts_tbl.add_column("Protocol")
         alerts_tbl.add_column("Port")
         alerts_tbl.add_column("Count")
         alerts_tbl.zebra_stripes = True

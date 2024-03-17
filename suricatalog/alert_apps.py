@@ -148,11 +148,11 @@ class TableAlertApp(BaseAlertApp):
                 alerts_tbl.loading = False
             else:
                 await self.show_error(reason=None, trace=None)
-        except (FileExistsError, UnicodeDecodeError) as ve:
-            self.log.info(f"Fatal error: {ve.reason}")
+        except ValueError as ve:
+            self.log.info(f"Fatal error: {ve}")
             tb = traceback.extract_stack()
             self.log.info(tb)
-            await self.show_error(trace=tb, reason=ve.reason)
+            await self.show_error(trace=tb, reason=str(ve))
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):

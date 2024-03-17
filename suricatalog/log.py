@@ -41,9 +41,9 @@ def get_events_from_eve(
                             yield data
                     except JSONDecodeError:
                         continue  # Try to read the next record
-        except (FileExistsError, UnicodeDecodeError) as err:
-            LOGGER.error(f"I cannot use {eve_file}. Ignoring it.", err)
-            raise
+        except (FileNotFoundError, FileExistsError, UnicodeDecodeError) as ve:
+            LOGGER.error(f"I cannot use {eve_file}. Ignoring it.", ve)
+            raise ValueError(f"I cannot use {eve_file}. Ignoring it.", ve)
 
 
 def tail_eve(
@@ -72,6 +72,6 @@ def tail_eve(
                     yield data
                 except JSONDecodeError:
                     continue
-    except (FileExistsError, UnicodeDecodeError) as err:
-        LOGGER.error(f"I cannot use {eve_file}. Ignoring it.", err)
-        raise
+    except (FileExistsError, UnicodeDecodeError) as ve:
+        LOGGER.error(f"I cannot use {eve_file}. Ignoring it.", ve)
+        raise ValueError(f"I cannot use {eve_file}. Ignoring it.", ve)
