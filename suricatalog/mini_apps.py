@@ -1,4 +1,5 @@
 import textwrap
+import traceback
 from pathlib import Path
 from typing import Type, List
 
@@ -11,6 +12,7 @@ from suricatalog import BASEDIR
 from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
+from suricatalog.screens import ErrorScreen
 
 
 class FlowApp(App):
@@ -146,7 +148,11 @@ class TopUserApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        pretty = RichLog(id="agent")
+        pretty = RichLog(
+            id="agent",
+            highlight=True,
+            auto_scroll=True
+        )
         pretty.loading = True
         yield pretty
         yield Footer()
@@ -180,25 +186,50 @@ class OneShotApp(App):
         super().__init__(driver_class, css_path, watch_css)
         self.data_filter = data_filter
         self.eve = eve
+        self.loaded = 0
 
     def action_quit_app(self) -> None:
         self.exit(f"Exiting {self.title} now...")
 
     def compose(self) -> ComposeResult:
         yield Header()
-        log = RichLog(id='events')
+        log = RichLog(
+            id='events',
+            highlight=True,
+            auto_scroll=True
+        )
         log.loading = True
         yield log
         yield Footer()
 
     async def pump_events(self, log: RichLog):
-        loaded = 0
-        for single_alert in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
-            log.loading = False
-            log.write(single_alert)
-            loaded += 1
+        try:
+            for single_alert in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
+                log.loading = False
+                log.write(single_alert)
+                self.loaded += 1
+        except ValueError as ve:
+            if hasattr(ve, 'message'):
+                reason = ve.message
+            elif hasattr(ve, 'reason'):
+                reason = f"{ve}"
+            else:
+                reason = f"{ve}"
+            tb = traceback.extract_stack()
+            error_screen = ErrorScreen(
+                trace=tb,
+                reason=reason
+            )
+            await self.push_screen(error_screen)
 
     @work(exclusive=False)
     async def on_mount(self):
         log = self.query_one('#events', RichLog)
         await self.pump_events(log)
+        if self.loaded > 0:
+            self.notify(
+                title="Finished loading events",
+                severity="information",
+                timeout=5,
+                message=f"Number of messages loaded: {self.loaded}"
+            )

@@ -124,10 +124,11 @@ class TableAlertApp(BaseAlertApp):
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
         try:
-            for event in get_events_from_eve(
+            events = get_events_from_eve(
                     data_filter=self.filter,
                     eve_files=self.eve_files
-            ):
+            )
+            for event in events:
                 if not self.filter.accept(event):
                     continue
                 brief_data = await BaseAlertApp.__extract__from_alert__(event)
@@ -144,12 +145,27 @@ class TableAlertApp(BaseAlertApp):
                 alert_cnt += 1
                 self.events[timestamp] = event
             alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
+            self.notify(
+                title="Finish loading events",
+                timeout=5,
+                severity="information",
+                message=textwrap.dedent(f"""
+                Loaded {alert_cnt} messages.
+                Click on a row to get more details, CTR+\\ to search
+                """)
+            )
             if alert_cnt:
                 alerts_tbl.loading = False
             else:
                 await self.show_error(reason=None, trace=None)
         except ValueError as ve:
-            self.log.info(f"Fatal error: {ve}")
+            if hasattr(ve, 'reason'):
+                reason = f"{ve}"
+            elif hasattr(ve, 'message'):
+                reason = ve.message
+            else:
+                reason = f"{ve}"
+            self.log.info(f"Fatal error: {reason}")
             tb = traceback.extract_stack()
             self.log.info(tb)
             await self.show_error(trace=tb, reason=str(ve))
@@ -157,8 +173,7 @@ class TableAlertApp(BaseAlertApp):
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
         alerts_tbl: DataTable = event.data_table
-        if event.column_index < 2:
-            alerts_tbl.sort(event.column_key)
+        alerts_tbl.sort(event.column_key)
 
     @on(DataTable.RowSelected)
     def on_row_clicked(self, event: DataTable.RowSelected) -> None:
