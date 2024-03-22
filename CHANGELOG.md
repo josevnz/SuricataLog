@@ -1,5 +1,8 @@
 # SuricataLog changelog
 
+## Mar Sun 23 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 1.1
+- TUI improvements on search and notifications
+
 ## Mar Sat 22 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 1.0
 - Match version to stable version
 - Added unit tests for TUI
