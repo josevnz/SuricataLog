@@ -68,7 +68,7 @@ pip install --editable .
 
 Running unit tests is very easy after that:
 ```shell
-(SuricataLog) [josevnz@dmaf5 SuricataLog]$ python -m unittest test/test_suricatalog.py
+(SuricataLog) [josevnz@dmaf5 SuricataLog]$ python -m unittest test/*.py
 .........
 ----------------------------------------------------------------------
 Ran 9 tests in 0.334s
