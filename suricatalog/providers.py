@@ -20,6 +20,15 @@ class TableColumns(Enum):
     Payload = 6
 
 
+PROVIDER_COLS = [
+    TableColumns.Signature,
+    TableColumns.Protocol,
+    TableColumns.Destination,
+    TableColumns.Source,
+    TableColumns.Payload
+]
+
+
 class TableAlertProvider(Provider):
 
     def __init__(self, screen: Screen[Any], match_style: Style | None = None):
@@ -34,13 +43,7 @@ class TableAlertProvider(Provider):
         for row_key in self.alerts_tbl.rows:
             row = self.alerts_tbl.get_row(row_key)
             my_app.log.info(f"Searching {row_key}:{row}")
-            for column in [
-                TableColumns.Signature,
-                TableColumns.Protocol,
-                TableColumns.Destination,
-                TableColumns.Source,
-                TableColumns.Payload
-            ]:
+            for column in PROVIDER_COLS:
                 searchable = row[column.value]
                 matcher = self.matcher(searchable)
                 runner_detail = DetailScreen(data=row)
@@ -58,13 +61,7 @@ class TableAlertProvider(Provider):
         for row_key in self.alerts_tbl.rows:
             row = self.alerts_tbl.get_row(row_key)
             my_app.log.info(f"Searching {row_key}:{row}")
-            for column in [
-                TableColumns.Signature,
-                TableColumns.Protocol,
-                TableColumns.Destination,
-                TableColumns.Source,
-                TableColumns.Payload
-            ]:
+            for column in PROVIDER_COLS:
                 searchable = row[column.value]
                 score = matcher.match(searchable)
                 if score > 0:
