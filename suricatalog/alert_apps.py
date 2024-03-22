@@ -157,8 +157,7 @@ class TableAlertApp(BaseAlertApp):
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
         alerts_tbl: DataTable = event.data_table
-        if event.column_index < 2:
-            alerts_tbl.sort(event.column_key)
+        alerts_tbl.sort(event.column_key)
 
     @on(DataTable.RowSelected)
     def on_row_clicked(self, event: DataTable.RowSelected) -> None:
