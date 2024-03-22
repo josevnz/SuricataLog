@@ -4,7 +4,7 @@ requires = [
     "wheel>=0.42.0",
     "build>=1.0.3",
     "twine>=4.0.2",
-    "textual-dev>=1.2.1"
+    "textual-dev>=1.5.1"
 ]
 build-backend = "setuptools.build_meta"
 [project]
