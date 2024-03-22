@@ -146,7 +146,11 @@ class TopUserApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        pretty = RichLog(id="agent")
+        pretty = RichLog(
+            id="agent",
+            highlight=True,
+            auto_scroll=True
+        )
         pretty.loading = True
         yield pretty
         yield Footer()
@@ -186,7 +190,11 @@ class OneShotApp(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        log = RichLog(id='events')
+        log = RichLog(
+            id='events',
+            highlight=True,
+            auto_scroll=True
+        )
         log.loading = True
         yield log
         yield Footer()

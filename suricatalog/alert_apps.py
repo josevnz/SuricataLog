@@ -96,6 +96,12 @@ class TableAlertApp(BaseAlertApp):
             trace: Union[traceback.StackSummary, None],
             reason: Union[str, None]
     ) -> None:
+        self.notify(
+            title="Unrecoverable error",
+            message="There was en error!, please check the reason and exit the app.",
+            severity="error",
+            timeout=10
+        )
         error_src = ErrorScreen(trace=trace, reason=reason)
         await self.push_screen(error_src)
 
@@ -124,10 +130,11 @@ class TableAlertApp(BaseAlertApp):
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
         try:
-            for event in get_events_from_eve(
+            events = get_events_from_eve(
                     data_filter=self.filter,
                     eve_files=self.eve_files
-            ):
+            )
+            for event in events:
                 if not self.filter.accept(event):
                     continue
                 brief_data = await BaseAlertApp.__extract__from_alert__(event)
@@ -144,6 +151,12 @@ class TableAlertApp(BaseAlertApp):
                 alert_cnt += 1
                 self.events[timestamp] = event
             alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
+            self.notify(
+                title="Finish loading events",
+                timeout=5,
+                severity="information",
+                message="Click on a row to get more details, CTR+\\ to search"
+            )
             if alert_cnt:
                 alerts_tbl.loading = False
             else:
