@@ -9,7 +9,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 [project]
 name = "SuricataLog"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]

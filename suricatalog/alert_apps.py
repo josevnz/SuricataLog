@@ -96,12 +96,6 @@ class TableAlertApp(BaseAlertApp):
             trace: Union[traceback.StackSummary, None],
             reason: Union[str, None]
     ) -> None:
-        self.notify(
-            title="Unrecoverable error",
-            message="There was en error!, please check the reason and exit the app.",
-            severity="error",
-            timeout=10
-        )
         error_src = ErrorScreen(trace=trace, reason=reason)
         await self.push_screen(error_src)
 
@@ -155,14 +149,23 @@ class TableAlertApp(BaseAlertApp):
                 title="Finish loading events",
                 timeout=5,
                 severity="information",
-                message="Click on a row to get more details, CTR+\\ to search"
+                message=textwrap.dedent(f"""
+                Loaded {alert_cnt} messages.
+                Click on a row to get more details, CTR+\\ to search
+                """)
             )
             if alert_cnt:
                 alerts_tbl.loading = False
             else:
                 await self.show_error(reason=None, trace=None)
         except ValueError as ve:
-            self.log.info(f"Fatal error: {ve}")
+            if hasattr(ve, 'reason'):
+                reason = f"{ve}"
+            elif hasattr(ve, 'message'):
+                reason = ve.message
+            else:
+                reason = f"{ve}"
+            self.log.info(f"Fatal error: {reason}")
             tb = traceback.extract_stack()
             self.log.info(tb)
             await self.show_error(trace=tb, reason=str(ve))

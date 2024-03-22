@@ -1,5 +1,5 @@
 import sys
-from traceback import FrameSummary
+from traceback import StackSummary
 
 from textual import on
 from textual.app import ComposeResult
@@ -44,7 +44,7 @@ class ErrorScreen(ModalScreen):
             ident: str | None = None,
             classes: str | None = None,
             data: str = None,
-            trace: FrameSummary = None,
+            trace: StackSummary = None,
             reason: str = None
     ):
         super().__init__(name, ident, classes)
@@ -60,7 +60,16 @@ class ErrorScreen(ModalScreen):
                     'traceback': self.trace
                 }
             )
-        button = Button.error("Exit application", id="close")
+        self.notify(
+            title="Unrecoverable error, press 'E' to exit!",
+            message=f"There was an error, application won't recover.",
+            severity="error",
+            timeout=15
+        )
+        button = Button.error(
+            "Exit application",
+            id="close"
+        )
         button.tooltip = "Unable to load data, program will exit!"
         yield button
 
