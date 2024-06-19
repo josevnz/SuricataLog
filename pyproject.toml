@@ -1,15 +1,16 @@
 [build-system]
 requires = [
-    "setuptools >= 67.8.0",
-    "wheel>=0.42.0",
-    "build>=1.0.3",
-    "twine>=4.0.2",
-    "textual-dev>=1.5.1"
+    "setuptools >= 70.1.0",
+    "wheel>=0.43.0",
+    "build>=1.2.1",
+    "twine>=5.1.0",
+    "textual-dev>=1.5.1",
+    "textual-serve==1.0.3"
 ]
 build-backend = "setuptools.build_meta"
 [project]
 name = "SuricataLog"
-version = "1.0.1"
+version = "1.0.2"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
@@ -42,6 +43,7 @@ include-package-data = true
 [project.scripts]
 eve_json = "suricatalog.scripts.eve_json:main"
 eve_log = "suricatalog.scripts.eve_log:main"
+eve_server = "suricatalog.scripts.eve_server:main"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}

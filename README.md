@@ -170,6 +170,28 @@ eve_json --netflow 224.0.0.251 test/eve_udp_flow.json
 eve_json --useragent test/eve.json
 ```
 
+### Running eve_* applications on a browser
+
+![Suricata eve server, running eve* applications on a browser!](suricata_eve_server.png)
+
+You can run Suricata Log applications on a browser by using the `eve_server` wrapper:
+
+```shell
+# Show the flow report on a eve.json file
+eve_server --application eve_json -- --flow ~/eve.json
+
+# Show NX domain report
+eve_server --application eve_json -- --nxdomain ~/eve.json
+
+# Inspect the eve.json records
+eve_server --applications eve_log -- ~/eve.json
+```
+
+You need to pass the '--' to tell the server than this options belong to the underlying eve_* you want to call.
+
+
+
+
 ## Supported versions
 
 I work on this project on **my spare time** and I cannot support every version of Linux/ Python combination out there.
