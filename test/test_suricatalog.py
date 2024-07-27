@@ -4,6 +4,8 @@ from unittest import IsolatedAsyncioTestCase, TestCase
 from datetime import datetime
 from pathlib import Path
 
+import pytz
+
 from suricatalog.time import parse_timestamp
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, TimestampFilter, AlwaysTrueFilter
 from suricatalog.log import get_events_from_eve
@@ -131,6 +133,16 @@ class SuricataLogTestCase(unittest.TestCase):
         self.assertTrue(parse_timestamp('2022-02-08 16:32:14.900292+0000'))
         self.assertTrue(parse_timestamp('2022-02-08T16:32:14.900292'))
         self.assertTrue(parse_timestamp(datetime.now()))
+        self.assertTrue(
+            parse_timestamp(
+                datetime(
+                    year=2024,
+                    day=2,
+                    month=2,
+                    tzinfo=pytz.UTC
+                )
+            )
+        )
         try:
             parse_timestamp('XXX-02-08T16:32:14.900292')
             self.fail("Was supposed to fail with an invalid timestamp")
