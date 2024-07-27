@@ -129,6 +129,7 @@ class SuricataLogTestCase(unittest.TestCase):
                 SuricataLogTestCase.eve_list.append(json.loads(event))
 
     def test_parse_timestamp(self):
+        invalid = 'XXX-02-08T16:32:14.900292'
         naive = datetime.now()
         non_naive = datetime(
                     year=2024,
@@ -136,7 +137,6 @@ class SuricataLogTestCase(unittest.TestCase):
                     month=2,
                     tzinfo=pytz.UTC
                 )
-        invalid = 'XXX-02-08T16:32:14.900292'
         dates = [
             '2022-02-08T16:32:14.900292+0000',
             '2022-02-08 16:32:14.900292+0000',
