@@ -1,9 +1,20 @@
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone, tzinfo
 from typing import Union, Any
 from timeit import default_timer as timer
 
-DEFAULT_TIMESTAMP_10M_AGO = datetime = datetime.now() - timedelta(minutes=10)
-DEFAULT_TIMESTAMP_10Y_AGO = datetime = datetime.now() - timedelta(days=365 * 10)
+import pytz
+
+DEFAULT_TZ: tzinfo = datetime.now(timezone.utc).astimezone().tzinfo
+DEFAULT_TIMESTAMP_10M_AGO: datetime = datetime.now(tz=DEFAULT_TZ) - timedelta(minutes=10)
+DEFAULT_TIMESTAMP_10Y_AGO: datetime = datetime.now(tz=DEFAULT_TZ) - timedelta(days=365 * 10)
+
+
+def to_utc(candidate: datetime) -> datetime:
+    try:
+        converted = candidate.astimezone(pytz.utc)
+    except (ValueError, TypeError):
+        converted = candidate.replace(tzinfo=pytz.utc)
+    return converted
 
 
 def parse_timestamp(candidate: Union[str, Any]) -> datetime:
@@ -15,13 +26,11 @@ def parse_timestamp(candidate: Union[str, Any]) -> datetime:
     if isinstance(candidate, str):
         try:
             iso_candidate = candidate.split('+', 1)[0]
-            return datetime.fromisoformat(iso_candidate)
+            return to_utc(datetime.fromisoformat(iso_candidate))
         except ValueError:
             raise ValueError(f"Invalid date passed: {candidate}")
-    elif isinstance(candidate, datetime):
-        return candidate
     else:
-        raise ValueError(f"I don't know how to handle {candidate}")
+        return to_utc(candidate)
 
 
 def get_clock(start_time: float) -> str:

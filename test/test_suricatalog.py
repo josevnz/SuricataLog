@@ -4,6 +4,8 @@ from unittest import IsolatedAsyncioTestCase, TestCase
 from datetime import datetime
 from pathlib import Path
 
+import pytz
+
 from suricatalog.time import parse_timestamp
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, TimestampFilter, AlwaysTrueFilter
 from suricatalog.log import get_events_from_eve
@@ -127,14 +129,33 @@ class SuricataLogTestCase(unittest.TestCase):
                 SuricataLogTestCase.eve_list.append(json.loads(event))
 
     def test_parse_timestamp(self):
-        self.assertTrue(parse_timestamp('2022-02-08T16:32:14.900292+0000'))
-        self.assertTrue(parse_timestamp('2022-02-08 16:32:14.900292+0000'))
-        self.assertTrue(parse_timestamp('2022-02-08T16:32:14.900292'))
-        try:
-            parse_timestamp('XXX-02-08T16:32:14.900292')
-            self.fail("Was supposed to fail with an invalid timestamp")
-        except ValueError:
-            pass
+        naive = datetime.now()
+        non_naive = datetime(
+                    year=2024,
+                    day=2,
+                    month=2,
+                    tzinfo=pytz.UTC
+                )
+        invalid = 'XXX-02-08T16:32:14.900292'
+        dates = [
+            '2022-02-08T16:32:14.900292+0000',
+            '2022-02-08 16:32:14.900292+0000',
+            '2022-02-08T16:32:14.900292',
+            naive,
+            non_naive,
+            invalid
+        ]
+        for idx, test_date in enumerate(dates):
+            try:
+                ts = parse_timestamp(test_date)
+                self.assertTrue(ts)
+                self.assertIsInstance(ts, datetime)
+                self.assertIsNotNone(ts.tzinfo)
+            except ValueError:
+                if idx == 6:
+                    self.fail(f"Was supposed to fail with an invalid timestamp: {invalid}")
+                else:
+                    pass
 
     def test_timestamp_filter(self):
         timestamp_filter = TimestampFilter()
