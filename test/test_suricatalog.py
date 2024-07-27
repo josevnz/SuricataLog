@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytz
 
-from suricatalog.time import parse_timestamp
+from suricatalog.time import parse_timestamp, to_utc
 from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, TimestampFilter, AlwaysTrueFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
@@ -128,15 +128,33 @@ class SuricataLogTestCase(unittest.TestCase):
             for event in eve_file:
                 SuricataLogTestCase.eve_list.append(json.loads(event))
 
+    def test_to_utc(self):
+        naive = datetime.now()
+        non_naive = datetime(
+            year=2024,
+            day=2,
+            month=2,
+            tzinfo=pytz.UTC
+        )
+        dates = [
+            naive,
+            non_naive
+        ]
+        for test_date in dates:
+            ts = to_utc(test_date)
+            self.assertTrue(ts)
+            self.assertIsInstance(ts, datetime)
+            self.assertIsNotNone(ts.tzinfo)
+
     def test_parse_timestamp(self):
         invalid = 'XXX-02-08T16:32:14.900292'
         naive = datetime.now()
         non_naive = datetime(
-                    year=2024,
-                    day=2,
-                    month=2,
-                    tzinfo=pytz.UTC
-                )
+            year=2024,
+            day=2,
+            month=2,
+            tzinfo=pytz.UTC
+        )
         dates = [
             '2022-02-08T16:32:14.900292+0000',
             '2022-02-08 16:32:14.900292+0000',
