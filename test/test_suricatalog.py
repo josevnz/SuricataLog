@@ -130,6 +130,7 @@ class SuricataLogTestCase(unittest.TestCase):
         self.assertTrue(parse_timestamp('2022-02-08T16:32:14.900292+0000'))
         self.assertTrue(parse_timestamp('2022-02-08 16:32:14.900292+0000'))
         self.assertTrue(parse_timestamp('2022-02-08T16:32:14.900292'))
+        self.assertTrue(parse_timestamp(datetime.now()))
         try:
             parse_timestamp('XXX-02-08T16:32:14.900292')
             self.fail("Was supposed to fail with an invalid timestamp")
