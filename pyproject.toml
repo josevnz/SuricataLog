@@ -5,12 +5,13 @@ requires = [
     "build>=1.2.1",
     "twine>=5.1.0",
     "textual-dev>=1.5.1",
-    "textual-serve==1.0.3"
+    "textual-serve==1.0.3",
+    "pytz==2024.1"
 ]
 build-backend = "setuptools.build_meta"
 [project]
 name = "SuricataLog"
-version = "1.0.2"
+version = "1.0.3"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]

@@ -200,12 +200,15 @@ This is my current test bed, and it may change without further notice
 | SuricataLog | Supported | OS                               | Python    | Suricata |
 |-------------|-----------|----------------------------------|-----------|----------|
 | <= 0.8      | NO        | NA                               | <  3.8    | 6.04     |
-| 0.9+        | YES       | fedora 37                        | => 3.11.4 | 6.04     |
-| 0.9+        | YES       | Armbian 23.02.2 Jammy            | => 3.10.6 | 6.04     |
-| 0.9+        | YES       | Ubuntu 20.04.4 LTS (Focal Fossa) | => 3.8.10 | 6.04     |
+| 0.9+        | NO        | fedora 37                        | => 3.11.4 | 6.04     |
+| 0.9+        | NO        | Armbian 23.02.2 Jammy            | => 3.10.6 | 6.04     |
+| 0.9+        | NO        | Ubuntu 20.04.4 LTS (Focal Fossa) | => 3.8.10 | 6.04     |
+| 1.0.3+      | YES       | fedora 40                        | => 3.11.4 | 7.0.6    |
 
 *You are more than welcome to*:
 * Submit patches with new features and bug-fixes.
 * Open bug reports. Be as detailed as possible, otherwise I will have no choice but to close it.
 
-
+## Tutorials
+* [Suricata, RaspberryPI4 and Python to secure your home network](TUTORIAL.md)
+* [Using SuricataLog to analyze your events](Using_SuricataLog_to_analyze_your_events.md)

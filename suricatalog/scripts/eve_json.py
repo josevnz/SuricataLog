@@ -69,7 +69,7 @@ def main():
     )
     OPTIONS = PARSER.parse_args()
     TIMESTAMP_FILTER = TimestampFilter()
-    TIMESTAMP_FILTER.timestamp = OPTIONS.timestamp
+    TIMESTAMP_FILTER._timestamp = OPTIONS.timestamp
     try:
         if OPTIONS.nxdomain:
             eve_app = get_capture(
