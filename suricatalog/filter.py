@@ -64,7 +64,8 @@ class WithPrintablePayloadFilter(BaseFilter):
         :param data:
         :return:
         """
-        if ('event_type' in data and
+        if (
+                'event_type' in data and
                 'alert' == data['event_type'] and
                 'payload_printable' in data and
                 data['payload_printable']
