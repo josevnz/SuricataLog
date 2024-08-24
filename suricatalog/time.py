@@ -5,8 +5,6 @@ from timeit import default_timer as timer
 import pytz
 
 DEFAULT_TZ: tzinfo = datetime.now(timezone.utc).astimezone().tzinfo
-DEFAULT_TIMESTAMP_10M_AGO: datetime = datetime.now(tz=DEFAULT_TZ) - timedelta(minutes=10)
-DEFAULT_TIMESTAMP_10Y_AGO: datetime = datetime.now(tz=DEFAULT_TZ) - timedelta(days=365 * 10)
 
 
 def to_utc(candidate: datetime) -> datetime:
@@ -15,6 +13,10 @@ def to_utc(candidate: datetime) -> datetime:
     except (ValueError, TypeError):
         converted = candidate.replace(tzinfo=pytz.utc)
     return converted
+
+
+DEFAULT_TIMESTAMP_10M_AGO: datetime = to_utc(datetime.now(tz=DEFAULT_TZ) - timedelta(minutes=10))
+DEFAULT_TIMESTAMP_10Y_AGO: datetime = to_utc(datetime.now(tz=DEFAULT_TZ) - timedelta(days=365 * 10))
 
 
 def parse_timestamp(candidate: Union[str, Any]) -> datetime:

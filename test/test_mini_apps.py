@@ -61,7 +61,7 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
 
     async def test_get_host_data_use(self):
         ts = TimestampFilter()
-        ts.timestamp = DEFAULT_TIMESTAMP_10Y_AGO
+        ts._timestamp = DEFAULT_TIMESTAMP_10Y_AGO
         app = get_host_data_use(
             eve_files=[EVE_UDP_FILE],
             data_filter=ts,
@@ -77,7 +77,7 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
 
     async def test_get_agents(self):
         ts = TimestampFilter()
-        ts.timestamp = DEFAULT_TIMESTAMP_10Y_AGO
+        ts._timestamp = DEFAULT_TIMESTAMP_10Y_AGO
         app = get_agents(
             eve_files=[EVE_FILE],
             data_filter=ts

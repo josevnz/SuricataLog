@@ -120,7 +120,12 @@ class ReportTestCase(IsolatedAsyncioTestCase):
 
 class SuricataLogTestCase(unittest.TestCase):
     eve_list = []
-    old_date = datetime.fromisoformat('2021-02-08T16:32:14.900292')
+    old_date = datetime(
+            year=2021,
+            day=2,
+            month=8,
+            tzinfo=pytz.UTC
+        )
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -177,7 +182,7 @@ class SuricataLogTestCase(unittest.TestCase):
 
     def test_timestamp_filter(self):
         timestamp_filter = TimestampFilter()
-        timestamp_filter.timestamp = SuricataLogTestCase.old_date
+        timestamp_filter._timestamp = SuricataLogTestCase.old_date
         self.assertTrue(
             timestamp_filter.accept(data=SuricataLogTestCase.eve_list[0])
         )

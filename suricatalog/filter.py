@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Dict, Any
 
-from suricatalog.time import DEFAULT_TIMESTAMP_10M_AGO, parse_timestamp
+from suricatalog.time import DEFAULT_TIMESTAMP_10M_AGO, parse_timestamp, to_utc
 
 
 class BaseFilter(ABC):
@@ -20,17 +20,24 @@ class AlwaysTrueFilter(BaseFilter):
 class OnlyAlertsFilter(BaseFilter):
 
     def __init__(self):
-        self.timestamp = DEFAULT_TIMESTAMP_10M_AGO
+        self._timestamp = DEFAULT_TIMESTAMP_10M_AGO
 
-    def set_timestamp(self, timestamp: datetime):
+    @property
+    def timestamp(self):
+        return self._timestamp
+
+    @timestamp.setter
+    def timestamp(self, timestamp: datetime):
         if not timestamp:
             raise ValueError("Missing timestamp")
-        self.timestamp = timestamp
+        if not self.timestamp.tzinfo:
+            raise ValueError(f"{timestamp} has not TimeZone information")
+        self._timestamp = timestamp
 
     def accept(self, data: Dict[Any, Any]) -> bool:
         try:
             event_timestamp = parse_timestamp(data['timestamp'])
-            if event_timestamp <= self.timestamp:
+            if event_timestamp <= self._timestamp:
                 return False
             if 'event_type' in data and 'alert' == data['event_type']:
                 return True
@@ -57,7 +64,11 @@ class WithPrintablePayloadFilter(BaseFilter):
         :param data:
         :return:
         """
-        if 'event_type' in data and 'alert' == data['event_type'] and 'payload_printable' in data and data['payload_printable']:
+        if ('event_type' in data and
+                'alert' == data['event_type'] and
+                'payload_printable' in data and
+                data['payload_printable']
+        ):
             return True
         return False
 
@@ -65,12 +76,19 @@ class WithPrintablePayloadFilter(BaseFilter):
 class TimestampFilter(BaseFilter):
 
     def __init__(self):
-        self.timestamp = DEFAULT_TIMESTAMP_10M_AGO
+        self._timestamp = DEFAULT_TIMESTAMP_10M_AGO
 
-    def set_timestamp(self, timestamp: datetime):
+    @property
+    def timestamp(self):
+        return self._timestamp
+
+    @timestamp.setter
+    def timestamp(self, timestamp: datetime):
         if not timestamp:
             raise ValueError("Missing timestamp")
-        self.timestamp = timestamp
+        if not timestamp.tzinfo:
+            raise ValueError(f"{timestamp} has not TimeZone information")
+        self._timestamp = timestamp
 
     def accept(self, data: Dict[Any, Any]) -> bool:
         """
@@ -80,8 +98,17 @@ class TimestampFilter(BaseFilter):
         """
         try:
             event_timestamp = parse_timestamp(data['timestamp'])
-            if event_timestamp <= self.timestamp:
+            if not event_timestamp.tzinfo:
+                event_timestamp = to_utc(event_timestamp)
+            if event_timestamp <= self._timestamp:
                 return False
+        except TypeError:
+            if not self._timestamp.tzinfo:
+                raise TypeError(f"today timestamp={self._timestamp} has not TimeZone information.")
         except ValueError:
             return False
         return True
+
+    @timestamp.setter
+    def timestamp(self, value):
+        self._timestamp = value
