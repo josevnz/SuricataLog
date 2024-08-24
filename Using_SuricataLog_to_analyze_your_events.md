@@ -67,3 +67,18 @@ pip install --editable . # To really play
 python3 -m unittest discover -s test -t test # Run unit tests
 ```
 
+### Debugging a textualize application
+
+On first terminal:
+
+```shell
+. ~/venv/suricatalog/bin/activate
+pip install textual-dev==1.3.0
+textual console
+```
+
+And on another:
+```shell
+. ~/venv/suricatalog/bin/activate
+textual run --dev --command eve_json --payload test/eve.json
+```
