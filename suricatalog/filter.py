@@ -67,6 +67,8 @@ class WithPrintablePayloadFilter(BaseFilter):
         if 'event_type' in data and 'alert' == data['event_type']:
             if 'payload_printable' in data and data['payload_printable'] and data['payload_printable'] != 'null':
                 return True
+            elif 'payload' in data and data['payload'] and data['payload'] != 'null':
+                return True
         return False
 
 
