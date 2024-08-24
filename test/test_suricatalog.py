@@ -18,6 +18,7 @@ events = []
 class FilterTestCase(TestCase):
 
     def test_with_printable_payload_filter(self):
+        data_filter = WithPrintablePayloadFilter()
         payload = json.loads('{"timestamp":"2022-02-08T16:32:14.900292+0000","flow_id":879564658970874,'
                              '"pcap_cnt":9146,"event_type":"alert","src_ip":"52.96.222.130","src_port":25,'
                              '"dest_ip":"10.2.8.102","dest_port":49880,"proto":"TCP","metadata":{"flowints":{'
@@ -29,7 +30,6 @@ class FilterTestCase(TestCase):
                              '"start":"2022-02-08T16:32:14.659706+0000"},"payload":"","payload_printable":"",'
                              '"stream":0,"packet":"AAgCHEevIOUqtpPxCABFAAAohfUAAIAGj5A0YN6CCgIIZgAZwth27Ik6+soFbVAQ'
                              '+vDMSAAA","packet_info":{"linktype":1},"host":"raspberrypi"}')
-        data_filter = WithPrintablePayloadFilter()
         self.assertFalse(data_filter.accept(payload))
         payload = json.loads('{"timestamp":"2022-02-08T16:32:20.491791+0000","flow_id":879564658970874,'
                              '"pcap_cnt":9254,"event_type":"alert","src_ip":"52.96.222.130","src_port":25,'
