@@ -90,6 +90,9 @@ Then on another terminal:
 textual run --dev --command eve_log --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
 ```
 
+### Creating a Docker image
+
+Please check [DOCKER.md](DOCKER.md) for more details.
 
 ## Running the scripts
 

@@ -1,0 +1,15 @@
+# Execute SuricataLog scripts from the Docker image
+---
+services:
+  suricatalog:
+    image: suricatalog:latest
+    volumes:
+      - type: bind
+        source: /var/log/suricata
+        target: /suricatalog
+        read_only: true
+    attach: false
+    build:
+        context: "."
+        dockerfile: Dockerfile
+        network: host
