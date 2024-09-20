@@ -1,4 +1,6 @@
 # Execute SuricataLog scripts from the Docker image
+# docker compose up --detach
+# docker compose exec suricatalog eve_log /suricatalog/eve.json
 ---
 services:
   suricatalog:
