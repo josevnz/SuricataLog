@@ -6,5 +6,6 @@ pip install --no-cache SuricataLog-*-py3-none-any.whl
 rm -f SuricataLog-*-py3-none-any.whl
 CMD
 VOLUME /suricatalogs
-ENTRYPOINT exec /bin/bash -c $*
+RUN ["python3"]
+WORKDIR /suricatalog
 LABEL "author"="Jose Vicente Nunez <kodegeek.com@protonmail.com>"

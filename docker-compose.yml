@@ -2,13 +2,15 @@
 ---
 services:
   suricatalog:
+    container_name: suricatalog
     image: suricatalog:latest
     volumes:
       - type: bind
         source: /var/log/suricata
         target: /suricatalog
         read_only: true
-    attach: false
+    restart: always
+    tty: true
     build:
         context: "."
         dockerfile: Dockerfile

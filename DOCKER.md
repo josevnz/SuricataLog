@@ -1,10 +1,12 @@
-# Docker build
+# Docker
+
+## Building the image
 
 Here you will find instructions on how to build a custom Docker container for SuricataLog.
 
 It is assumed you have docker-ce version '24.0.7' or better.
 
-## Create the wheelhouse 
+### Create the wheelhouse 
 
 You need to have the SuricataLog wheelhouse
 
@@ -18,7 +20,7 @@ pip install wheel
 python -m build .
 ```
 
-## Create the Docker image
+### Create the Docker image
 
 ```shell
 docker compose build
@@ -31,6 +33,49 @@ If the image was built correctly, you will see something like this:
 (SuricataLog) [josevnz@dmaf5 SuriCon-2024]$ docker images suricatalog:latest
 REPOSITORY    TAG       IMAGE ID       CREATED         SIZE
 suricatalog   latest    ed1aaac1f3de   6 minutes ago   173MB
+```
+
+## Running the container
+
+### Using docker command
+
+You first start a docker container, and then you can attach to it. You need to pass the directory where you have your
+eve.json files so the volume is accessible to SuricataLog
+
+```shell
+docker run --restart always --detach --tty --volume $PWD/test:/suricatalog --name suricatalog suricatalog:latest
+
+# Run eve_log
+docker exec --interactive --tty suricatalog eve_log /suricatalog/eve.json
+
+# Exit and then run eve_json
+docker exec --interactive --tty suricatalog eve_json --payload /suricatalog/eve.json
+```
+
+Once you are done with the container you can kill it with:
+
+```shell
+docker stop suricatalog
+```
+
+### Using docker compose
+
+If you download the [docker-compose.yml](docker-compose.yml) you can then do the following, with less typing:
+
+```shell
+docker compose up --detach
+
+# Run eve_log
+docker compose exec suricatalog eve_log /suricatalog/eve.json
+
+# Exit and then run eve_json
+docker compose exec suricatalog eve_json --payload /suricatalog/eve.json
+```
+
+To stop the container:
+
+```shell
+docker compose stop
 ```
 
 
