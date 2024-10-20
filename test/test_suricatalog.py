@@ -306,6 +306,9 @@ class ReportTestCase(IsolatedAsyncioTestCase):
 
 
 class SuricataLogTestCase(unittest.TestCase):
+    """
+    Unit test for suricata log common tests
+    """
     eve_list = []
     old_date = datetime(
             year=2021,
@@ -316,11 +319,19 @@ class SuricataLogTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        with open(BASEDIR.joinpath("eve.json"), 'rt') as eve_file:
+        """
+        Setup data loading
+        :return:
+        """
+        with open(BASEDIR.joinpath("eve.json"), 'rt', encoding='utf-8') as eve_file:
             for event in eve_file:
                 SuricataLogTestCase.eve_list.append(json.loads(event))
 
     def test_to_utc(self):
+        """
+        Test UCT datetime handling
+        :return:
+        """
         naive = datetime.now()
         non_naive = datetime(
             year=2024,
@@ -339,6 +350,10 @@ class SuricataLogTestCase(unittest.TestCase):
             self.assertIsNotNone(ts.tzinfo)
 
     def test_parse_timestamp(self):
+        """
+        Test timestamp parsing
+        :return:
+        """
         invalid = 'XXX-02-08T16:32:14.900292'
         naive = datetime.now()
         non_naive = datetime(
@@ -368,8 +383,12 @@ class SuricataLogTestCase(unittest.TestCase):
                     pass
 
     def test_timestamp_filter(self):
+        """
+        Test timestamp filtering
+        :return:
+        """
         timestamp_filter = TimestampFilter()
-        timestamp_filter._timestamp = SuricataLogTestCase.old_date
+        timestamp_filter.timestamp = SuricataLogTestCase.old_date
         self.assertTrue(
             timestamp_filter.accept(data=SuricataLogTestCase.eve_list[0])
         )
@@ -378,6 +397,10 @@ class SuricataLogTestCase(unittest.TestCase):
         )
 
     def test_get_alerts(self):
+        """
+        Test get alerts
+        :return:
+        """
         timestamp_filter = TimestampFilter()
         timestamp_filter.timestamp = SuricataLogTestCase.old_date
         all_alerts = [x for x in get_events_from_eve(
@@ -389,11 +412,15 @@ class SuricataLogTestCase(unittest.TestCase):
         self.assertEqual('SURICATA Applayer Detect protocol only one direction', all_alerts[90]['alert']['signature'])
 
     def test_get_all_events(self):
+        """
+        Test get all event, unfiltered
+        :return:
+        """
         always_true_filter = AlwaysTrueFilter()
-        all_events = [x for x in get_events_from_eve(
+        all_events = list(get_events_from_eve(
             eve_files=[BASEDIR.joinpath("eve.json")],
             data_filter=always_true_filter
-        )]
+        ))
         self.assertIsNotNone(all_events)
         self.assertListEqual(SuricataLogTestCase.eve_list, all_events)
 
