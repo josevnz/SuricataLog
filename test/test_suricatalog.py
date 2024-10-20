@@ -1,3 +1,6 @@
+"""
+Uni tests for suricata log application features and helpers
+"""
 import json
 import unittest
 from unittest import IsolatedAsyncioTestCase, TestCase
@@ -16,8 +19,14 @@ events = []
 
 
 class FilterTestCase(TestCase):
-
+    """
+    Unit test for filters
+    """
     def test_with_printable_payload_filter(self):
+        """
+        Payload test
+        :return:
+        """
         data_filter = WithPrintablePayloadFilter()
         payload = json.loads('{"timestamp":"2022-02-08T16:32:14.900292+0000","flow_id":879564658970874,'
                              '"pcap_cnt":9146,"event_type":"alert","src_ip":"52.96.222.130","src_port":25,'
@@ -45,9 +54,13 @@ class FilterTestCase(TestCase):
         self.assertTrue(data_filter.accept(payload))
 
     def test_with_printable_payload_filter_from_file(self):
+        """
+        Test printable payload
+        :return:
+        """
         data_filter = WithPrintablePayloadFilter()
         # 84 of these payloads have a 'null',so they are expected to be filtered
-        flow_ids = {
+        flow_ids = [
             1117051772115445,
             1117051772115445,
             879572199993573,
@@ -166,10 +179,10 @@ class FilterTestCase(TestCase):
             348636333008022,
             242479979619734,
             1605766509821287
-        }
+        ]
         accepted_cnt = 34
         counted = 0
-        with open(BASEDIR.joinpath("eve-2.json"), 'rt') as eve_file:
+        with open(BASEDIR.joinpath("eve-2.json"), 'rt', encoding='utf-8') as eve_file:
             for event in eve_file:
                 payload = json.loads(event)
                 accepted = data_filter.accept(payload)
@@ -177,7 +190,12 @@ class FilterTestCase(TestCase):
                 Validation is tricky, as the payload is split across several alerts. For example:
                 {"flow_id":1117051772115445,"payload":null,"alert":{"action":"allowed","gid":1,"signature_id":2260002,"rev":1,"signature":"SURICATA,
                 ...
-                {"flow_id":1117051772115445,"payload":"MjIwIHNtdHAubWFpbC55YWhvby5jb20gRVNNVFAgcmVhZHkNCjI1MC1rdWJlbm9kZTUxNS5tYWlsLXByb2QxLm9tZWdhLmdxMS55YWhvby5jb20gSGVsbG8gWzE3My4xNjYuMTQ2LjExMl0gWzE3My4xNjYuMTQ2LjExMl0pDQoyNTAtRU5IQU5DRURTVEFUVVNDT0RFUw0KMjUwLThCSVRNSU1FDQoyNTAtU0laRSA0MTY5NzI4MA0KMjUwIEFVVEggUExBSU4gTE9HSU4gWE9BVVRIMiBPQVVUSEJFQVJFUg0KMzM0IFZYTmxjbTVoYldVNg0KMzM0IFVHRnpjM2R2Y21RNg0KNTM1IDUuNy4wICgjQVVUSDAwNSkgVG9vIG1hbnkgYmFkIGF1dGggYXR0ZW1wdHMuDQo=","alert":{"action":"allowed","gid":1,"signature_id":2220000,"rev":1,"signature":"SURICATA,
+                {"flow_id":1117051772115445,"payload":
+                "MjIwIHNtdHAubWFpbC55YWhvby5jb20gRVNNVFAgcmVhZHkNCjI1MC1rdWJlbm9kZTUxNS5tYWlsLXByb2QxLm9tZWdhLmdxMS55YWhvby\
+                5jb20gSGVsbG8gWzE3My4xNjYuMTQ2LjExMl0gWzE3My4xNjYuMTQ2LjExMl0pDQoyNTAtRU5IQU5DRURTVEFUVVNDT0RFUw0KMjUwLThCSVRNSU1FDQoy\
+                NTAtU0laRSA0MTY5NzI4MA0KMjUwIEFVVEggUExBSU4gTE9HSU4gWE9BVVRIMiBPQVVUSEJFQVJFUg0KMzM0IFZYTmxjbTVoYldVNg0KMzM0IFVHRnpjM2R\
+                2Y21RNg0KNTM1IDUuNy4wICgjQVVUSDAwNSkgVG9vIG1hbnkgYmFkIGF1dGggYXR0ZW1wdHMuDQo=",\
+                "alert":{"action":"allowed","gid":1,"signature_id":2220000,"rev":1,"signature":"SURICATA,
                 So we must manually ensure there is indeed a payload
                 """
                 if 'flow_id' in payload:
@@ -191,6 +209,10 @@ class FilterTestCase(TestCase):
         self.assertEqual(accepted_cnt, counted)
 
     def test_nxdomain(self):
+        """
+        Test NX DNS app
+        :return:
+        """
         data_filter = NXDomainFilter()
         payload = json.loads('{"timestamp":"2022-02-23T19:04:05.606882+0000","flow_id":1452066252079368,'
                              '"pcap_cnt":85538,"event_type":"dns","src_ip":"172.16.0.170","src_port":58529,'
@@ -219,19 +241,30 @@ class FilterTestCase(TestCase):
 
 
 class ReportTestCase(IsolatedAsyncioTestCase):
+    """
+    Report test case
+    """
     eve_list = []
     netflow_eve_list = []
 
     @classmethod
     def setUpClass(cls) -> None:
-        with open(BASEDIR.joinpath("eve.json"), 'rt') as eve_file:
+        """
+        Setup data for testing
+        :return:
+        """
+        with open(BASEDIR.joinpath("eve.json"), 'rt', encoding='utf-8') as eve_file:
             for event in eve_file:
                 ReportTestCase.eve_list.append(json.loads(event))
-        with open(BASEDIR.joinpath("eve_udp_flow.json"), 'rt') as eve_file:
+        with open(BASEDIR.joinpath("eve_udp_flow.json"), 'rt', encoding='utf-8') as eve_file:
             for event in eve_file:
                 ReportTestCase.netflow_eve_list.append(json.loads(event))
 
     async def test_aggregated_flow_proto_report(self):
+        """
+        Test flow report
+        :return:
+        """
         events.append("test_aggregated_flow_proto_report")
         can_rep = AggregatedFlowProtoReport()
         for alert in ReportTestCase.eve_list:
@@ -241,6 +274,10 @@ class ReportTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(336, can_rep.port_proto_count[('TCP', 443)])
 
     async def test_host_data_use_report(self):
+        """
+        Test data use report
+        :return:
+        """
         events.append("test_host_data_use_report")
         hr = HostDataUseReport()
         for netflow_event in ReportTestCase.netflow_eve_list:
@@ -254,6 +291,10 @@ class ReportTestCase(IsolatedAsyncioTestCase):
         self.assertEqual(153339, hr.bytes)
 
     async def test_top_user_agents(self):
+        """
+        Test top user agents
+        :return:
+        """
         events.append("test_top_user_agents")
         tua = TopUserAgents()
         for event in ReportTestCase.eve_list:
