@@ -1,3 +1,6 @@
+"""
+Package commons
+"""
 import locale
 from pathlib import Path
 
