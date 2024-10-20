@@ -16,7 +16,7 @@ Step by step you used to install the tool (git clone, pip install, virtualenv cr
 **To Reproduce**
 Steps to reproduce the behavior, full command line please:
 1. Go to '...'
-1. Run command '....'
+2. Run command '....'
 3. See error
 
 **Expected behavior**

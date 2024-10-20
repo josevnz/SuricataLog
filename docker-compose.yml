@@ -1,6 +1,15 @@
 # Execute SuricataLog scripts from the Docker image
-# docker compose up --detach
-# docker compose exec suricatalog eve_log /suricatalog/eve.json
+#
+# docker compose --file docker-compose.yml up --detach
+# And then one of the following:
+# 1) Full shell, to explore (press eve_ + <TAB> to autocomplete):
+# docker compose exec suricatalog /bin/bash -l
+# 2) Or run the commands directly:
+# docker compose exec suricatalog eve_log eve.json
+# docker compose exec suricatalog eve_json --flow eve.json
+#
+# You can call eve_${command} --help to get the full help.
+# To shut down the docker container: docker compose down suricatalog
 ---
 services:
   suricatalog:
@@ -11,7 +20,7 @@ services:
         source: /var/log/suricata
         target: /suricatalog
         read_only: true
-    restart: always
+    restart: no
     tty: true
     build:
         context: "."
