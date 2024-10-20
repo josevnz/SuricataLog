@@ -23,7 +23,9 @@ LOGGER.addHandler(_sc)
 
 
 class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
-
+    """
+    Alert app unit test
+    """
     async def test_extract_from_alert(self):
         """
         Text alert extraction
