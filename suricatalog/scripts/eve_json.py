@@ -23,84 +23,88 @@ ALWAYS_TRUE = AlwaysTrueFilter()
 
 
 def main():
-    PARSER = argparse.ArgumentParser(description=__doc__)
-    PARSER.add_argument(
+    """
+    CLI entry point
+    :return:
+    """
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
         "--timestamp",
         type=parse_timestamp,
         default=DEFAULT_TIMESTAMP_10Y_AGO,
         help=f"Minimum timestamp in the past to use when filtering events ({DEFAULT_TIMESTAMP_10Y_AGO})"
     )
-    EXCLUSIVE_FLAGS = PARSER.add_mutually_exclusive_group()
-    EXCLUSIVE_FLAGS.add_argument(
+    exclusive_flags = parser.add_mutually_exclusive_group()
+    exclusive_flags.add_argument(
         "--nxdomain",
         action='store_true',
         default=False,
-        help=f"Show DNS records with NXDOMAIN"
+        help="Show DNS records with NXDOMAIN"
     )
-    EXCLUSIVE_FLAGS.add_argument(
+    exclusive_flags.add_argument(
         "--payload",
         action='store_true',
         default=False,
-        help=f"Show alerts with a printable payload"
+        help="Show alerts with a printable payload"
     )
-    EXCLUSIVE_FLAGS.add_argument(
+    exclusive_flags.add_argument(
         "--flow",
         action='store_true',
         default=False,
-        help=f"Aggregated flow report per protocol and destination port"
+        help="Aggregated flow report per protocol and destination port"
     )
-    EXCLUSIVE_FLAGS.add_argument(
+    exclusive_flags.add_argument(
         "--netflow",
         type=ip_address,
         action='store',
-        help=f"Get the netflow for a given IP address"
+        help="Get the netflow for a given IP address"
     )
-    EXCLUSIVE_FLAGS.add_argument(
+    exclusive_flags.add_argument(
         "--useragent",
         action='store_true',
         default=False,
-        help=f"Top user agent in HTTP traffic"
+        help="Top user agent in HTTP traffic"
     )
-    PARSER.add_argument(
+    parser.add_argument(
         'eve_file',
         type=Path,
         nargs="+",
         help=f"Path to one or more {DEFAULT_EVE[0]} file to parse."
     )
-    OPTIONS = PARSER.parse_args()
-    TIMESTAMP_FILTER = TimestampFilter()
-    TIMESTAMP_FILTER._timestamp = OPTIONS.timestamp
+    options = parser.parse_args()
+    timestamp_filter = TimestampFilter()
+    timestamp_filter.timestamp = options.timestamp
     try:
-        if OPTIONS.nxdomain:
+        if options.nxdomain:
             eve_app = get_capture(
-                eve=OPTIONS.eve_file,
+                eve=options.eve_file,
                 data_filter=NXDomainFilter(),
                 title="SuricataLog DNS records with NXDOMAIN"
             )
-        elif OPTIONS.payload:
+        elif options.payload:
             eve_app = get_capture(
-                eve=OPTIONS.eve_file,
+                eve=options.eve_file,
                 data_filter=WithPrintablePayloadFilter(),
                 title="SuricataLog Inspect Alert Data (payload)"
             )
-        elif OPTIONS.flow:
+        elif options.flow:
             eve_app = get_one_shot_flow_table(
-                eve=OPTIONS.eve_file,
+                eve=options.eve_file,
                 data_filter=ALWAYS_TRUE
             )
-        elif OPTIONS.netflow:
+        elif options.netflow:
             eve_app = get_host_data_use(
-                eve_files=OPTIONS.eve_file,
-                data_filter=TIMESTAMP_FILTER,
-                ip_address=OPTIONS.netflow.exploded
+                eve_files=options.eve_file,
+                data_filter=timestamp_filter,
+                ip_address=options.netflow.exploded
             )
-        elif OPTIONS.useragent:
+        elif options.useragent:
             eve_app = get_agents(
-                eve_files=OPTIONS.eve_file,
-                data_filter=TIMESTAMP_FILTER
+                eve_files=options.eve_file,
+                data_filter=timestamp_filter
             )
         else:
-            PARSER.print_usage()
+            parser.print_usage()
             sys.exit(0)
         eve_app.run()
     except KeyboardInterrupt:
