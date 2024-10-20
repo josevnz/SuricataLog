@@ -1,3 +1,6 @@
+"""
+Collection of mini apps, canned reports.
+"""
 import textwrap
 import traceback
 from pathlib import Path
@@ -16,6 +19,9 @@ from suricatalog.screens import ErrorScreen
 
 
 class FlowApp(App):
+    """
+    Flow traffic application
+    """
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
@@ -29,14 +35,30 @@ class FlowApp(App):
             data_filter: BaseFilter = None,
             eve: List[Path] = None
     ):
+        """
+        Constructor
+        :param driver_class:
+        :param css_path:
+        :param watch_css:
+        :param data_filter:
+        :param eve:
+        """
         super().__init__(driver_class, css_path, watch_css)
         self.data_filter = data_filter
         self.eve = eve
 
     def action_quit_app(self) -> None:
+        """
+        Exit the application
+        :return:
+        """
         self.exit("Exiting Net-Flow now...")
 
     def compose(self) -> ComposeResult:
+        """
+        Place components of the app on screen
+        :return:
+        """
         yield Header()
         alerts_tbl = DataTable()
         alerts_tbl.show_header = True
@@ -53,6 +75,10 @@ class FlowApp(App):
         yield Footer()
 
     async def on_mount(self) -> None:
+        """
+        Populate components of the app on screen with relevant data
+        :return:
+        """
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
         afr = AggregatedFlowProtoReport()
@@ -73,11 +99,19 @@ class FlowApp(App):
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
+        """
+        Handle clicks on table hear
+        :param event:
+        :return:
+        """
         alerts_tbl: DataTable = event.data_table
         alerts_tbl.sort(event.column_key)
 
 
 class HostDataUse(App):
+    """
+    Host data usage application
+    """
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
@@ -94,15 +128,32 @@ class HostDataUse(App):
             eve: List[Path] = None
 
     ):
+        """
+        Constructor
+        :param driver_class:
+        :param css_path:
+        :param watch_css:
+        :param ip_address:
+        :param data_filter:
+        :param eve:
+        """
         super().__init__(driver_class, css_path, watch_css)
         self.ip_address = ip_address
         self.data_filter: BaseFilter = data_filter
         self.eve = eve
 
     def action_quit_app(self) -> None:
+        """
+        Quit application
+        :return:
+        """
         self.exit("Exiting Net-Flow now...")
 
     def compose(self) -> ComposeResult:
+        """
+        Place components of the app on screen
+        :return:
+        """
         yield Header()
         digits = Digits(id="netflow")
         digits.loading = True
@@ -114,6 +165,10 @@ class HostDataUse(App):
 
     @work(exclusive=False)
     async def on_mount(self) -> None:
+        """
+        Initialize TUI components with data
+        :return:
+        """
         host_data_user_report = HostDataUseReport()
         for event in get_events_from_eve(
                 eve_files=self.eve,
@@ -125,6 +180,9 @@ class HostDataUse(App):
 
 
 class TopUserApp(App):
+    """
+    Show top users
+    """
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
@@ -139,14 +197,30 @@ class TopUserApp(App):
             data_filter: BaseFilter = None,
             eve: List[Path] = None
     ):
+        """
+        Constructor
+        :param driver_class:
+        :param css_path:
+        :param watch_css:
+        :param data_filter:
+        :param eve:
+        """
         super().__init__(driver_class, css_path, watch_css)
         self.data_filter = data_filter
         self.eve_files = eve
 
     def action_quit_app(self) -> None:
+        """
+        Exit app
+        :return:
+        """
         self.exit("Exiting Top user now...")
 
     def compose(self) -> ComposeResult:
+        """
+        Component placement
+        :return:
+        """
         yield Header()
         pretty = RichLog(
             id="agent",
@@ -159,6 +233,10 @@ class TopUserApp(App):
 
     @work(exclusive=False)
     async def on_mount(self) -> None:
+        """
+        Populate TUI components with data
+        :return:
+        """
         top_user_agents = TopUserAgents()
         log = self.query_one("#agent", RichLog)
         log.loading = False
@@ -170,6 +248,9 @@ class TopUserApp(App):
 
 
 class OneShotApp(App):
+    """
+    One shot application, displays data based on filter
+    """
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
@@ -183,15 +264,31 @@ class OneShotApp(App):
             eve: List[Path] = None,
             data_filter: BaseFilter = None
     ):
+        """
+        Constructor
+        :param driver_class:
+        :param css_path:
+        :param watch_css:
+        :param eve:
+        :param data_filter:
+        """
         super().__init__(driver_class, css_path, watch_css)
         self.data_filter = data_filter
         self.eve = eve
         self.loaded = 0
 
     def action_quit_app(self) -> None:
+        """
+        Exit application
+        :return:
+        """
         self.exit(f"Exiting {self.title} now...")
 
     def compose(self) -> ComposeResult:
+        """
+        Place components of the app on screen
+        :return:
+        """
         yield Header()
         log = RichLog(
             id='events',
@@ -203,6 +300,11 @@ class OneShotApp(App):
         yield Footer()
 
     async def pump_events(self, log: RichLog):
+        """
+        Get events from eve log and send them to the log
+        :param log:
+        :return:
+        """
         try:
             for single_alert in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
                 log.loading = False
@@ -224,6 +326,10 @@ class OneShotApp(App):
 
     @work(exclusive=False)
     async def on_mount(self):
+        """
+        Place elements on the screen
+        :return:
+        """
         log = self.query_one('#events', RichLog)
         await self.pump_events(log)
         if self.loaded > 0:
