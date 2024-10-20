@@ -3,7 +3,8 @@ requires = [
     "setuptools >= 70.1.0",
     "wheel>=0.43.0",
     "build>=1.2.1",
-    "textual-serve==1.0.3",
+    "textual==0.83.0",
+    "textual-serve==1.1.1",
     "pytz==2024.1"
 ]
 build-backend = "setuptools.build_meta"
@@ -13,7 +14,7 @@ lint = [
     "pylint",
 ]
 dev = [
-    "textual-dev>=1.5.1",
+    "textual-dev>=1.6.1",
     "twine>=5.1.0",
 ]
 
@@ -31,7 +32,8 @@ classifiers = [
   "Programming Language :: Python"
 ]
 dependencies = [
-    "textual-serve==1.0.3",
+    "textual==0.83.0",
+    "textual-serve==1.1.1",
     "pytz==2024.1"
 ]
 description = "Scripts to display contents of Suricata eve.json log"
