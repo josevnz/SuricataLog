@@ -44,6 +44,13 @@ eve.json files so the volume is accessible to SuricataLog
 
 If you download the [docker-compose.yml](docker-compose.yml) you can then do the following, with less typing:
 
+Build a new docker image:
+
+```shell
+docker compose --file docker-compose.yml build
+```
+
+And then run it:
 
 ```shell
 docker compose --file docker-compose.yml up --detach
@@ -74,9 +81,9 @@ docker compose stop suricatalog
 #### Too much typing? Set up a function
 
 ```shell
-function sl { docker compose exec suricatalog $*; }
-sl eve_log eve.json
-sl eve_json --flow eve.json
+function eve { docker compose exec suricatalog $*; }
+eve eve_log eve.json
+eve eve_json --flow eve.json
 ```
 
 You get the idea.
