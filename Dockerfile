@@ -1,4 +1,6 @@
-# You can also build a container using the whell house from Pypi, see below
+# The Docker container needs an pre-build image. It can come from your local filesystem or from Pypi.org
+# Please check the DOCKER.md file for building instructions.
+#
 FROM python:3.11-slim as python3
 SHELL ["/bin/bash", "-c"]
 ADD dist/SuricataLog-*-py3-none-any.whl .
