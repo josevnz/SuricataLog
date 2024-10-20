@@ -1,9 +1,16 @@
+"""
+Collection of canned reports
+
+"""
 import dataclasses
 from typing import Dict, Any, Tuple
 
 
 @dataclasses.dataclass
 class AggregatedFlowProtoReport:
+    """
+    FLow protocol report details
+    """
     port_proto_count: Dict[Tuple[str, int], int] = dataclasses.field(default_factory=dict)
 
     async def ingest_data(self, data: Dict[Any, Any]) -> None:
@@ -35,6 +42,9 @@ class AggregatedFlowProtoReport:
 
 @dataclasses.dataclass
 class HostDataUseReport:
+    """
+    Host data usage report
+    """
     bytes: int = 0
 
     async def ingest_data(self, data: Dict[Any, Any], dest: str) -> None:
@@ -51,6 +61,9 @@ class HostDataUseReport:
 
 
 class TopUserAgents:
+    """
+    Replicate tutorial top user agents query with jq.
+    """
 
     agents: Dict[str, int] = {}
 
@@ -69,8 +82,10 @@ class TopUserAgents:
         {
             "Microsoft NCSI": 5,
             "Microsoft-CryptoAPI/6.1": 2,
-            "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; Win64; x64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729)": 2,
-            "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Win64; x64; Trident/7.0; .NET CLR 2.0.50727; SLCC2; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E)": 6,
+            "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 10.0; Win64; x64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727;
+            .NET CLR 3.0.30729; .NET CLR 3.5.30729)": 2,
+            "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Win64; x64; Trident/7.0; .NET CLR 2.0.50727; SLCC2;
+            .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E)": 6,
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; rv:11.0) like Gecko": 3,
             "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko": 2,
             "WinHTTP loader/1.0": 4,
