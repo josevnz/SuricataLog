@@ -1,3 +1,6 @@
+"""
+Alert applications
+"""
 import textwrap
 import traceback
 from pathlib import Path
@@ -15,6 +18,9 @@ from suricatalog.screens import DetailScreen, ErrorScreen
 
 
 class BaseAlertApp(App):
+    """
+    Base application for alert applications, shared logic
+    """
 
     def __init__(
             self,
@@ -22,6 +28,12 @@ class BaseAlertApp(App):
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
     ):
+        """
+        Constructor
+        :param driver_class:
+        :param css_path:
+        :param watch_css:
+        """
         super().__init__(driver_class, css_path, watch_css)
         self.eve_files = None
         self.filter = None
@@ -43,6 +55,11 @@ class BaseAlertApp(App):
 
     @staticmethod
     async def __extract__from_alert__(alert: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract alerts from event
+        :param alert:
+        :return:
+        """
         timestamp = alert['timestamp']
         dest_port = str(BaseAlertApp.__get_key_from_map__(alert, ['dest_port']))
         dest_ip = BaseAlertApp.__get_key_from_map__(alert, ['dest_ip'])
@@ -65,17 +82,30 @@ class BaseAlertApp(App):
         }
 
     def set_filter(self, the_filter: BaseFilter):
+        """
+        Set filter for application
+        :param the_filter:
+        :return:
+        """
         if not the_filter:
             raise ValueError("Filter is required")
         self.filter = the_filter
 
     def set_eve_files(self, eve_files: List[Path]):
+        """
+        Set eve files for application
+        :param eve_files:
+        :return:
+        """
         if not eve_files:
             raise ValueError("One or more eve files is required")
         self.eve_files = eve_files
 
 
 class TableAlertApp(BaseAlertApp):
+    """
+    Concrete implementation for alert application
+    """
     BINDINGS = [
         ("q", "quit_app", "Quit")
     ]
@@ -88,6 +118,12 @@ class TableAlertApp(BaseAlertApp):
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
     ):
+        """
+        Constructor
+        :param driver_class:
+        :param css_path:
+        :param watch_css:
+        """
         super().__init__(driver_class, css_path, watch_css)
         self.events: Union[Dict[Dict[str, any]], Dict] = {}
 
@@ -96,10 +132,20 @@ class TableAlertApp(BaseAlertApp):
             trace: Union[traceback.StackSummary, None],
             reason: Union[str, None]
     ) -> None:
+        """
+        Show error on special screen
+        :param trace:
+        :param reason:
+        :return:
+        """
         error_src = ErrorScreen(trace=trace, reason=reason)
         await self.push_screen(error_src)
 
     def compose(self) -> ComposeResult:
+        """
+        Place TUI components
+        :return:
+        """
         yield Header()
         alerts_tbl = DataTable()
         alerts_tbl.show_header = True
@@ -121,6 +167,10 @@ class TableAlertApp(BaseAlertApp):
 
     @work(exclusive=False)
     async def on_mount(self) -> None:
+        """
+        Initialize TUI components
+        :return:
+        """
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
         try:
@@ -172,11 +222,21 @@ class TableAlertApp(BaseAlertApp):
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
+        """
+        Handle click events on table
+        :param event:
+        :return:
+        """
         alerts_tbl: DataTable = event.data_table
         alerts_tbl.sort(event.column_key)
 
     @on(DataTable.RowSelected)
     def on_row_clicked(self, event: DataTable.RowSelected) -> None:
+        """
+        Handle click on rows
+        :param event:
+        :return:
+        """
         table = event.data_table
         row_key = event.row_key
         row = table.get_row(row_key)
@@ -185,4 +245,8 @@ class TableAlertApp(BaseAlertApp):
         self.push_screen(runner_detail)
 
     def action_quit_app(self) -> None:
+        """
+        Handle exit action
+        :return:
+        """
         self.exit("Exiting Alerts now...")
