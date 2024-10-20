@@ -1,3 +1,5 @@
+# Publish code to Pypi
+---
 name: "Publish SuricataLog \U0001F40D distribution \U0001F4E6 to PyPI"
 'on': push
 jobs:

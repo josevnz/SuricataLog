@@ -1,3 +1,5 @@
+# Run code through Pylint
+---
 name: Pylint action
 'on':
   - push
