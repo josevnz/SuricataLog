@@ -6,7 +6,7 @@ Author: Jose Vicente Nunez (kodegeek.com@protonmail.com)
 import argparse
 from pathlib import Path
 
-from suricatalog.filter import BaseFilter, OnlyAlertsFilter
+from suricatalog.filter import BaseFilter, WithPrintablePayloadFilter
 from suricatalog.alert_apps import TableAlertApp
 from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10Y_AGO
 from suricatalog.log import DEFAULT_EVE
@@ -31,7 +31,7 @@ def main():
         help=f"Path to one or more {DEFAULT_EVE[0]} file to parse."
     )
     options = parser.parse_args()
-    timestamp_filter: BaseFilter = OnlyAlertsFilter()
+    timestamp_filter: BaseFilter = WithPrintablePayloadFilter()
     timestamp_filter.timestamp = options.timestamp
     try:
         app = TableAlertApp()

@@ -54,7 +54,7 @@ class BaseAlertApp(App):
         return val
 
     @staticmethod
-    async def __extract__from_alert__(alert: Dict[str, Any]) -> Dict[str, Any]:
+    async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
         """
         Extract alerts from event
         :param alert:
@@ -181,7 +181,7 @@ class TableAlertApp(BaseAlertApp):
             for event in events:
                 if not self.filter.accept(event):
                     continue
-                brief_data = await BaseAlertApp.__extract__from_alert__(event)
+                brief_data = await BaseAlertApp.extract_from_alert(event)
                 timestamp = brief_data['timestamp']
                 alerts_tbl.add_row(
                     timestamp,
