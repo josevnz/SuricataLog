@@ -12,6 +12,7 @@ class BaseFilter(ABC):
     """
     Abstract filter
     """
+
     @abstractmethod
     def accept(self, data: Dict[Any, Any]) -> bool:
         """
@@ -103,6 +104,7 @@ class WithPrintablePayloadFilter(BaseFilter):
     """
     Show only records with a printable payload
     """
+
     def accept(self, data: Dict[Any, Any]) -> bool:
         """
         cat ~/SuricataLog/test/eve.json | jq -r -c 'select(.event_type=="alert")|.payload'|base64 --decode
@@ -110,7 +112,8 @@ class WithPrintablePayloadFilter(BaseFilter):
         :return:
         """
         if 'event_type' in data and 'alert' == data['event_type']:
-            payload_printable = 'payload_printable' in data and data['payload_printable'] and data['payload_printable'] != 'null'
+            payload_printable = 'payload_printable' in data and data['payload_printable'] and data[
+                'payload_printable'] != 'null'
             has_payload = 'payload' in data and data['payload'] and data['payload'] != 'null'
             if payload_printable or has_payload:
                 return True
@@ -162,3 +165,22 @@ class TimestampFilter(BaseFilter):
         except ValueError:
             return False
         return True
+
+
+class WithPayloadFilter(BaseFilter):
+    """
+    Filter records with any payload
+    """
+
+    def accept(self, data: Dict[Any, Any]) -> bool:
+        """
+        cat ~/SuricataLog/test/eve.json | jq -r -c 'select(.event_type=="alert")|.payload'|base64 --decode
+        :param data:
+        :return:
+        """
+        if 'event_type' in data and 'alert' == data['event_type']:
+            payload = 'payload' in data and data['payload'] and data[
+                'payload'] != 'null'
+            if payload:
+                return True
+        return False
