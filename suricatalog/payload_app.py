@@ -2,13 +2,14 @@
 Payload application
 """
 from pathlib import Path
-from typing import Type, List
+from typing import Type, List, Dict, Any
 
 from textual import work
 from textual.app import App, CSSPathType, ComposeResult
 from textual.driver import Driver
+from textual.widgets import LoadingIndicator
 
-from suricatalog.filter import WithPayloadFilter
+from suricatalog.filter import WithPayloadFilter, BaseFilter
 
 
 class PayloadApp(App):
@@ -43,7 +44,7 @@ class PayloadApp(App):
         self.eve = eve
         self.loaded = 0
 
-    def set_filter(self, payload_filter: WithPayloadFilter):
+    def set_filter(self, payload_filter: BaseFilter):
         """
         Set filter for application
         :param payload_filter:
@@ -68,7 +69,7 @@ class PayloadApp(App):
         Place TUI components
         :return:
         """
-        pass
+        yield LoadingIndicator()
 
     @work(exclusive=False)
     async def on_mount(self) -> None:
@@ -84,3 +85,44 @@ class PayloadApp(App):
         :return:
         """
         self.exit("Exiting payload app now...")
+
+
+def get_key_from_map(map1: Dict[str, Any], keys: List[str]):
+    """
+    Return the first matching key from a map
+    :param map1:
+    :param keys:
+    :return: Nothing ig none of the keys are in the map
+    """
+    val = ""
+    for key in keys:
+        if key in map1:
+            val = map1[key]
+            break
+    return val
+
+
+async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Extract alerts from event
+    :param alert:
+    :return:
+    """
+    timestamp = alert['timestamp']
+    dest_port = str(get_key_from_map(alert, ['dest_port']))
+    dest_ip = get_key_from_map(alert, ['dest_ip'])
+    src_ip = get_key_from_map(alert, ['src_ip'])
+    src_port = str(get_key_from_map(alert, ['src_port']))
+    protocol = get_key_from_map(alert, ['app_proto', 'proto'])
+    signature = alert['alert']['signature']
+    payload = alert['payload'] if 'payload' in alert else ""
+    return {
+        "timestamp": timestamp,
+        "dest_port": dest_port,
+        "src_ip": src_ip,
+        "dest_ip": dest_ip,
+        "src_port": src_port,
+        "protocol": protocol,
+        "signature": signature,
+        "payload": payload
+    }
