@@ -102,6 +102,10 @@ def get_key_from_map(map1: Dict[str, Any], keys: List[str]):
     return val
 
 
+def generate_filename(payload_data: Dict[str, any], **kwargs: Dict[Any, Any]):
+    raise NotImplemented()
+
+
 async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
     """
     Extract alerts from event
