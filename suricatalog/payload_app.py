@@ -144,3 +144,4 @@ async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
         "payload": payload
     }
     return extracted
+

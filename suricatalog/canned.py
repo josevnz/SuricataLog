@@ -9,7 +9,10 @@ import locale
 
 from textual.app import App
 
-from suricatalog.mini_apps import FlowApp, HostDataUse, TopUserApp, OneShotApp
+from suricatalog.flow_apps import FlowApp
+from suricatalog.hostdatause_app import HostDataUse
+from suricatalog.topuser_app import TopUserApp
+from suricatalog.oneshot_app import OneShotApp
 from suricatalog.filter import BaseFilter
 
 locale.setlocale(locale.LC_ALL, '')
