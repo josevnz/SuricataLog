@@ -32,6 +32,8 @@ def get_events_from_eve(
     :param data_filter: Filter events based on several criteria
     :return:
     """
+    if not isinstance(data_filter, BaseFilter):
+        raise ValueError("Invalid 'data_filter' passed.")
     if eve_files is None:
         eve_files = DEFAULT_EVE
     for eve_file in eve_files:

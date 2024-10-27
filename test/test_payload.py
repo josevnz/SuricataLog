@@ -1,7 +1,7 @@
 """
 Unit test code for payload management
 """
-
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -81,7 +81,13 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
             self.assertIsNotNone(payload)
 
     async def test_save_payload(self):
-        pass
+        with tempfile.NamedTemporaryFile(delete=True) as tmpdir:
+            payload = {'payload': "FakeData"}
+            saved = await PayloadApp.save_payload(
+                payload_file=Path(tmpdir.name) / "",
+                payload=payload
+            )
+            self.assertEqual(8, saved)
 
 
 if __name__ == '__main__':

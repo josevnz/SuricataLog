@@ -32,7 +32,7 @@ class PayloadApp(App):
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
             eve: List[Path] = None,
-            data_filter: WithPayloadFilter = None
+            data_filter: WithPayloadFilter = WithPayloadFilter()
     ):
         """
         Constructor
@@ -197,7 +197,7 @@ class PayloadApp(App):
         self.exit("Exiting payload app now...")
 
     @staticmethod
-    async def save_payload(payload: Dict[str, Any], payload_file: Path) -> None:
+    async def save_payload(payload: Dict[str, Any], payload_file: Path) -> int:
         """
         Save the extracted payload to disk
         :param payload:
@@ -208,8 +208,10 @@ class PayloadApp(App):
             try:
                 bin_payload = base64.b64decode(payload['payload'], altchars=None, validate=False)
                 payload_fh.write(bin_payload)
+                return len(payload['payload'])
             except (TypeError, ValueError):
                 payload_fh.write(payload['payload'])
+                return len(payload['payload'])
 
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
@@ -228,6 +230,10 @@ class PayloadApp(App):
         :param extracted:
         :return:
         """
+        if 'flow_id' not in extracted:
+            raise ValueError(f"Missing flow_id")
+        if 'timestamp' not in extracted:
+            raise ValueError(f"Missing timestamp")
         uid = extracted['flow_id'] + str(extracted['timestamp'])
         return uid
 
@@ -263,3 +269,9 @@ class PayloadApp(App):
             else:
                 reason = f"{ve}"
             tb = traceback.extract_stack()
+            self.notify(
+                message=f"{reason}. {tb}",
+                timeout=20,
+                title="There was a problem extracting the payloads",
+                severity="error"
+            )
