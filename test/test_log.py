@@ -13,7 +13,6 @@ from suricatalog.log import get_events_from_eve
 from suricatalog.time import to_utc, parse_timestamp
 
 BASEDIR = Path(__file__).parent
-events = []
 
 
 class SuricataLogTestCase(unittest.TestCase):
