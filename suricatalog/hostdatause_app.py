@@ -1,10 +1,12 @@
+"""
+Host data use application
+"""
 import textwrap
 from pathlib import Path
 from typing import Type, List
 
 from textual import work
-from textual._path import CSSPathType
-from textual.app import App, ComposeResult
+from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.widgets import Header, Digits, Footer
 

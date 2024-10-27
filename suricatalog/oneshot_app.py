@@ -1,3 +1,6 @@
+"""
+One shot application related code
+"""
 import traceback
 from pathlib import Path
 from typing import Type, List
@@ -66,7 +69,7 @@ class OneShotApp(App):
 
     async def pump_events(self, log: RichLog):
         """
-        Get events from eve log and send them to the log
+        Get events from eve log and send them to the application log
         :param log:
         :return:
         """

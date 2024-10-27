@@ -4,7 +4,7 @@ Unit test for reports
 import json
 import unittest
 from unittest import IsolatedAsyncioTestCase
-from test.test_log import BASEDIR, events
+from test.test_log import BASEDIR
 from suricatalog.report import AggregatedFlowProtoReport, HostDataUseReport, TopUserAgents
 
 
@@ -37,7 +37,6 @@ class ReportTestCase(IsolatedAsyncioTestCase):
         Test flow report
         :return:
         """
-        events.append("test_aggregated_flow_proto_report")
         can_rep = AggregatedFlowProtoReport()
         for alert in ReportTestCase.eve_list:
             await can_rep.ingest_data(alert)
@@ -50,7 +49,6 @@ class ReportTestCase(IsolatedAsyncioTestCase):
         Test data use report
         :return:
         """
-        events.append("test_host_data_use_report")
         hr = HostDataUseReport()
         for netflow_event in ReportTestCase.netflow_eve_list:
             await hr.ingest_data(netflow_event, '224.0.0.251')
@@ -67,7 +65,6 @@ class ReportTestCase(IsolatedAsyncioTestCase):
         Test top user agents
         :return:
         """
-        events.append("test_top_user_agents")
         tua = TopUserAgents()
         for event in ReportTestCase.eve_list:
             await tua.ingest_data(event)

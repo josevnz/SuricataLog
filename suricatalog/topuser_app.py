@@ -1,3 +1,6 @@
+"""
+Top user application related code
+"""
 from pathlib import Path
 from typing import Type, List
 
