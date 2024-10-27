@@ -30,6 +30,8 @@ def main():
     )
     options = parser.parse_args()
     try:
+        if not options.report_dir.exists():
+            raise ValueError(f"Please continue {options.report_dir} before we can proceed to extract the payloads.")
         payload_filter: BaseFilter = WithPayloadFilter()
         app = PayloadApp()
         app.title = f"SuricataLog Payload extractor. Working on {','.join(x.as_posix() for x in options.eve_file)}"
