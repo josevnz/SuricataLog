@@ -231,9 +231,9 @@ class PayloadApp(App):
         :return:
         """
         if 'flow_id' not in extracted:
-            raise ValueError(f"Missing flow_id")
+            raise ValueError("Missing flow_id")
         if 'timestamp' not in extracted:
-            raise ValueError(f"Missing timestamp")
+            raise ValueError("Missing timestamp")
         uid = extracted['flow_id'] + str(extracted['timestamp'])
         return uid
 
