@@ -32,21 +32,36 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertEquals(131, len(payload_events))
 
     def test_generate_filename(self):
-        with open(BASEDIR.parent / "test/eve_payload.json") as f:
-            for line in f:
-                payloads = json.loads(line)
-                for payload in payloads:
-                    self.assertIsNotNone(payload)
-                    raise NotImplemented()
+        payload_filter = WithPayloadFilter()
+        payload_events = list(get_events_from_eve(
+                eve_files=EVE_FILES,
+                data_filter=payload_filter
+        ))
+        for payload_event in payload_events:
+            self.assertIsNotNone(payload_event)
+            raise NotImplemented()
 
-    def test_extract_from_alert(self):
-        with open(BASEDIR.parent / "test/eve_payload.json") as f:
-            for line in f:
-                payloads = json.loads(line)
-                self.assertIsNotNone(payloads)
-                for payload_event in payloads:
-                    extracted = extract_from_alert(alert=payload_event)
-                    self.assertIsNotNone(extracted)
+    async def test_extract_from_alert(self):
+        payload_filter = WithPayloadFilter()
+        payload_events = list(get_events_from_eve(
+                eve_files=EVE_FILES,
+                data_filter=payload_filter
+        ))
+        keys = {
+            "timestamp",
+            "dest_port",
+            "src_ip",
+            "dest_ip",
+            "src_port",
+            "protocol",
+            "signature",
+            "payload"
+        }
+        for payload_event in payload_events:
+            self.assertIsNotNone(payload_event)
+            extracted = await extract_from_alert(alert=payload_event)
+            self.assertIsNotNone(extracted)
+            self.assertEqual(keys, set(extracted.keys()))
 
 
 if __name__ == '__main__':

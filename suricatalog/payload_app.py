@@ -120,7 +120,7 @@ async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
     protocol = get_key_from_map(alert, ['app_proto', 'proto'])
     signature = alert['alert']['signature']
     payload = alert['payload'] if 'payload' in alert else ""
-    return {
+    extracted = {
         "timestamp": timestamp,
         "dest_port": dest_port,
         "src_ip": src_ip,
@@ -130,3 +130,4 @@ async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
         "signature": signature,
         "payload": payload
     }
+    return extracted
