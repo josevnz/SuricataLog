@@ -1,13 +1,13 @@
 """
-Unit test code
+Unit test code for payload management
 """
-import json
+
 import unittest
 from pathlib import Path
 
 from suricatalog.filter import WithPayloadFilter
 from suricatalog.log import get_events_from_eve
-from suricatalog.payload_app import extract_from_alert
+from suricatalog.payload_app import extract_from_alert, generate_filename
 
 BASEDIR = Path(__file__).parent
 EVE_FILES = [
@@ -39,7 +39,9 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
         ))
         for payload_event in payload_events:
             self.assertIsNotNone(payload_event)
-            raise NotImplemented()
+            filename = generate_filename(payload_data=payload_event)
+            self.assertIsNotNone(filename)
+            print(filename)
 
     async def test_extract_from_alert(self):
         payload_filter = WithPayloadFilter()
@@ -53,8 +55,6 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
             "src_ip",
             "dest_ip",
             "src_port",
-            "protocol",
-            "signature",
             "payload"
         }
         for payload_event in payload_events:
@@ -62,6 +62,8 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
             extracted = await extract_from_alert(alert=payload_event)
             self.assertIsNotNone(extracted)
             self.assertEqual(keys, set(extracted.keys()))
+            payload = extracted['payload']
+            self.assertIsNotNone(payload)
 
 
 if __name__ == '__main__':

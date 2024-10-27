@@ -102,8 +102,25 @@ def get_key_from_map(map1: Dict[str, Any], keys: List[str]):
     return val
 
 
-def generate_filename(payload_data: Dict[str, any], **kwargs: Dict[Any, Any]):
-    raise NotImplemented()
+def generate_filename(**payload_data: Dict[Any, any]):
+    if 'payload_data' in payload_data:
+        data = payload_data['payload_data']
+    else:
+        data = payload_data
+    if not isinstance(data, dict):
+        raise ValueError(f"payload_data must be a dict: {data}")
+    timestamp = data.get("timestamp", None)
+    if timestamp is None:
+        raise ValueError(f"payload_data must have a timestamp: {data}")
+    flow_id = data.get("flow_id", None)
+    if flow_id is None:
+        raise ValueError(f"payload_data must have a signature: {data}")
+    dest_port = data.get("dest_port", "")
+    src_ip = data.get("src_ip", "")
+    dest_ip = data.get("dest_ip", "")
+    src_port = data.get("src_port", "")
+    filename = f"payload_export-{flow_id}-{timestamp}-{src_ip}:{src_port}-{dest_ip}:{dest_port}"
+    return filename
 
 
 async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
@@ -117,8 +134,6 @@ async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
     dest_ip = get_key_from_map(alert, ['dest_ip'])
     src_ip = get_key_from_map(alert, ['src_ip'])
     src_port = str(get_key_from_map(alert, ['src_port']))
-    protocol = get_key_from_map(alert, ['app_proto', 'proto'])
-    signature = alert['alert']['signature']
     payload = alert['payload'] if 'payload' in alert else ""
     extracted = {
         "timestamp": timestamp,
@@ -126,8 +141,6 @@ async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
         "src_ip": src_ip,
         "dest_ip": dest_ip,
         "src_port": src_port,
-        "protocol": protocol,
-        "signature": signature,
         "payload": payload
     }
     return extracted
