@@ -5,7 +5,7 @@ import base64
 import textwrap
 import traceback
 from pathlib import Path
-from typing import Type, List, Dict, Any
+from typing import Type, List, Dict, Any, Union
 
 from textual import work, on
 from textual.app import App, CSSPathType, ComposeResult
@@ -127,27 +127,37 @@ class PayloadApp(App):
     @staticmethod
     async def extract_from_alert(
             alert: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    ) -> Union[None, Dict[str, Any]]:
         """
-        Extract alerts from event
+        Extract alerts from event. Handle version changes between Suricata 6 and 7+.
         :param alert:
         :return:
         """
-        timestamp = alert['timestamp']
-        dest_port = str(PayloadApp.get_key_from_map(alert, ['dest_port']))
-        dest_ip = PayloadApp.get_key_from_map(alert, ['dest_ip'])
-        src_ip = PayloadApp.get_key_from_map(alert, ['src_ip'])
-        src_port = str(PayloadApp.get_key_from_map(alert, ['src_port']))
-        payload = alert['payload'] if 'payload' in alert else ""
-        extracted = {
-            "timestamp": timestamp,
-            "dest_port": dest_port,
-            "src_ip": src_ip,
-            "dest_ip": dest_ip,
-            "src_port": src_port,
-            "payload": payload
-        }
-        return extracted
+        if 'payload' not in alert:
+            return None
+        try:
+            timestamp = alert['timestamp']
+            dest_port = str(PayloadApp.get_key_from_map(alert, ['dest_port']))
+            dest_ip = PayloadApp.get_key_from_map(alert, ['dest_ip'])
+            src_ip = PayloadApp.get_key_from_map(alert, ['src_ip'])
+            src_port = str(PayloadApp.get_key_from_map(alert, ['src_port']))
+            payload = alert['payload']
+            if 'signature' in alert:
+                signature = alert['signature']
+            else:
+                signature = alert['alert']['signature']
+            extracted = {
+                "timestamp": timestamp,
+                "dest_port": dest_port,
+                "src_ip": src_ip,
+                "dest_ip": dest_ip,
+                "src_port": src_port,
+                "payload": payload,
+                "signature": signature
+            }
+            return extracted
+        except KeyError as ke:
+            raise KeyError(f"alert={alert}", ke) from ke
 
     def compose(self) -> ComposeResult:
         """
@@ -230,11 +240,11 @@ class PayloadApp(App):
         :param extracted:
         :return:
         """
-        if 'flow_id' not in extracted:
-            raise ValueError("Missing flow_id")
+        if 'signature' not in extracted:
+            raise ValueError("Missing signature")
         if 'timestamp' not in extracted:
             raise ValueError("Missing timestamp")
-        uid = extracted['flow_id'] + str(extracted['timestamp'])
+        uid = extracted['signature'] + str(extracted['timestamp'])
         return uid
 
     async def pump_events(self):

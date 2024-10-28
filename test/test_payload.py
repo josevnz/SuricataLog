@@ -70,7 +70,8 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
             "src_ip",
             "dest_ip",
             "src_port",
-            "payload"
+            "payload",
+            "signature"
         }
         for payload_event in payload_events:
             self.assertIsNotNone(payload_event)
