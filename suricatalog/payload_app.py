@@ -217,13 +217,13 @@ class PayloadApp(App):
             extract_ids = set([])
             # Need to count the events first. And don't want to store them in memory because the payload may be
             # huge...
-            for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
+            for alert_with_payload in get_events_from_eve(eve_files=self.eve_files, data_filter=self.data_filter):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                 uid = self.unique_id(extracted=extracted)
                 extract_ids.add(uid)
                 self.loaded += 1
 
-            for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
+            for alert_with_payload in get_events_from_eve(eve_files=self.eve_files, data_filter=self.data_filter):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                 file_name = PayloadApp.generate_filename(
                     base_dir=self.report_dir,

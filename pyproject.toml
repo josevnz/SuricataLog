@@ -105,7 +105,7 @@ max-bool-expr = 5
 max-branches = 25
 max-locals = 35
 max-parents = 7
-max-positional-arguments = 7
+# max-positional-arguments = 7
 max-public-methods = 20
 max-returns = 6
 max-statements = 90
@@ -144,7 +144,7 @@ notes = ["FIXME", "XXX", "TODO"]
 max-nested-blocks = 7
 
 never-returning-functions = ["sys.exit", "argparse.parse_error"]
-suggest-join-with-non-empty-separator = true
+# suggest-join-with-non-empty-separator = true
 
 [tool.pylint.reports]
 evaluation = "max(0, 0 if fatal else 10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10))"

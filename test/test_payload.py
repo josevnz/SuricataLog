@@ -82,6 +82,10 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
             self.assertIsNotNone(payload)
 
     async def test_save_payload(self):
+        """
+        Test if payload can be saved
+        :return:
+        """
         with tempfile.NamedTemporaryFile(delete=True) as tmpdir:
             payload = {'payload': "FakeData"}
             saved = await PayloadApp.save_payload(
