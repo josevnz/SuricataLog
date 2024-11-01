@@ -5,7 +5,7 @@ Application to extract payloads from Suricata eve log files.
 import argparse
 from pathlib import Path
 
-from suricatalog.filter import BaseFilter, WithPayloadFilter
+from suricatalog.filter import WithPayloadFilter
 from suricatalog.log import DEFAULT_EVE
 from suricatalog.payload_app import PayloadApp
 

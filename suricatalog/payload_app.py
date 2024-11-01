@@ -260,4 +260,4 @@ class PayloadApp(App):
                 title="There was a problem extracting the payloads",
                 severity="error"
             )
-            raise ValueError("There was a problem extracting the payloads", ve)
+            raise ValueError("There was a problem extracting the payloads", ve) from ve
