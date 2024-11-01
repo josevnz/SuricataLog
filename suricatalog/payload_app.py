@@ -2,6 +2,7 @@
 Payload application
 """
 import base64
+import re
 import traceback
 from pathlib import Path
 from typing import Type, List, Dict, Any, Union
@@ -70,6 +71,14 @@ class PayloadApp(App):
         return val
 
     @staticmethod
+    def convert_to_filename(orig: Union[str, None]) -> str:
+        if orig is None:
+            return "no_signature"
+        filename = re.sub(r'\W+', '', orig)
+        filename = filename.replace(' ', '_')
+        return filename
+
+    @staticmethod
     def generate_filename(
             base_dir: Path,
             prefix: str = "payload_export",
@@ -88,14 +97,15 @@ class PayloadApp(App):
         timestamp = data.get("timestamp", None)
         if timestamp is None:
             raise ValueError(f"payload_data must have a timestamp: {data}")
-        flow_id = data.get("flow_id", None)
-        if flow_id is None:
+        signature = data.get("signature", None)
+        if signature is None:
             raise ValueError(f"payload_data must have a signature: {data}")
+        signature = PayloadApp.convert_to_filename(signature)
         dest_port = data.get("dest_port", "")
         src_ip = data.get("src_ip", "")
         dest_ip = data.get("dest_ip", "")
         src_port = data.get("src_port", "")
-        filename = f"{prefix}-{flow_id}-{timestamp}-{src_ip}:{src_port}-{dest_ip}:{dest_port}"
+        filename = f"{prefix}-{signature}-{timestamp}-{src_ip}:{src_port}-{dest_ip}:{dest_port}"
         return base_dir / filename
 
     @staticmethod
@@ -245,3 +255,4 @@ class PayloadApp(App):
                 title="There was a problem extracting the payloads",
                 severity="error"
             )
+            raise ValueError("There was a problem extracting the payloads", ve)
