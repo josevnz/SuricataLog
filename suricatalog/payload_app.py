@@ -2,7 +2,6 @@
 Payload application
 """
 import base64
-import textwrap
 import traceback
 from pathlib import Path
 from typing import Type, List, Dict, Any, Union
@@ -13,7 +12,7 @@ from textual.containers import Center, Middle
 from textual.driver import Driver
 from textual.widgets import Header, Footer, ProgressBar, DataTable
 
-from suricatalog.filter import WithPayloadFilter, BaseFilter
+from suricatalog.filter import WithPayloadFilter
 from suricatalog.log import get_events_from_eve
 
 
