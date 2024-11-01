@@ -72,6 +72,11 @@ class PayloadApp(App):
 
     @staticmethod
     def convert_to_filename(orig: Union[str, None]) -> str:
+        """
+        Make sure string is safe with filesystem
+        :param orig:
+        :return:
+        """
         if orig is None:
             return "no_signature"
         filename = re.sub(r'\W+', '', orig)
