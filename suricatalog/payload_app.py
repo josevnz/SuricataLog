@@ -150,7 +150,7 @@ class PayloadApp(App):
         Initialize TUI components
         :return:
         """
-        # await self.pump_events()
+        await self.pump_events()
         if self.loaded > 0:
             self.notify(
                 title="Finished extracting payloads from events",

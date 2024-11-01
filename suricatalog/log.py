@@ -45,6 +45,7 @@ def get_events_from_eve(
                         if data_filter.accept(data):
                             yield data
                     except JSONDecodeError:
+                        LOGGER.exception("I cannot use data: '%s'. Ignoring it.", line)
                         continue  # Try to read the next record
         except (FileNotFoundError, FileExistsError, UnicodeDecodeError) as ve:
             LOGGER.exception("I cannot use %s. Ignoring it.", eve_file)
