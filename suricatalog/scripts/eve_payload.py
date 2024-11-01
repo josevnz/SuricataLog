@@ -32,12 +32,12 @@ def main():
     try:
         if not options.report_dir.exists():
             raise ValueError(f"Please continue {options.report_dir} before we can proceed to extract the payloads.")
-        payload_filter: BaseFilter = WithPayloadFilter()
-        app = PayloadApp()
+        app = PayloadApp(
+            eve_files=options.eve_file,
+            data_filter=WithPayloadFilter(),
+            report_dir=options.report_dir
+        )
         app.title = f"SuricataLog Payload extractor. Working on {','.join(x.as_posix() for x in options.eve_file)}"
-        app.set_filter(payload_filter)
-        app.set_eve_files(options.eve_file)
-        app.set_report_dir(options.report_dir)
         app.run()
     except KeyboardInterrupt:
         pass

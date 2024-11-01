@@ -31,54 +31,29 @@ class PayloadApp(App):
             driver_class: Type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
-            eve: List[Path] = None,
-            data_filter: WithPayloadFilter = WithPayloadFilter()
+            eve_files: List[Path] = None,
+            data_filter: WithPayloadFilter = WithPayloadFilter(),
+            report_dir: Path = None,
     ):
         """
         Constructor
         :param driver_class:
         :param css_path:
         :param watch_css:
-        :param eve:
+        :param eve_files:
         :param data_filter:
         """
         super().__init__(driver_class, css_path, watch_css)
-        self.eve_files = None
-        self.filter = None
-        self.data_filter = data_filter
-        self.eve = eve
-        self.loaded = 0
-        self.report_dir = None
-
-    def set_filter(self, payload_filter: BaseFilter):
-        """
-        Set filter for application
-        :param payload_filter:
-        :return:
-        """
-        if not payload_filter:
-            raise ValueError("Filter is required")
-        self.filter = payload_filter
-
-    def set_eve_files(self, eve_files: List[Path]):
-        """
-        Set eve files for application
-        :param eve_files:
-        :return:
-        """
         if not eve_files:
-            raise ValueError("One or more eve files is required")
+            raise ValueError("Filter is required")
         self.eve_files = eve_files
-
-    def set_report_dir(self, report_dir: Path):
-        """
-        Set report directory for the application
-        :param report_dir:
-        :return:
-        """
+        if not data_filter:
+            raise ValueError("Filter is required")
+        self.data_filter = data_filter
         if not report_dir:
-            raise ValueError("One or more eve files is required")
+            raise ValueError("Destination report is missing")
         self.report_dir = report_dir
+        self.loaded = 0
 
     @staticmethod
     def get_key_from_map(map1: Dict[str, Any], keys: List[str]):
@@ -166,16 +141,6 @@ class PayloadApp(App):
         """
         yield Header()
         with Center():
-            eve_files_tbl = DataTable()
-            eve_files_tbl.show_header = True
-            eve_files_tbl.add_column("File")
-            eve_files_tbl.zebra_stripes = True
-            eve_files_tbl.loading = True
-            eve_files_tbl.cursor_type = 'row'
-            eve_files_tbl.tooltip = textwrap.dedent("""
-                    Files being processed
-                    """)
-            yield eve_files_tbl
             with Middle():
                 yield ProgressBar(total=100)
         yield Footer()
@@ -186,11 +151,7 @@ class PayloadApp(App):
         Initialize TUI components
         :return:
         """
-        eve_files_tbl = self.query_one(DataTable)
-        for eve_file in self.eve_files:
-            eve_files_tbl.add_row(eve_file.as_posix())
-        eve_files_tbl.loading = False
-        await self.pump_events()
+        # await self.pump_events()
         if self.loaded > 0:
             self.notify(
                 title="Finished extracting payloads from events",
