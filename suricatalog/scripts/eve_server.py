@@ -23,6 +23,10 @@ PORT = 8000
 
 
 def main():
+    """
+    Entry point for wrapper
+    :return:
+    """
     parser = argparse.ArgumentParser(
         description=__doc__,
         exit_on_error=False
@@ -55,7 +59,7 @@ def main():
     )
 
     options = parser.parse_args()
-    cmd = f"{options.application} {' '.join([option for option in options.eve_remainder])}"
+    cmd = f"{options.application} {' '.join(list(options.eve_remainder))}"
     server = Server(
         port=options.port,
         command=cmd,

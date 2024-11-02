@@ -1,3 +1,6 @@
+"""
+Log file contents logic
+"""
 import json
 import os
 import time
@@ -29,21 +32,24 @@ def get_events_from_eve(
     :param data_filter: Filter events based on several criteria
     :return:
     """
+    if not isinstance(data_filter, BaseFilter):
+        raise ValueError("Invalid 'data_filter' passed.")
     if eve_files is None:
         eve_files = DEFAULT_EVE
     for eve_file in eve_files:
         try:
-            with open(eve_file, 'rt') as eve:
+            with open(eve_file, 'rt', encoding='utf-8') as eve:
                 for line in eve:
                     try:
                         data = json.loads(line)
                         if data_filter.accept(data):
                             yield data
                     except JSONDecodeError:
+                        LOGGER.exception("I cannot use data: '%s'. Ignoring it.", line)
                         continue  # Try to read the next record
         except (FileNotFoundError, FileExistsError, UnicodeDecodeError) as ve:
-            LOGGER.error(f"I cannot use {eve_file}. Ignoring it.", ve)
-            raise ValueError(f"I cannot use {eve_file}. Ignoring it.", ve)
+            LOGGER.exception("I cannot use file %s. Ignoring it.", eve_file)
+            raise ValueError(f"I cannot use {eve_file}. Ignoring it.", ve) from ve
 
 
 def tail_eve(
@@ -60,7 +66,7 @@ def tail_eve(
     if eve_file is None:
         eve_file = DEFAULT_EVE
     try:
-        with open(eve_file, 'rt') as eve:
+        with open(eve_file, 'rt', encoding='utf-8') as eve:
             eve.seek(0, os.SEEK_END)
             while True:
                 try:
@@ -73,5 +79,5 @@ def tail_eve(
                 except JSONDecodeError:
                     continue
     except (FileExistsError, UnicodeDecodeError) as ve:
-        LOGGER.error(f"I cannot use {eve_file}. Ignoring it.", ve)
-        raise ValueError(f"I cannot use {eve_file}. Ignoring it.", ve)
+        LOGGER.exception("I cannot use %s. Ignoring it.", eve_file)
+        raise ValueError(f"I cannot use {eve_file}. Ignoring it.", ve) from ve

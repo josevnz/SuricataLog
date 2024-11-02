@@ -1,3 +1,6 @@
+"""
+Discover code for table helpers
+"""
 from enum import Enum
 from functools import partial
 from typing import Any
@@ -11,34 +14,53 @@ from suricatalog.screens import DetailScreen
 
 
 class TableColumns(Enum):
-    Timestamp = 0
-    Severity = 1
-    Signature = 2
-    Protocol = 3
-    Destination = 4
-    Source = 5
-    Payload = 6
+    """
+    Columns for events
+    """
+    TIMESTAMP = 0
+    SEVERITY = 1
+    SIGNATURE = 2
+    PROTOCOL = 3
+    DESTINATION = 4
+    SOURCE = 5
+    PAYLOAD = 6
 
 
 PROVIDER_COLS = [
-    TableColumns.Signature,
-    TableColumns.Protocol,
-    TableColumns.Destination,
-    TableColumns.Source,
-    TableColumns.Payload
+    TableColumns.SIGNATURE,
+    TableColumns.PROTOCOL,
+    TableColumns.DESTINATION,
+    TableColumns.SOURCE,
+    TableColumns.PAYLOAD
 ]
 
 
 class TableAlertProvider(Provider):
+    """
+    Event provider implementation
+    """
 
     def __init__(self, screen: Screen[Any], match_style: Style | None = None):
+        """
+        Constructor
+        :param screen:
+        :param match_style:
+        """
         super().__init__(screen, match_style)
         self.alerts_tbl = None
 
     async def startup(self) -> None:
+        """
+        initialization for the provider, when firts loaded
+        :return:
+        """
         self.alerts_tbl = self.app.query(DataTable).first()
 
     async def discover(self) -> DiscoveryHit:
+        """
+        Value discovery
+        :return:
+        """
         my_app = self.screen.app
         for row_key in self.alerts_tbl.rows:
             row = self.alerts_tbl.get_row(row_key)
@@ -56,6 +78,11 @@ class TableAlertProvider(Provider):
             break  # Only care about the first result
 
     async def search(self, query: str) -> Hits:
+        """
+        Value search
+        :param query:
+        :return:
+        """
         matcher = self.matcher(query)
         my_app = self.screen.app
         for row_key in self.alerts_tbl.rows:

@@ -90,10 +90,13 @@ Then on another terminal:
 textual run --dev --command eve_log --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
 ```
 
+### Creating a Docker image
+
+Please check [DOCKER.md](DOCKER.md) for more details.
 
 ## Running the scripts
 
-Once everything is installed you should be able to call the scripts
+Once everything is installed in  your virtual environment you should be able to call the scripts
 
 ### Simple EVE log parser
 
@@ -189,8 +192,9 @@ eve_server --applications eve_log -- ~/eve.json
 
 You need to pass the '--' to tell the server than this options belong to the underlying eve_* you want to call.
 
+## Running from Docker
 
-
+It is also possible to run SuricataLog from a Docker container. Please see the [DOCKER.md](DOCKER.md) for more details
 
 ## Supported versions
 

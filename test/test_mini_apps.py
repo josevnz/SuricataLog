@@ -1,3 +1,6 @@
+"""
+Unit tests for mini apps
+"""
 import unittest
 from ipaddress import ip_address
 from pathlib import Path
@@ -16,11 +19,18 @@ OLD_DATE = DEFAULT_TIMESTAMP_10Y_AGO
 
 
 class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
+    """
+    Concrete implementation of unit test for mini apps
+    """
     async def test_get_capture(self):
+        """
+        Simulate user iteration with mini apps
+        :return:
+        """
         app = get_capture(
-                eve=[EVE_FILE],
-                data_filter=NXDomainFilter(),
-                title="SuricataLog DNS records with NXDOMAIN"
+            eve=[EVE_FILE],
+            data_filter=NXDomainFilter(),
+            title="SuricataLog DNS records with NXDOMAIN"
         )
         self.assertIsNotNone(app)
         async with app.run_test() as pilot:
@@ -36,14 +46,18 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
                 title="SuricataLog Inspect Alert Data (payload)"
             )
             self.assertIsNotNone(app)
-            async with app.run_test() as pilot:
-                log = app.screen.query(RichLog).first()
-                self.assertIsNotNone(log)
-                self.assertRegex("{", log.lines[0].text)
-                await pilot.pause()
-                await pilot.press("q")
+        async with app.run_test() as pilot:
+            log = app.screen.query(RichLog).first()
+            self.assertIsNotNone(log)
+            self.assertRegex("{", log.lines[0].text)
+            await pilot.pause()
+            await pilot.press("q")
 
     async def test_get_one_shot_flow_table(self):
+        """
+        Test one shot table app
+        :return:
+        """
         app = get_one_shot_flow_table(
             eve=[EVE_FILE],
             data_filter=ALWAYS_TRUE
@@ -60,8 +74,12 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
             await pilot.press("q")
 
     async def test_get_host_data_use(self):
+        """
+        Test get host data app
+        :return:
+        """
         ts = TimestampFilter()
-        ts._timestamp = DEFAULT_TIMESTAMP_10Y_AGO
+        ts.timestamp = DEFAULT_TIMESTAMP_10Y_AGO
         app = get_host_data_use(
             eve_files=[EVE_UDP_FILE],
             data_filter=ts,
@@ -76,8 +94,12 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
             await pilot.press("q")
 
     async def test_get_agents(self):
+        """
+        Test get agents app
+        :return:
+        """
         ts = TimestampFilter()
-        ts._timestamp = DEFAULT_TIMESTAMP_10Y_AGO
+        ts.timestamp = DEFAULT_TIMESTAMP_10Y_AGO
         app = get_agents(
             eve_files=[EVE_FILE],
             data_filter=ts
