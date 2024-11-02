@@ -193,9 +193,11 @@ class PayloadApp(App):
             try:
                 bin_payload = base64.b64decode(payload['payload'], altchars=None, validate=False)
                 payload_fh.write(bin_payload)
+                payload_fh.flush()
                 return len(payload['payload'])
             except (TypeError, ValueError):
                 payload_fh.write(payload['payload'])
+                payload_fh.flush()
                 return len(payload['payload'])
 
     @on(DataTable.HeaderSelected)

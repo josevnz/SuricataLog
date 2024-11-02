@@ -44,7 +44,7 @@ class BaseAlertApp(App):
         Return the first matching key from a map
         :param map1:
         :param keys:
-        :return: Nothing ig none of the keys are in the map
+        :return: Nothing if none of the keys are in the map
         """
         val = ""
         for key in keys:
@@ -67,8 +67,8 @@ class BaseAlertApp(App):
         src_port = str(BaseAlertApp.__get_key_from_map__(alert, ['src_port']))
         protocol = BaseAlertApp.__get_key_from_map__(alert, ['app_proto', 'proto'])
         severity = alert['alert']['severity']
-        signature = alert['alert']['signature']
-        payload_printable = alert['payload_printable'] if 'payload_printable' in alert else ""
+        signature = alert['alert'].get('signature', '')
+        payload_printable = alert.get('payload_printable', '')
         return {
             "timestamp": timestamp,
             "dest_port": dest_port,

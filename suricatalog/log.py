@@ -48,7 +48,7 @@ def get_events_from_eve(
                         LOGGER.exception("I cannot use data: '%s'. Ignoring it.", line)
                         continue  # Try to read the next record
         except (FileNotFoundError, FileExistsError, UnicodeDecodeError) as ve:
-            LOGGER.exception("I cannot use %s. Ignoring it.", eve_file)
+            LOGGER.exception("I cannot use file %s. Ignoring it.", eve_file)
             raise ValueError(f"I cannot use {eve_file}. Ignoring it.", ve) from ve
 
 
