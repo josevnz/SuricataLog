@@ -240,7 +240,7 @@ class PayloadApp(App):
                 extract_ids.add(uid)
 
             progress_bar = self.query_one(ProgressBar)
-            self.loaded == 1
+            self.loaded = 1
             for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                 file_name = PayloadApp.generate_filename(
