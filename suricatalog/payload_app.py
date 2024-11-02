@@ -31,7 +31,7 @@ class PayloadApp(App):
             driver_class: Type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
-            eve_files: List[Path] = None,
+            eve: List[Path] = None,
             data_filter: WithPayloadFilter = WithPayloadFilter(),
             report_dir: Path = None,
     ):
@@ -40,13 +40,13 @@ class PayloadApp(App):
         :param driver_class:
         :param css_path:
         :param watch_css:
-        :param eve_files:
+        :param eve:
         :param data_filter:
         """
         super().__init__(driver_class, css_path, watch_css)
-        if not eve_files:
-            raise ValueError("Filter is required")
-        self.eve_files = eve_files
+        if not eve:
+            raise ValueError("At least one Eve file is required")
+        self.eve = eve
         if not data_filter:
             raise ValueError("Filter is required")
         self.data_filter = data_filter
@@ -87,7 +87,7 @@ class PayloadApp(App):
     def generate_filename(
             base_dir: Path,
             prefix: str = "payload_export",
-            **payload_data: Dict[Any, any],
+            **payload_data: Dict[Any, Any],
     ) -> Path:
         """
         Generate a filename from payload components
@@ -234,13 +234,13 @@ class PayloadApp(App):
             extract_ids = set([])
             # Need to count the events first. And don't want to store them in memory because the payload may be
             # huge...
-            for alert_with_payload in get_events_from_eve(eve_files=self.eve_files, data_filter=self.data_filter):
+            for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                 uid = self.unique_id(extracted=extracted)
                 extract_ids.add(uid)
                 self.loaded += 1
 
-            for alert_with_payload in get_events_from_eve(eve_files=self.eve_files, data_filter=self.data_filter):
+            for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                 file_name = PayloadApp.generate_filename(
                     base_dir=self.report_dir,

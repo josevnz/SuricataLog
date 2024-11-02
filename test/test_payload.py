@@ -35,7 +35,7 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(payload_events)
         self.assertEqual(131, len(payload_events))
 
-    def test_generate_filename(self):
+    async def test_generate_filename(self):
         """
         Make sure generated test filename is correct
         :return:
@@ -47,12 +47,13 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
         ))
         for payload_event in payload_events:
             self.assertIsNotNone(payload_event)
+            extracted = await PayloadApp.extract_from_alert(alert=payload_event)
             filename = PayloadApp.generate_filename(
                 base_dir=Path.home(),
-                payload_data=payload_event
+                payload_data=extracted
             )
             self.assertIsNotNone(filename)
-            print(filename)
+            # print(filename)
 
     async def test_extract_from_alert(self):
         """

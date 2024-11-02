@@ -33,7 +33,7 @@ def main():
         if not options.report_dir.exists():
             raise ValueError(f"Please continue {options.report_dir} before we can proceed to extract the payloads.")
         app = PayloadApp(
-            eve_files=options.eve_file,
+            eve=options.eve_file,
             data_filter=WithPayloadFilter(),
             report_dir=options.report_dir
         )
