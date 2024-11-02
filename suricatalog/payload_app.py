@@ -156,7 +156,7 @@ class PayloadApp(App):
         yield Header()
         with Center():
             with Middle():
-                yield ProgressBar(total=100)
+                yield ProgressBar(total=100, show_eta=False)
         yield Footer()
 
     @work(exclusive=False)
@@ -238,8 +238,9 @@ class PayloadApp(App):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                 uid = self.unique_id(extracted=extracted)
                 extract_ids.add(uid)
-                self.loaded += 1
 
+            progress_bar = self.query_one(ProgressBar)
+            self.loaded == 1
             for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                 file_name = PayloadApp.generate_filename(
@@ -247,6 +248,9 @@ class PayloadApp(App):
                     payload_data=extracted
                 )
                 await self.save_payload(payload_file=file_name, payload=extracted)
+                progress = (self.loaded / len(extract_ids)) * 100.0
+                progress_bar.update(total=len(extract_ids), progress=progress)
+                self.loaded += 1
 
         except ValueError as ve:
             if hasattr(ve, 'message'):
