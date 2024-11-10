@@ -11,7 +11,9 @@ apt-get dist-upgrade -y
 pip install --no-cache --upgrade setuptools
 pip install --no-cache SuricataLog-*-py3-none-any.whl
 rm -f SuricataLog-*-py3-none-any.whl
-# pip install --no-cache SuricataLog
+apt autoremove -y
+apt clean -y
+apt autoclean -y
 CMD
 VOLUME /suricatalog
 RUN ["python3"]
