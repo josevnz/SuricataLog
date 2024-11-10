@@ -5,6 +5,9 @@ FROM python:3.11-slim as python3
 SHELL ["/bin/bash", "-c"]
 ADD dist/SuricataLog-*-py3-none-any.whl .
 RUN <<CMD
+apt-get update -y
+apt-get upgrade -y
+apt-get dist-upgrade -y
 pip install --no-cache --upgrade setuptools
 pip install --no-cache SuricataLog-*-py3-none-any.whl
 rm -f SuricataLog-*-py3-none-any.whl
