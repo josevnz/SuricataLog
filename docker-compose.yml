@@ -23,6 +23,6 @@ services:
     restart: no
     tty: true
     build:
-        context: "."
-        dockerfile: Dockerfile
-        network: host
+      context: "."
+      dockerfile: Dockerfile
+      network: host
