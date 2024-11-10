@@ -8,8 +8,10 @@ from textual import work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.widgets import Header, RichLog, Footer
+import pyperclip
 
 from suricatalog import BASEDIR
+from suricatalog.clipboard import copy_from_richlog
 from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import TopUserAgents
@@ -20,7 +22,8 @@ class TopUserApp(App):
     Show top users
     """
     BINDINGS = [
-        ("q", "quit_app", "Quit")
+        ("q", "quit_app", "Quit"),
+        ("y,c", "copy_log", "Copy to clipboard")
     ]
     CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.tcss')
     ENABLE_COMMAND_PALETTE = False
@@ -51,6 +54,23 @@ class TopUserApp(App):
         :return:
         """
         self.exit("Exiting Top user now...")
+
+    def action_copy_log(self) -> None:
+        """
+        Copy contents to the clipboard
+        :return:
+        """
+        rich_log = self.query_one(RichLog)
+        try:
+            _, ln = copy_from_richlog(rich_log)
+            self.notify(f"Copied {ln} characters!", title="Copied selection")
+        except pyperclip.PyperclipException as exc:
+            # Show a toast popup if we fail to copy.
+            self.notify(
+                str(exc),
+                title="Clipboard error",
+                severity="error",
+            )
 
     def compose(self) -> ComposeResult:
         """

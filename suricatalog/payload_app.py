@@ -20,6 +20,7 @@ from suricatalog.log import get_events_from_eve
 class PayloadApp(App):
     """
     Base application for payload applications, shared logic
+    No clipboard binding here as it makes no sense.
     """
     BINDINGS = [
         ("q", "quit_app", "Quit")

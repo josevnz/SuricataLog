@@ -5,11 +5,13 @@ import textwrap
 from pathlib import Path
 from typing import Type, List
 
+import pyperclip
 from textual import on
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.widgets import Header, DataTable, Footer
 
+from suricatalog.clipboard import copy_from_table
 from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import AggregatedFlowProtoReport
@@ -20,7 +22,8 @@ class FlowApp(App):
     Flow traffic application
     """
     BINDINGS = [
-        ("q", "quit_app", "Quit")
+        ("q", "quit_app", "Quit"),
+        ("y,c", "copy_table", "Copy to clipboard")
     ]
     ENABLE_COMMAND_PALETTE = False
 
@@ -50,6 +53,23 @@ class FlowApp(App):
         :return:
         """
         self.exit("Exiting Net-Flow now...")
+
+    def action_copy_table(self) -> None:
+        """
+        Copy contents to the clipboard
+        :return:
+        """
+        table_data = self.query_one(DataTable)
+        try:
+            _, ln = copy_from_table(table_data)
+            self.notify(f"Copied {ln} characters!", title="Copied selection")
+        except pyperclip.PyperclipException as exc:
+            # Show a toast popup if we fail to copy.
+            self.notify(
+                str(exc),
+                title="Clipboard error",
+                severity="error",
+            )
 
     def compose(self) -> ComposeResult:
         """

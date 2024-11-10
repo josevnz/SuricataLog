@@ -6,11 +6,13 @@ import traceback
 from pathlib import Path
 from typing import Type, List, Any, Dict, Union
 
+import pyperclip
 from textual import on, work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.widgets import Footer, Header, DataTable
 
+from suricatalog.clipboard import copy_from_table
 from suricatalog.log import get_events_from_eve
 from suricatalog.filter import BaseFilter
 from suricatalog.providers import TableAlertProvider, TableColumns
@@ -110,7 +112,8 @@ class TableAlertApp(BaseAlertApp):
     Concrete implementation for alert application
     """
     BINDINGS = [
-        ("q", "quit_app", "Quit")
+        ("q", "quit_app", "Quit"),
+        ("c", "copy_table", "Copy to clipboard")
     ]
     ENABLE_COMMAND_PALETTE = True
     COMMANDS = App.COMMANDS | {TableAlertProvider}
@@ -253,3 +256,20 @@ class TableAlertApp(BaseAlertApp):
         :return:
         """
         self.exit("Exiting Alerts now...")
+
+    def action_copy_table(self) -> None:
+        """
+        Copy contents to the clipboard
+        :return:
+        """
+        table_data = self.query_one(DataTable)
+        try:
+            _, ln = copy_from_table(table_data)
+            self.notify(f"Copied {ln} characters!", title="Copied selection")
+        except pyperclip.PyperclipException as exc:
+            # Show a toast popup if we fail to copy.
+            self.notify(
+                str(exc),
+                title="Clipboard error",
+                severity="error",
+            )

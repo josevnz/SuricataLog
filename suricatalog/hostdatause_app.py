@@ -5,12 +5,14 @@ import textwrap
 from pathlib import Path
 from typing import Type, List
 
+import pyperclip
 from textual import work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.widgets import Header, Digits, Footer
 
 from suricatalog import BASEDIR
+from suricatalog.clipboard import copy_from_digits
 from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.report import HostDataUseReport
@@ -21,7 +23,8 @@ class HostDataUse(App):
     Host data usage application
     """
     BINDINGS = [
-        ("q", "quit_app", "Quit")
+        ("q", "quit_app", "Quit"),
+        ("y,c", "copy_digits", "Copy to clipboard")
     ]
     CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.tcss')
     ENABLE_COMMAND_PALETTE = False
@@ -56,6 +59,23 @@ class HostDataUse(App):
         :return:
         """
         self.exit("Exiting Net-Flow now...")
+
+    def action_copy_digits(self) -> None:
+        """
+        Copy contents to the clipboard
+        :return:
+        """
+        digits = self.query_one(Digits)
+        try:
+            _, ln = copy_from_digits(digits)
+            self.notify(f"Copied {ln} characters!", title="Copied selection")
+        except pyperclip.PyperclipException as exc:
+            # Show a toast popup if we fail to copy.
+            self.notify(
+                str(exc),
+                title="Clipboard error",
+                severity="error",
+            )
 
     def compose(self) -> ComposeResult:
         """

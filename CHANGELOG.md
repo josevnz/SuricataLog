@@ -1,9 +1,18 @@
 # SuricataLog changelog
 
-## Mar Sun 23 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 1.1
+## Nov Sun 10 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 1.0.5
+- Added support for copying data into the clipboard!
+
+## Oct Thu 31 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 1.0.4
+- Suricon 2024 release, features promised during Pre-Suricon 2024 Youtube presentation.
+- Added back Docker container for CLI
+- New payload export application
+- Code cleanup and code fixes
+
+## Mar Sun 23 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 1.0.1
 - TUI improvements on search and notifications
 
-## Mar Sat 22 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 1.0
+## Mar Sat 22 2024 Jose Vicente Nunez <kodegeek.com@protonmail.com> - 1.0.0
 - Match version to stable version
 - Added unit tests for TUI
 

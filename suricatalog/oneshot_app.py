@@ -5,11 +5,13 @@ import traceback
 from pathlib import Path
 from typing import Type, List
 
+import pyperclip
 from textual import work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.widgets import Header, RichLog, Footer
 
+from suricatalog.clipboard import copy_from_richlog
 from suricatalog.filter import BaseFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.screens import ErrorScreen
@@ -20,7 +22,8 @@ class OneShotApp(App):
     One shot application, displays data based on filter
     """
     BINDINGS = [
-        ("q", "quit_app", "Quit")
+        ("q", "quit_app", "Quit"),
+        ("y,c", "copy_log", "Copy to clipboard")
     ]
     ENABLE_COMMAND_PALETTE = False
 
@@ -51,6 +54,23 @@ class OneShotApp(App):
         :return:
         """
         self.exit(f"Exiting {self.title} now...")
+
+    def action_copy_log(self) -> None:
+        """
+        Copy contents to the clipboard
+        :return:
+        """
+        rich_log = self.query_one(RichLog)
+        try:
+            _, ln = copy_from_richlog(rich_log)
+            self.notify(f"Copied {ln} characters!", title="Copied selection")
+        except pyperclip.PyperclipException as exc:
+            # Show a toast popup if we fail to copy.
+            self.notify(
+                str(exc),
+                title="Clipboard error",
+                severity="error",
+            )
 
     def compose(self) -> ComposeResult:
         """
