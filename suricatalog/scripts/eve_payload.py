@@ -38,7 +38,7 @@ def main():
             report_dir=options.report_dir
         )
         app.title = f"SuricataLog Payload extractor. Working on {','.join(x.as_posix() for x in options.eve_file)}. Results to {options.report_dir.as_posix()}"
-        app.run()
+        app.run(inline=True)
     except KeyboardInterrupt:
         pass
 
