@@ -18,7 +18,7 @@ dev = [
 
 [project]
 name = "SuricataLog"
-version = "1.0.6"
+version = "1.0.7"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
@@ -30,7 +30,7 @@ classifiers = [
   "Programming Language :: Python"
 ]
 dependencies = [
-    "textual==1.0.0",
+    "textual==2.0.3",
     "textual-serve==1.1.1",
     "pytz==2024.1",
     "pyperclip==1.9.0"
