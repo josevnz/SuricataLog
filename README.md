@@ -196,6 +196,16 @@ You need to pass the '--' to tell the server than this options belong to the und
 
 It is also possible to run SuricataLog from a Docker container. Please see the [DOCKER.md](DOCKER.md) for more details
 
+## Running with uv
+
+If you have uv, you can just do this:
+
+```shell
+uvx --from SuricataLog eve_log /var/log/suricata/eve.json
+uvx --from SuricataLog eve_json --useragent /var/log/suricata/eve.json
+uvx --from SuricataLog eve_server --application eve_json -- --flow /var/log/suricata/eve.json
+```
+
 ## Supported versions
 
 I work on this project on **my spare time** and I cannot support every version of Linux/ Python combination out there.
