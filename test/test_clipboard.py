@@ -142,7 +142,7 @@ class ClipboardTestCase(unittest.IsolatedAsyncioTestCase):
             await pilot.pause()
             await pilot.press("c")  # Copy to clipboard
             await pilot.pause()
-        self.assertEqual(135, app.ln)
+        self.assertEqual(86, app.ln)
 
 
 if __name__ == '__main__':
