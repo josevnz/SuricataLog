@@ -1,13 +1,13 @@
 """
 Log file contents logic
 """
-import json
 import os
 import time
-from json import JSONDecodeError
 from pathlib import Path
 import logging
 from typing import Callable, Dict
+import orjson
+from orjson import JSONDecodeError
 
 from suricatalog.filter import BaseFilter
 
@@ -41,7 +41,7 @@ def get_events_from_eve(
             with open(eve_file, 'rt', encoding='utf-8') as eve:
                 for line in eve:
                     try:
-                        data = json.loads(line)
+                        data = orjson.loads(line)
                         if data_filter.accept(data):
                             yield data
                     except JSONDecodeError:
@@ -55,7 +55,7 @@ def get_events_from_eve(
 def tail_eve(
         *,
         eve_file=None,
-        decorator: Callable = json.loads
+        decorator: Callable = orjson.loads
 ):
     """
     Similar to UNIX ``tail -f eve.json``

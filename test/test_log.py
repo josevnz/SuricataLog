@@ -1,7 +1,7 @@
 """
 Unit test for logging
 """
-import json
+
 import unittest
 from datetime import datetime
 from pathlib import Path
@@ -11,6 +11,7 @@ import pytz
 from suricatalog.filter import TimestampFilter, AlwaysTrueFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.time import to_utc, parse_timestamp
+import orjson
 
 BASEDIR = Path(__file__).parent
 
@@ -35,7 +36,7 @@ class SuricataLogTestCase(unittest.TestCase):
         """
         with open(BASEDIR.joinpath("eve.json"), 'rt', encoding='utf-8') as eve_file:
             for event in eve_file:
-                SuricataLogTestCase.eve_list.append(json.loads(event))
+                SuricataLogTestCase.eve_list.append(orjson.loads(event))
 
     def test_to_utc(self):
         """
