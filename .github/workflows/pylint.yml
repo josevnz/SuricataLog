@@ -23,4 +23,4 @@ jobs:
           pip install --editable .[dev,lint]
       - name: Analysing the SuricataLog code with pylint
         run: |
-          pylint suricatalog
+          pylint suricatalog --extension-pkg-allow-list orjson
