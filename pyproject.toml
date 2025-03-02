@@ -34,7 +34,7 @@ dependencies = [
     "textual-serve==1.1.1",
     "pytz==2024.1",
     "pyperclip==1.9.0",
-    "orjson==3.10"
+    "orjson==3.10.15"
 ]
 description = "Scripts to display contents of Suricata eve.json log"
 readme = {file = "README.md", content-type = "text/markdown"}
