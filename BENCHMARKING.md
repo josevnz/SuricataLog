@@ -2,7 +2,7 @@
 
 ## Reading eve.json files
 
-This is probably the most consuming part. Using the regular Python JSON library versus []():
+This is probably the most consuming part. Using the regular Python JSON library versus [orjson](https://github.com/ijl/orjson):
 
 ```python
 import timeit
