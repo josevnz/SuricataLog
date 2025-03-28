@@ -26,6 +26,7 @@ class FlowApp(App):
         ("y,c", "copy_table", "Copy to clipboard")
     ]
     ENABLE_COMMAND_PALETTE = False
+    current_sorts: set = set()
 
     def __init__(
             self,
@@ -114,6 +115,18 @@ class FlowApp(App):
             )
             alert_cnt += 1
 
+    def sort_reverse(self, sort_type: str):
+        """
+        Determine if `sort_type` is ascending or descending.
+        :param sort_type: Keep track of column being sorted.
+        """
+        reverse = sort_type in self.current_sorts
+        if reverse:
+            self.current_sorts.remove(sort_type)
+        else:
+            self.current_sorts.add(sort_type)
+        return reverse
+
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
         """
@@ -122,4 +135,7 @@ class FlowApp(App):
         :return:
         """
         alerts_tbl: DataTable = event.data_table
-        alerts_tbl.sort(event.column_key)
+        alerts_tbl.sort(
+            event.column_key,
+            reverse=self.sort_reverse(event.column_key.value)
+        )

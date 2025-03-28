@@ -26,6 +26,7 @@ class PayloadApp(App):
         ("q", "quit_app", "Quit")
     ]
     ENABLE_COMMAND_PALETTE = False
+    current_sorts: set = set()
 
     def __init__(
             self,
@@ -201,15 +202,30 @@ class PayloadApp(App):
                 payload_fh.flush()
                 return len(payload['payload'])
 
+    def sort_reverse(self, sort_type: str):
+        """
+        Determine if `sort_type` is ascending or descending.
+        :param sort_type: Keep track of column being sorted.
+        """
+        reverse = sort_type in self.current_sorts
+        if reverse:
+            self.current_sorts.remove(sort_type)
+        else:
+            self.current_sorts.add(sort_type)
+        return reverse
+
     @on(DataTable.HeaderSelected)
     def on_header_clicked(self, event: DataTable.HeaderSelected):
         """
-        Handle clicks on table hear
+        Handle clicks on table header
         :param event:
         :return:
         """
         eve_files_tbl: DataTable = event.data_table
-        eve_files_tbl.sort(event.column_key)
+        eve_files_tbl.sort(
+            event.column_key,
+            reverse=self.sort_reverse(event.column_key.value)
+        )
 
     @staticmethod
     def unique_id(extracted: Dict[Any, Any]) -> str:
