@@ -13,12 +13,13 @@ lint = [
 ]
 dev = [
     "textual-dev==1.7.0",
-    "twine>=5.1.0",
+    "twine>=6.1.0",
+    'build'
 ]
 
 [project]
 name = "SuricataLog"
-version = "1.0.8"
+version = "1.0.9"
 authors = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
@@ -30,11 +31,11 @@ classifiers = [
   "Programming Language :: Python"
 ]
 dependencies = [
-    "textual==2.0.3",
+    "textual==3.0.0",
     "textual-serve==1.1.1",
     "pytz==2024.1",
     "pyperclip==1.9.0",
-    "orjson==3.10.15"
+    "orjson==3.10.16"
 ]
 description = "Scripts to display contents of Suricata eve.json log"
 readme = {file = "README.md", content-type = "text/markdown"}
