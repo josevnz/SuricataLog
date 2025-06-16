@@ -181,7 +181,7 @@ class SuricataLogTestCase(unittest.TestCase):
 
         for file in files:
             with self.subTest(file=files):
-                self.__class__.logger.info("Testing % file", file)
+                self.__class__.logger.info("Testing %s", file.resolve().as_posix())
                 for alert in get_events_from_eve(
                         eve_files=[file],
                         data_filter=only_alerts_filter
@@ -190,6 +190,9 @@ class SuricataLogTestCase(unittest.TestCase):
                     alert_keys = alert.keys()
                     for keyword in ["alert"]:
                         self.assertIn(keyword, alert_keys)
+                        sub_keys = alert["alert"].keys()
+                        for expected_subkey in ["signature", "severity"]:
+                            self.assertIn(expected_subkey, sub_keys)
 
 
 if __name__ == '__main__':
