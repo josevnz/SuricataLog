@@ -15,6 +15,10 @@ EVE_FILES = [
     BASEDIR.joinpath("eve-2.json")
 ]
 
+PAYLOAD_FILES = [
+    BASEDIR.joinpath("eve_payload.json")
+]
+
 
 class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
 
@@ -82,7 +86,7 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
             payload = extracted['payload']
             self.assertIsNotNone(payload)
 
-    async def test_save_payload(self):
+    async def test_save_fake_payload(self):
         """
         Test if payload can be saved
         :return:
@@ -90,10 +94,25 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
         with tempfile.NamedTemporaryFile(delete=True) as tmpdir:
             payload = {'payload': "FakeData"}
             saved = await PayloadApp.save_payload(
-                payload_file=Path(tmpdir.name) / "",
+                payload_file=Path(tmpdir.name),
                 payload=payload
             )
             self.assertEqual(8, saved)
+
+    async def test_save_payload_from_file(self):
+        """
+        Test if payload can be extracted and then saved to a temporary file
+        :return:
+        """
+        payload_filter = WithPayloadFilter()
+        for event_with_payload in get_events_from_eve(eve_files=PAYLOAD_FILES, data_filter=payload_filter):
+            self.assertIsNotNone(event_with_payload)
+            extracted = await PayloadApp.extract_from_alert(alert=event_with_payload)
+            self.assertIsNotNone(extracted)
+            with tempfile.NamedTemporaryFile(delete=True) as tmpdir:
+                temp_filename = Path(tmpdir.name).resolve()
+                length_saved = await PayloadApp.save_payload(payload_file=temp_filename, payload=event_with_payload)
+                self.assertGreater(length_saved, 0)
 
 
 if __name__ == '__main__':

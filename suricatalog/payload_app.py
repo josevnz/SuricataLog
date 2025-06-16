@@ -189,7 +189,7 @@ class PayloadApp(App):
         Save the extracted payload to disk
         :param payload:
         :param payload_file:
-        :return:
+        :return: Length of the payload saved
         """
         with open(payload_file, "wb") as payload_fh:
             try:

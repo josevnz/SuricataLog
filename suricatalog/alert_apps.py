@@ -1,7 +1,7 @@
 """
 Alert applications
 """
-import textwrap
+import inspect
 import traceback
 from pathlib import Path
 from typing import Type, List, Any, Dict, Union
@@ -41,7 +41,7 @@ class BaseAlertApp(App):
         self.filter = None
 
     @staticmethod
-    def __get_key_from_map__(map1: Dict[str, Any], keys: List[str]):
+    def __get_key_from_map__(map1: Dict[str, Any], keys: List[str]) -> Union[str, None]:
         """
         Return the first matching key from a map
         :param map1:
@@ -166,7 +166,7 @@ class TableAlertApp(BaseAlertApp):
         alerts_tbl.zebra_stripes = True
         alerts_tbl.loading = True
         alerts_tbl.cursor_type = 'row'
-        alerts_tbl.tooltip = textwrap.dedent("""
+        alerts_tbl.tooltip = inspect.cleandoc("""
         Suricata alert details. Select a row to get full details.
         """)
         yield alerts_tbl
@@ -206,7 +206,7 @@ class TableAlertApp(BaseAlertApp):
                 title="Finish loading events",
                 timeout=5,
                 severity="information",
-                message=textwrap.dedent(f"""
+                message=inspect.cleandoc(f"""
                 Loaded {alert_cnt} messages.
                 Click on a row to get more details, CTR+\\ to search
                 """)

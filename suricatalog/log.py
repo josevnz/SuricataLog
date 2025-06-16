@@ -1,13 +1,12 @@
 """
 Log file contents logic
 """
-import os
-import time
+import json
 from pathlib import Path
 import logging
-from typing import Callable, Dict
+from typing import Dict
 import orjson
-from orjson import JSONDecodeError
+from orjson import JSONDecodeError as OJSONDecodeError
 
 from suricatalog.filter import BaseFilter
 
@@ -36,48 +35,24 @@ def get_events_from_eve(
         raise ValueError("Invalid 'data_filter' passed.")
     if eve_files is None:
         eve_files = DEFAULT_EVE
+
     for eve_file in eve_files:
         try:
             with open(eve_file, 'rt', encoding='utf-8') as eve:
                 for line in eve:
                     try:
-                        data = orjson.loads(line)
+                        data = orjson.loads(
+                            line
+                        )
                         if data_filter.accept(data):
                             yield data
-                    except JSONDecodeError:
-                        LOGGER.exception("I cannot use data: '%s'. Ignoring it.", line)
-                        continue  # Try to read the next record
-        except (FileNotFoundError, FileExistsError, UnicodeDecodeError) as ve:
-            LOGGER.exception("I cannot use file %s. Ignoring it.", eve_file)
-            raise ValueError(f"I cannot use {eve_file}. Ignoring it.", ve) from ve
-
-
-def tail_eve(
-        *,
-        eve_file=None,
-        decorator: Callable = orjson.loads
-):
-    """
-    Similar to UNIX ``tail -f eve.json``
-    :param decorator:
-    :param eve_file:
-    :return:
-    """
-    if eve_file is None:
-        eve_file = DEFAULT_EVE
-    try:
-        with open(eve_file, 'rt', encoding='utf-8') as eve:
-            eve.seek(0, os.SEEK_END)
-            while True:
-                try:
-                    line = eve.readline()
-                    if not line:
-                        time.sleep(0.1)
-                        continue
-                    data = decorator(line)
-                    yield data
-                except JSONDecodeError:
-                    continue
-    except (FileExistsError, UnicodeDecodeError) as ve:
-        LOGGER.exception("I cannot use %s. Ignoring it.", eve_file)
-        raise ValueError(f"I cannot use {eve_file}. Ignoring it.", ve) from ve
+                    except OJSONDecodeError:
+                        try:
+                            data = json.loads(line)
+                            if data_filter.accept(data):
+                                yield data
+                        except json.JSONDecodeError:
+                            LOGGER.exception("I cannot use data: '%s'. Ignoring it.", line)
+                            continue  # Try to read the next record
+        except (FileNotFoundError, FileExistsError, UnicodeDecodeError):
+            LOGGER.exception("I cannot use file '%s'. Ignoring it.", eve_file)
