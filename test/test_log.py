@@ -1,16 +1,18 @@
 """
 Unit test for logging
 """
-
+import bz2
+import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
-
+import logging
 import pytz
 
-from suricatalog.filter import TimestampFilter, AlwaysTrueFilter
+from suricatalog.filter import TimestampFilter, AlwaysTrueFilter, OnlyAlertsFilter
 from suricatalog.log import get_events_from_eve
 from suricatalog.time import to_utc, parse_timestamp
+
 import orjson
 
 BASEDIR = Path(__file__).parent
@@ -27,6 +29,7 @@ class SuricataLogTestCase(unittest.TestCase):
         month=8,
         tzinfo=pytz.UTC
     )
+    huge_eve_file: tempfile.NamedTemporaryFile
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -34,9 +37,25 @@ class SuricataLogTestCase(unittest.TestCase):
         Setup data loading
         :return:
         """
+        logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s')
+        cls.logger = logging.getLogger("SuricataLogTestCase")
+        cls.logger.setLevel(logging.INFO)
         with open(BASEDIR.joinpath("eve.json"), 'rt', encoding='utf-8') as eve_file:
             for event in eve_file:
                 SuricataLogTestCase.eve_list.append(orjson.loads(event))
+        cls.logger.info("Loaded eve %s", "eve.json")
+
+        large_eve_compressed = Path(BASEDIR) / "eve_large.json.bz2"
+        data = bz2.BZ2File(large_eve_compressed).read()
+        cls.logger.info("Uncompressed and loaded %s", large_eve_compressed.resolve().as_posix())
+        cls.huge_eve_file = tempfile.NamedTemporaryFile(mode='wb', dir="/var/tmp", prefix="eve_large-", suffix=".json", delete=False)
+        cls.huge_eve_file.write(data)
+        cls.logger.info("Wrote %s", cls.huge_eve_file.name)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.huge_eve_file.delete
+        cls.logger.info("Removed %s", cls.huge_eve_file.name)
 
     def test_to_utc(self):
         """
@@ -134,6 +153,49 @@ class SuricataLogTestCase(unittest.TestCase):
         ))
         self.assertIsNotNone(all_events)
         self.assertListEqual(SuricataLogTestCase.eve_list, all_events)
+
+        all_events = list(get_events_from_eve(
+            eve_files=[BASEDIR.joinpath("eve.json"), BASEDIR.joinpath("eve-2.json")],
+            data_filter=always_true_filter
+        ))
+        self.assertIsNotNone(all_events)
+        self.assertEqual(len(all_events), 9436)
+
+        all_events = list(get_events_from_eve(
+            eve_files=[Path(self.__class__.huge_eve_file.name)],
+            data_filter=always_true_filter
+        ))
+        self.assertIsNotNone(all_events)
+        self.assertEqual(len(all_events), 40231)
+
+    def test_get_only_alerts(self):
+        only_alerts_filter = OnlyAlertsFilter()
+        only_alerts_filter.timestamp = SuricataLogTestCase.old_date
+
+        self.__class__.logger.info("Testing % file", "eve.json")
+        for alert in get_events_from_eve(
+                eve_files=[BASEDIR.joinpath("eve.json")],
+                data_filter=only_alerts_filter
+        ):
+            self.assertIsNotNone(alert)
+            self.__class__.logger.info(alert)
+
+        self.__class__.logger.info("Testing % file", "eve-2.json")
+        for alert in get_events_from_eve(
+                eve_files=[BASEDIR.joinpath("eve-2.json")],
+                data_filter=only_alerts_filter
+        ):
+            self.assertIsNotNone(alert)
+            self.__class__.logger.info(alert)
+
+        large_eve = Path(self.__class__.huge_eve_file.name)
+        self.__class__.logger.info("Testing % file", large_eve.resolve().as_posix())
+        for alert in get_events_from_eve(
+                eve_files=[large_eve],
+                data_filter=only_alerts_filter
+        ):
+            self.assertIsNotNone(alert)
+            self.__class__.logger.info(alert)
 
 
 if __name__ == '__main__':
