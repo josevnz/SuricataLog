@@ -172,30 +172,24 @@ class SuricataLogTestCase(unittest.TestCase):
         only_alerts_filter = OnlyAlertsFilter()
         only_alerts_filter.timestamp = SuricataLogTestCase.old_date
 
-        self.__class__.logger.info("Testing % file", "eve.json")
-        for alert in get_events_from_eve(
-                eve_files=[BASEDIR.joinpath("eve.json")],
-                data_filter=only_alerts_filter
-        ):
-            self.assertIsNotNone(alert)
-            self.__class__.logger.info(alert)
+        # Testing files as separate groups to make it easier to spot issues.
+        files = [
+            BASEDIR.joinpath("eve.json"),
+            BASEDIR.joinpath("eve-2.json"),
+            Path(self.__class__.huge_eve_file.name)
+        ]
 
-        self.__class__.logger.info("Testing % file", "eve-2.json")
-        for alert in get_events_from_eve(
-                eve_files=[BASEDIR.joinpath("eve-2.json")],
-                data_filter=only_alerts_filter
-        ):
-            self.assertIsNotNone(alert)
-            self.__class__.logger.info(alert)
-
-        large_eve = Path(self.__class__.huge_eve_file.name)
-        self.__class__.logger.info("Testing % file", large_eve.resolve().as_posix())
-        for alert in get_events_from_eve(
-                eve_files=[large_eve],
-                data_filter=only_alerts_filter
-        ):
-            self.assertIsNotNone(alert)
-            self.__class__.logger.info(alert)
+        for file in files:
+            with self.subTest(file=files):
+                self.__class__.logger.info("Testing % file", file)
+                for alert in get_events_from_eve(
+                        eve_files=[file],
+                        data_filter=only_alerts_filter
+                ):
+                    self.assertIsNotNone(alert)
+                    alert_keys = alert.keys()
+                    for keyword in ["alert"]:
+                        self.assertIn(keyword, alert_keys)
 
 
 if __name__ == '__main__':
