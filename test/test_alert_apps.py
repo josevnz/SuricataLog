@@ -1,7 +1,9 @@
 """
 Unit test for alert applications
 """
+import bz2
 import logging
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -12,7 +14,8 @@ from suricatalog.log import get_events_from_eve
 BASEDIR = Path(__file__).parent
 EVE_FILES = [
     BASEDIR.joinpath("eve-2.json"),
-    BASEDIR.joinpath("eve.json")
+    BASEDIR.joinpath("eve.json"),
+
 ]
 _fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s")
 _sc = logging.StreamHandler()
@@ -23,24 +26,51 @@ LOGGER.addHandler(_sc)
 
 
 class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
+    huge_eve_file: tempfile.NamedTemporaryFile
+
+    @classmethod
+    def setUpClass(cls):
+        cls.huge_eve_file = tempfile.NamedTemporaryFile(
+            mode='wb',
+            dir="/var/tmp",
+            prefix="eve_large-",
+            suffix=".json",
+            delete=False
+        )
+        large_eve_compressed = Path(BASEDIR) / "eve_large.json.bz2"
+        data = bz2.BZ2File(large_eve_compressed).read()
+        cls.huge_eve_file.write(data)
+        EVE_FILES.append(Path(cls.huge_eve_file.name))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.huge_eve_file.delete
+
     """
     Alert app unit test
     """
+
     async def test_extract_from_alert(self):
         """
         Text alert extraction
         :return:
         """
         for eve_file in EVE_FILES:
-            events = get_events_from_eve(
-                data_filter=WithPrintablePayloadFilter(),
-                eve_files=[eve_file]
-            )
-            LOGGER.info("Processing %s", eve_file.as_posix())
-            for event in events:
-                brief_data = await BaseAlertApp.extract_from_alert(event)
-                self.assertIsNotNone(brief_data)
-                LOGGER.info("%s", brief_data)
+            with self.subTest(eve_file=eve_file):
+                events = get_events_from_eve(
+                    data_filter=WithPrintablePayloadFilter(),
+                    eve_files=[eve_file]
+                )
+                LOGGER.info("Processing %s", eve_file.as_posix())
+                wanted_keys = ["timestamp", "dest_port", "src_ip", "dest_ip", "src_port", "protocol", "severity",
+                               "signature",
+                               "payload_printable"]
+                for event in events:
+                    brief_data = await BaseAlertApp.extract_from_alert(event)
+                    self.assertIsNotNone(brief_data)
+                    for key in wanted_keys:
+                        self.assertIn(key, brief_data)
+                    LOGGER.info("%s", brief_data)
 
     """
     Concrete unit test for alert app
