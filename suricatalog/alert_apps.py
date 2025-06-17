@@ -41,17 +41,17 @@ class BaseAlertApp(App):
         self.filter = None
 
     @staticmethod
-    def __get_key_from_map__(map1: Dict[str, Any], keys: List[str]) -> Union[str, None]:
+    def __get_key_from_map__(data: Dict[str, Any], keys: List[str]) -> Union[str, None]:
         """
         Return the first matching key from a map
-        :param map1:
+        :param data:
         :param keys:
         :return: Nothing if none of the keys are in the map
         """
         val = ""
         for key in keys:
-            if key in map1:
-                val = map1[key]
+            if key in data:
+                val = data[key]
                 break
         return val
 
@@ -62,12 +62,14 @@ class BaseAlertApp(App):
         :param alert:
         :return:
         """
-        timestamp = alert['timestamp']
-        dest_port = str(BaseAlertApp.__get_key_from_map__(alert, ['dest_port']))
-        dest_ip = BaseAlertApp.__get_key_from_map__(alert, ['dest_ip'])
-        src_ip = BaseAlertApp.__get_key_from_map__(alert, ['src_ip'])
-        src_port = str(BaseAlertApp.__get_key_from_map__(alert, ['src_port']))
-        protocol = BaseAlertApp.__get_key_from_map__(alert, ['app_proto', 'proto'])
+        timestamp = alert.get('timestamp', None)
+        if not timestamp:
+            return {}
+        dest_port = str(BaseAlertApp.__get_key_from_map__(data=alert, keys=['dest_port']))
+        dest_ip = BaseAlertApp.__get_key_from_map__(data=alert, keys=['dest_ip'])
+        src_ip = BaseAlertApp.__get_key_from_map__(data=alert, keys=['src_ip'])
+        src_port = str(BaseAlertApp.__get_key_from_map__(data=alert, keys=['src_port']))
+        protocol = BaseAlertApp.__get_key_from_map__(data=alert, keys=['app_proto', 'proto'])
         severity = alert['alert']['severity']
         if 'signature' in alert:
             signature = alert.get('signature', '')
@@ -181,14 +183,12 @@ class TableAlertApp(BaseAlertApp):
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
         try:
-            events = get_events_from_eve(
-                    data_filter=self.filter,
-                    eve_files=self.eve_files
-            )
-            for event in events:
+            for event in get_events_from_eve(data_filter=self.filter, eve_files=self.eve_files):
                 if not self.filter.accept(event):
                     continue
                 brief_data = await BaseAlertApp.extract_from_alert(event)
+                if not brief_data:
+                    self.log.warning("Skipping malformed event: %s", event)
                 timestamp = brief_data['timestamp']
                 alerts_tbl.add_row(
                     timestamp,
@@ -205,16 +205,15 @@ class TableAlertApp(BaseAlertApp):
             self.notify(
                 title="Finish loading events",
                 timeout=5,
-                severity="information",
+                severity="information" if alert_cnt > 0 else "error",
                 message=inspect.cleandoc(f"""
                 Loaded {alert_cnt} messages.
                 Click on a row to get more details, CTR+\\ to search
-                """)
+                """) if alert_cnt > 0 else "Nothing to display."
             )
-            if alert_cnt:
-                alerts_tbl.loading = False
-            else:
-                await self.show_error(reason=None, trace=None)
+            alerts_tbl.loading = False
+            if not alert_cnt:
+                await self.show_error(reason="Could not recover a single alert.", trace=None)
         except ValueError as ve:
             if hasattr(ve, 'reason'):
                 reason = f"{ve}"
@@ -222,9 +221,9 @@ class TableAlertApp(BaseAlertApp):
                 reason = ve.message
             else:
                 reason = f"{ve}"
-            self.log.info(f"Fatal error: {reason}")
+            self.log.error(f"Fatal error: {reason}")
             tb = traceback.extract_stack()
-            self.log.info(tb)
+            self.log.error(tb)
             await self.show_error(trace=tb, reason=str(ve))
 
     def sort_reverse(self, sort_type: str):
