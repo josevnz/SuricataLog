@@ -100,7 +100,7 @@ class ErrorScreen(ModalScreen):
             )
         self.notify(
             title="Unrecoverable error, press 'E' to exit!",
-            message=f"There was an error, application won't recover.",
+            message="There was an error, application won't recover.",
             severity="error",
             timeout=120
         )
