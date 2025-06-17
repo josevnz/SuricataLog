@@ -255,19 +255,28 @@ class PayloadApp(App):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                 uid = self.unique_id(extracted=extracted)
                 extract_ids.add(uid)
-
             progress_bar = self.query_one(ProgressBar)
-            self.loaded = 1
-            for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
-                extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
-                file_name = PayloadApp.generate_filename(
-                    base_dir=self.report_dir,
-                    payload_data=extracted
+            if extract_ids:
+                self.loaded = 1
+                for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
+                    extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
+                    file_name = PayloadApp.generate_filename(
+                        base_dir=self.report_dir,
+                        payload_data=extracted
+                    )
+                    await self.save_payload(payload_file=file_name, payload=extracted)
+                    progress = (self.loaded / len(extract_ids)) * 100.0
+                    progress_bar.update(total=len(extract_ids), progress=progress)
+                    self.loaded += 1
+            else:
+                self.notify(
+                    message="There are no payloads to extract!",
+                    timeout=30,
+                    title="Provided files do not have a single payload.",
+                    severity="warning",
                 )
-                await self.save_payload(payload_file=file_name, payload=extracted)
-                progress = (self.loaded / len(extract_ids)) * 100.0
+                progress = 100.0
                 progress_bar.update(total=len(extract_ids), progress=progress)
-                self.loaded += 1
 
         except ValueError as ve:
             if hasattr(ve, 'message'):
