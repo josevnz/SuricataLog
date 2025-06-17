@@ -12,17 +12,23 @@ from suricatalog.filter import OnlyAlertsFilter, WithPrintablePayloadFilter
 from suricatalog.log import get_events_from_eve
 
 BASEDIR = Path(__file__).parent
-EVE_FILES = [
-    BASEDIR.joinpath("eve-2.json"),
-    BASEDIR.joinpath("eve.json"),
-
-]
 _fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s")
 _sc = logging.StreamHandler()
 _sc.setFormatter(_fmt)
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 LOGGER.addHandler(_sc)
+WANTED_KEYS = [
+    "timestamp",
+    "dest_port",
+    "src_ip",
+    "dest_ip",
+    "src_port",
+    "protocol",
+    "severity",
+    "signature",
+    "payload_printable"
+]
 
 
 class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
@@ -40,7 +46,11 @@ class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
         large_eve_compressed = Path(BASEDIR) / "eve_large.json.bz2"
         data = bz2.BZ2File(large_eve_compressed).read()
         cls.huge_eve_file.write(data)
-        EVE_FILES.append(Path(cls.huge_eve_file.name))
+        cls.eve_files = [
+            BASEDIR.joinpath("eve-2.json"),
+            BASEDIR.joinpath("eve.json"),
+            Path(cls.huge_eve_file.name)
+        ]
 
     @classmethod
     def tearDownClass(cls):
@@ -55,20 +65,18 @@ class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
         Text alert extraction
         :return:
         """
-        for eve_file in EVE_FILES:
+        for eve_file in AlertAppsTestCase.eve_files:
             with self.subTest(eve_file=eve_file):
                 events = get_events_from_eve(
                     data_filter=WithPrintablePayloadFilter(),
                     eve_files=[eve_file]
                 )
                 LOGGER.info("Processing %s", eve_file.as_posix())
-                wanted_keys = ["timestamp", "dest_port", "src_ip", "dest_ip", "src_port", "protocol", "severity",
-                               "signature",
-                               "payload_printable"]
+
                 for event in events:
                     brief_data = await BaseAlertApp.extract_from_alert(event)
                     self.assertIsNotNone(brief_data)
-                    for key in wanted_keys:
+                    for key in WANTED_KEYS:
                         self.assertIn(key, brief_data)
                     LOGGER.info("%s", brief_data)
 
@@ -82,7 +90,7 @@ class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
         :return:
         """
         app = TableAlertApp()
-        app.set_eve_files(EVE_FILES)
+        app.set_eve_files(AlertAppsTestCase.eve_files)
         app.set_filter(OnlyAlertsFilter())
         app.title = "Dummy title"
         self.assertIsNotNone(app)
