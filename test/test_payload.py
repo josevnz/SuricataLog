@@ -1,6 +1,7 @@
 """
 Unit test code for payload management
 """
+import bz2
 import tempfile
 import unittest
 from pathlib import Path
@@ -113,6 +114,21 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
                 temp_filename = Path(tmpdir.name).resolve()
                 length_saved = await PayloadApp.save_payload(payload_file=temp_filename, payload=event_with_payload)
                 self.assertGreater(length_saved, 0)
+
+    async def test_load_no_payload_large(self):
+        huge_eve_file = tempfile.NamedTemporaryFile(
+            mode='wb',
+            dir="/var/tmp",
+            prefix="eve_large-",
+            suffix=".json",
+            delete=False
+        )
+        payload_filter = WithPayloadFilter()
+        large_eve_compressed = Path(BASEDIR) / "eve_large.json.bz2"
+        data = bz2.BZ2File(large_eve_compressed).read()
+        huge_eve_file.write(data)
+        for event in get_events_from_eve(eve_files=[Path(huge_eve_file.name)], data_filter=payload_filter):
+            self.fail(f"Not supposed to get any events, yet got this: {event}")
 
 
 if __name__ == '__main__':
