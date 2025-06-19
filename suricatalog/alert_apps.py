@@ -10,6 +10,7 @@ import pyperclip
 from textual import on, work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
+from textual.reactive import Reactive
 from textual.widgets import DataTable, Footer, Header
 
 from suricatalog.clipboard import copy_from_table
@@ -120,6 +121,7 @@ class TableAlertApp(BaseAlertApp):
     ENABLE_COMMAND_PALETTE = True
     COMMANDS = App.COMMANDS | {TableAlertProvider}
     current_sorts: set = set()
+    enable_developer_warnings: Reactive[bool] = Reactive(False)
 
     def __init__(
             self,
@@ -185,6 +187,7 @@ class TableAlertApp(BaseAlertApp):
         try:
             eve_lh = EveLogHandler()
             for event in eve_lh.get_events(data_filter=self.filter, eve_files=self.eve_files):
+                self.log.debug(f"Got event (filter={self.filter}): {event}")
                 if not self.filter.accept(event):
                     continue
                 brief_data = await BaseAlertApp.extract_from_alert(event)

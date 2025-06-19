@@ -7,7 +7,6 @@ from pathlib import Path
 
 import orjson
 from orjson import JSONDecodeError as OJSONDecodeError
-from textual.logging import TextualHandler
 
 from suricatalog.filter import BaseFilter
 
@@ -39,9 +38,6 @@ class EveLogHandler:
         self.logger = logging.getLogger(__name__)
         self.logger.addHandler(log_handler)
         self.logger.setLevel(logging.INFO)
-
-    def enable_textual_handler(self):
-        self.logger.addHandler(TextualHandler())
 
     def get_events(
             self,
