@@ -1,12 +1,13 @@
 """
-Log file contents logic
+Eve log file contents logic
 """
 import json
 from pathlib import Path
 import logging
-from typing import Dict
+from typing import Dict, Union
 import orjson
 from orjson import JSONDecodeError as OJSONDecodeError
+from textual.logging import TextualHandler
 
 from suricatalog.filter import BaseFilter
 
@@ -14,14 +15,33 @@ DEFAULT_EVE_JSON = [Path("/var/log/suricata/eve.json")]
 
 
 class EveLogHandler:
+    """
+    Handle processing of eve.json files
+    """
 
-    def __init__(self):
-        _fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s")
-        _sc = logging.StreamHandler()
-        _sc.setFormatter(_fmt)
+    def __init__(
+            self,
+            log_file: Union[Path, str, None] = None
+    ):
+        """
+        :param log_file: If set logs will be written to a file
+        """
+        fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s")
+        log_handler = None
+        if log_file:
+            if isinstance(log_file, str):
+                log_file = Path(log_file)
+            if log_file.parent.exists() and log_file.parent.is_dir():
+                log_handler = logging.FileHandler(filename=log_file)
+        if not log_handler:  # Still no log_handler
+            log_handler = logging.StreamHandler()
+        log_handler.setFormatter(fmt)
         self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(log_handler)
         self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(_sc)
+
+    def enable_textual_handler(self):
+        self.logger.addHandler(TextualHandler())
 
     def get_events(
             self,
@@ -34,7 +54,7 @@ class EveLogHandler:
         JSON document, otherwise reader will crash
         :param eve_files:
         :param data_filter: Filter events based on several criteria
-        :return:
+        :return: Dictionary with events
         """
         if not isinstance(data_filter, BaseFilter):
             raise ValueError("Invalid 'data_filter' passed.")
