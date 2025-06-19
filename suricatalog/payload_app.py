@@ -5,16 +5,16 @@ import base64
 import re
 import traceback
 from pathlib import Path
-from typing import Type, List, Dict, Any, Union
+from typing import Any
 
-from textual import work, on
-from textual.app import App, CSSPathType, ComposeResult
+from textual import on, work
+from textual.app import App, ComposeResult, CSSPathType
 from textual.containers import Center, Middle
 from textual.driver import Driver
-from textual.widgets import Header, Footer, ProgressBar, DataTable
+from textual.widgets import DataTable, Footer, Header, ProgressBar
 
 from suricatalog.filter import WithPayloadFilter
-from suricatalog.log import get_events_from_eve
+from suricatalog.log import EveLogHandler
 
 
 class PayloadApp(App):
@@ -30,11 +30,11 @@ class PayloadApp(App):
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
-            eve: List[Path] = None,
-            data_filter: WithPayloadFilter = WithPayloadFilter(),
+            eve: list[Path] = None,
+            data_filter: WithPayloadFilter = None,
             report_dir: Path = None,
     ):
         """
@@ -50,7 +50,7 @@ class PayloadApp(App):
             raise ValueError("At least one Eve file is required")
         self.eve = eve
         if not data_filter:
-            raise ValueError("Filter is required")
+            data_filter = WithPayloadFilter()
         self.data_filter = data_filter
         if not report_dir:
             raise ValueError("Destination report is missing")
@@ -58,7 +58,7 @@ class PayloadApp(App):
         self.loaded = 0
 
     @staticmethod
-    def get_key_from_map(map1: Dict[str, Any], keys: List[str]):
+    def get_key_from_map(map1: dict[str, Any], keys: list[str]):
         """
         Return the first matching key from a map
         :param map1:
@@ -73,7 +73,7 @@ class PayloadApp(App):
         return val
 
     @staticmethod
-    def convert_to_filename(orig: Union[str, None]) -> str:
+    def convert_to_filename(orig: str | None) -> str:
         """
         Make sure string is safe with filesystem
         :param orig:
@@ -89,7 +89,7 @@ class PayloadApp(App):
     def generate_filename(
             base_dir: Path,
             prefix: str = "payload_export",
-            **payload_data: Dict[Any, Any],
+            **payload_data: dict[Any, Any],
     ) -> Path:
         """
         Generate a filename from payload components
@@ -117,8 +117,8 @@ class PayloadApp(App):
 
     @staticmethod
     async def extract_from_alert(
-            alert: Dict[str, Any]
-    ) -> Union[None, Dict[str, Any]]:
+            alert: dict[str, Any]
+    ) -> None | dict[str, Any]:
         """
         Extract alerts from event. Handle version changes between Suricata 6 and 7+.
         :param alert:
@@ -156,9 +156,8 @@ class PayloadApp(App):
         :return:
         """
         yield Header()
-        with Center():
-            with Middle():
-                yield ProgressBar(total=100, show_eta=False)
+        with Center(), Middle():
+            yield ProgressBar(total=100, show_eta=False)
         yield Footer()
 
     @work(exclusive=False)
@@ -184,12 +183,12 @@ class PayloadApp(App):
         self.exit("Exiting payload app now...")
 
     @staticmethod
-    async def save_payload(payload: Dict[str, Any], payload_file: Path) -> int:
+    async def save_payload(payload: dict[str, Any], payload_file: Path) -> int:
         """
         Save the extracted payload to disk
         :param payload:
         :param payload_file:
-        :return:
+        :return: Length of the payload saved
         """
         with open(payload_file, "wb") as payload_fh:
             try:
@@ -228,7 +227,7 @@ class PayloadApp(App):
         )
 
     @staticmethod
-    def unique_id(extracted: Dict[Any, Any]) -> str:
+    def unique_id(extracted: dict[Any, Any]) -> str:
         """
         Get the unique id based on extracted payload components
         :param extracted:
@@ -251,23 +250,33 @@ class PayloadApp(App):
             extract_ids = set([])
             # Need to count the events first. And don't want to store them in memory because the payload may be
             # huge...
-            for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
+            eve_lh = EveLogHandler()
+            for alert_with_payload in eve_lh.get_events(eve_files=self.eve, data_filter=self.data_filter):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                 uid = self.unique_id(extracted=extracted)
                 extract_ids.add(uid)
-
             progress_bar = self.query_one(ProgressBar)
-            self.loaded = 1
-            for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
-                extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
-                file_name = PayloadApp.generate_filename(
-                    base_dir=self.report_dir,
-                    payload_data=extracted
+            if extract_ids:
+                self.loaded = 1
+                for alert_with_payload in eve_lh.get_events(eve_files=self.eve, data_filter=self.data_filter):
+                    extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
+                    file_name = PayloadApp.generate_filename(
+                        base_dir=self.report_dir,
+                        payload_data=extracted
+                    )
+                    await self.save_payload(payload_file=file_name, payload=extracted)
+                    progress = (self.loaded / len(extract_ids)) * 100.0
+                    progress_bar.update(total=len(extract_ids), progress=progress)
+                    self.loaded += 1
+            else:
+                self.notify(
+                    message="There are no payloads to extract!",
+                    timeout=30,
+                    title="Provided files do not have a single payload.",
+                    severity="warning",
                 )
-                await self.save_payload(payload_file=file_name, payload=extracted)
-                progress = (self.loaded / len(extract_ids)) * 100.0
+                progress = 100.0
                 progress_bar.update(total=len(extract_ids), progress=progress)
-                self.loaded += 1
 
         except ValueError as ve:
             if hasattr(ve, 'message'):

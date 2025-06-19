@@ -3,24 +3,23 @@ Canned report application
 """
 from __future__ import annotations
 
-from pathlib import Path
-from typing import List
 import locale
+from pathlib import Path
 
 from textual.app import App
 
+from suricatalog.filter import BaseFilter
 from suricatalog.flow_app import FlowApp
 from suricatalog.hostdatause_app import HostDataUse
-from suricatalog.topuser_app import TopUserApp
 from suricatalog.oneshot_app import OneShotApp
-from suricatalog.filter import BaseFilter
+from suricatalog.topuser_app import TopUserApp
 
 locale.setlocale(locale.LC_ALL, '')
 
 
 def get_one_shot_flow_table(
         *,
-        eve: List[Path],
+        eve: list[Path],
         data_filter: BaseFilter
 ) -> App:
     """
@@ -39,7 +38,7 @@ def get_one_shot_flow_table(
 
 
 def get_host_data_use(
-        eve_files: List[Path],
+        eve_files: list[Path],
         data_filter: BaseFilter,
         ip_address: any
 ) -> App:
@@ -60,7 +59,7 @@ def get_host_data_use(
 
 
 def get_agents(
-        eve_files: List[Path],
+        eve_files: list[Path],
         data_filter: BaseFilter
 ) -> App:
     """
@@ -79,7 +78,7 @@ def get_agents(
 
 def get_capture(
         *,
-        eve: List[Path],
+        eve: list[Path],
         data_filter: BaseFilter,
         title: str
 ) -> App:

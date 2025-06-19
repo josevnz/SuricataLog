@@ -1,20 +1,21 @@
 """
 Alert applications
 """
-import textwrap
+import inspect
 import traceback
 from pathlib import Path
-from typing import Type, List, Any, Dict, Union
+from typing import Any
 
 import pyperclip
 from textual import on, work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Footer, Header, DataTable
+from textual.reactive import Reactive
+from textual.widgets import DataTable, Footer, Header
 
 from suricatalog.clipboard import copy_from_table
-from suricatalog.log import get_events_from_eve
 from suricatalog.filter import BaseFilter
+from suricatalog.log import EveLogHandler
 from suricatalog.providers import TableAlertProvider, TableColumns
 from suricatalog.screens import DetailScreen, ErrorScreen
 
@@ -26,7 +27,7 @@ class BaseAlertApp(App):
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
     ):
@@ -41,33 +42,35 @@ class BaseAlertApp(App):
         self.filter = None
 
     @staticmethod
-    def __get_key_from_map__(map1: Dict[str, Any], keys: List[str]):
+    def __get_key_from_map__(data: dict[str, Any], keys: list[str]) -> str | None:
         """
         Return the first matching key from a map
-        :param map1:
+        :param data:
         :param keys:
         :return: Nothing if none of the keys are in the map
         """
         val = ""
         for key in keys:
-            if key in map1:
-                val = map1[key]
+            if key in data:
+                val = data[key]
                 break
         return val
 
     @staticmethod
-    async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
+    async def extract_from_alert(alert: dict[str, Any]) -> dict[str, Any]:
         """
         Extract alerts from event
         :param alert:
         :return:
         """
-        timestamp = alert['timestamp']
-        dest_port = str(BaseAlertApp.__get_key_from_map__(alert, ['dest_port']))
-        dest_ip = BaseAlertApp.__get_key_from_map__(alert, ['dest_ip'])
-        src_ip = BaseAlertApp.__get_key_from_map__(alert, ['src_ip'])
-        src_port = str(BaseAlertApp.__get_key_from_map__(alert, ['src_port']))
-        protocol = BaseAlertApp.__get_key_from_map__(alert, ['app_proto', 'proto'])
+        timestamp = alert.get('timestamp')
+        if not timestamp:
+            return {}
+        dest_port = str(BaseAlertApp.__get_key_from_map__(data=alert, keys=['dest_port']))
+        dest_ip = BaseAlertApp.__get_key_from_map__(data=alert, keys=['dest_ip'])
+        src_ip = BaseAlertApp.__get_key_from_map__(data=alert, keys=['src_ip'])
+        src_port = str(BaseAlertApp.__get_key_from_map__(data=alert, keys=['src_port']))
+        protocol = BaseAlertApp.__get_key_from_map__(data=alert, keys=['app_proto', 'proto'])
         severity = alert['alert']['severity']
         if 'signature' in alert:
             signature = alert.get('signature', '')
@@ -96,7 +99,7 @@ class BaseAlertApp(App):
             raise ValueError("Filter is required")
         self.filter = the_filter
 
-    def set_eve_files(self, eve_files: List[Path]):
+    def set_eve_files(self, eve_files: list[Path]):
         """
         Set eve files for application
         :param eve_files:
@@ -118,10 +121,11 @@ class TableAlertApp(BaseAlertApp):
     ENABLE_COMMAND_PALETTE = True
     COMMANDS = App.COMMANDS | {TableAlertProvider}
     current_sorts: set = set()
+    enable_developer_warnings: Reactive[bool] = Reactive(False)
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
     ):
@@ -132,12 +136,12 @@ class TableAlertApp(BaseAlertApp):
         :param watch_css:
         """
         super().__init__(driver_class, css_path, watch_css)
-        self.events: Union[Dict[Dict[str, any]], Dict] = {}
+        self.events: dict[dict[str, any]] | dict = {}
 
     async def show_error(
             self,
-            trace: Union[traceback.StackSummary, None],
-            reason: Union[str, None]
+            trace: traceback.StackSummary | None,
+            reason: str | None
     ) -> None:
         """
         Show error on special screen
@@ -166,7 +170,7 @@ class TableAlertApp(BaseAlertApp):
         alerts_tbl.zebra_stripes = True
         alerts_tbl.loading = True
         alerts_tbl.cursor_type = 'row'
-        alerts_tbl.tooltip = textwrap.dedent("""
+        alerts_tbl.tooltip = inspect.cleandoc("""
         Suricata alert details. Select a row to get full details.
         """)
         yield alerts_tbl
@@ -181,14 +185,14 @@ class TableAlertApp(BaseAlertApp):
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
         try:
-            events = get_events_from_eve(
-                    data_filter=self.filter,
-                    eve_files=self.eve_files
-            )
-            for event in events:
+            eve_lh = EveLogHandler()
+            for event in eve_lh.get_events(data_filter=self.filter, eve_files=self.eve_files):
+                self.log.debug(f"Got event (filter={self.filter}): {event}")
                 if not self.filter.accept(event):
                     continue
                 brief_data = await BaseAlertApp.extract_from_alert(event)
+                if not brief_data:
+                    self.log.warning("Skipping malformed event: %s", event)
                 timestamp = brief_data['timestamp']
                 alerts_tbl.add_row(
                     timestamp,
@@ -205,16 +209,15 @@ class TableAlertApp(BaseAlertApp):
             self.notify(
                 title="Finish loading events",
                 timeout=5,
-                severity="information",
-                message=textwrap.dedent(f"""
+                severity="information" if alert_cnt > 0 else "error",
+                message=inspect.cleandoc(f"""
                 Loaded {alert_cnt} messages.
                 Click on a row to get more details, CTR+\\ to search
-                """)
+                """) if alert_cnt > 0 else "Nothing to display."
             )
-            if alert_cnt:
-                alerts_tbl.loading = False
-            else:
-                await self.show_error(reason=None, trace=None)
+            alerts_tbl.loading = False
+            if not alert_cnt:
+                await self.show_error(reason="Could not recover a single alert.", trace=None)
         except ValueError as ve:
             if hasattr(ve, 'reason'):
                 reason = f"{ve}"
@@ -222,9 +225,9 @@ class TableAlertApp(BaseAlertApp):
                 reason = ve.message
             else:
                 reason = f"{ve}"
-            self.log.info(f"Fatal error: {reason}")
+            self.log.error(f"Fatal error: {reason}")
             tb = traceback.extract_stack()
-            self.log.info(tb)
+            self.log.error(tb)
             await self.show_error(trace=tb, reason=str(ve))
 
     def sort_reverse(self, sort_type: str):

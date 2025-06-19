@@ -3,7 +3,7 @@ Common filtering logic
 """
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any
 
 from suricatalog.time import DEFAULT_TIMESTAMP_10M_AGO, parse_timestamp, to_utc
 
@@ -14,7 +14,7 @@ class BaseFilter(ABC):
     """
 
     @abstractmethod
-    def accept(self, data: Dict[Any, Any]) -> bool:
+    def accept(self, data: dict[Any, Any]) -> bool:
         """
         Needs to be overridden with real logic
         :param data:
@@ -28,7 +28,7 @@ class AlwaysTrueFilter(BaseFilter):
     This filter is always true
     """
 
-    def accept(self, data: Dict[Any, Any]) -> bool:
+    def accept(self, data: dict[Any, Any]) -> bool:
         """
         Always true implementation
         :param data:
@@ -69,7 +69,7 @@ class OnlyAlertsFilter(BaseFilter):
             raise ValueError(f"{timestamp} has not TimeZone information")
         self._timestamp = timestamp
 
-    def accept(self, data: Dict[Any, Any]) -> bool:
+    def accept(self, data: dict[Any, Any]) -> bool:
         """
         Filter events based on time and only alerts
         :param data:
@@ -79,9 +79,7 @@ class OnlyAlertsFilter(BaseFilter):
             event_timestamp = parse_timestamp(data['timestamp'])
             if event_timestamp <= self._timestamp:
                 return False
-            if 'event_type' in data and 'alert' == data['event_type']:
-                return True
-            return False
+            return bool('event_type' in data and data['event_type'] == 'alert')
         except ValueError:
             return False
 
@@ -91,13 +89,11 @@ class NXDomainFilter(BaseFilter):
     Filter for DNS code
     """
 
-    def accept(self, data: Dict[Any, Any]) -> bool:
+    def accept(self, data: dict[Any, Any]) -> bool:
         """
         tail -f eve.json|jq -c 'select(.dns.rcode=="NXDOMAIN")'
         """
-        if 'dns' in data and 'rcode' in data['dns'] and data['dns']['rcode'] == 'NXDOMAIN':
-            return True
-        return False
+        return bool('dns' in data and 'rcode' in data['dns'] and data['dns']['rcode'] == 'NXDOMAIN')
 
 
 class WithPrintablePayloadFilter(BaseFilter):
@@ -105,13 +101,13 @@ class WithPrintablePayloadFilter(BaseFilter):
     Show only records with a printable payload
     """
 
-    def accept(self, data: Dict[Any, Any]) -> bool:
+    def accept(self, data: dict[Any, Any]) -> bool:
         """
         cat ~/SuricataLog/test/eve.json | jq -r -c 'select(.event_type=="alert")|.payload'|base64 --decode
         :param data:
         :return:
         """
-        if 'event_type' in data and 'alert' == data['event_type']:
+        if 'event_type' in data and data['event_type'] == 'alert':
             payload_printable = 'payload_printable' in data and data['payload_printable'] and data[
                 'payload_printable'] != 'null'
             has_payload = 'payload' in data and data['payload'] and data['payload'] != 'null'
@@ -147,7 +143,7 @@ class TimestampFilter(BaseFilter):
             raise ValueError(f"{timestamp} has not TimeZone information")
         self._timestamp = timestamp
 
-    def accept(self, data: Dict[Any, Any]) -> bool:
+    def accept(self, data: dict[Any, Any]) -> bool:
         """
         Filter events on a given timestamp
         :param data:
@@ -172,13 +168,13 @@ class WithPayloadFilter(BaseFilter):
     Filter records with any payload
     """
 
-    def accept(self, data: Dict[Any, Any]) -> bool:
+    def accept(self, data: dict[Any, Any]) -> bool:
         """
         cat ~/SuricataLog/test/eve.json | jq -r -c 'select(.event_type=="alert")|.payload'|base64 --decode
         :param data:
         :return:
         """
-        if 'event_type' in data and 'alert' == data['event_type']:
+        if 'event_type' in data and data['event_type'] == 'alert':
             payload = 'payload' in data and data['payload'] and data[
                 'payload'] != 'null'
             if payload:

@@ -7,7 +7,7 @@ from traceback import StackSummary
 from textual import on
 from textual.app import ComposeResult
 from textual.screen import ModalScreen
-from textual.widgets import Pretty, Button
+from textual.widgets import Button, Pretty
 
 from suricatalog import BASEDIR
 
@@ -102,7 +102,7 @@ class ErrorScreen(ModalScreen):
             title="Unrecoverable error, press 'E' to exit!",
             message="There was an error, application won't recover.",
             severity="error",
-            timeout=15
+            timeout=120
         )
         button = Button.error(
             "Exit application",

@@ -11,13 +11,23 @@ A few things:
 
 import argparse
 import sys
-from pathlib import Path
 from ipaddress import ip_address
+from pathlib import Path
 
-from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, AlwaysTrueFilter, TimestampFilter
-from suricatalog.log import DEFAULT_EVE
+from suricatalog.canned import (
+    get_agents,
+    get_capture,
+    get_host_data_use,
+    get_one_shot_flow_table,
+)
+from suricatalog.filter import (
+    AlwaysTrueFilter,
+    NXDomainFilter,
+    TimestampFilter,
+    WithPrintablePayloadFilter,
+)
+from suricatalog.log import DEFAULT_EVE_JSON
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
-from suricatalog.canned import get_one_shot_flow_table, get_host_data_use, get_agents, get_capture
 
 ALWAYS_TRUE = AlwaysTrueFilter()
 
@@ -69,7 +79,7 @@ def main():
         'eve_file',
         type=Path,
         nargs="+",
-        help=f"Path to one or more {DEFAULT_EVE[0]} file to parse."
+        help=f"Path to one or more {DEFAULT_EVE_JSON[0]} file to parse."
     )
     options = parser.parse_args()
     timestamp_filter = TimestampFilter()

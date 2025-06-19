@@ -81,14 +81,16 @@ If the unit tests fails, then this is most likely the first place to fix a probl
 I do recommend also running the textualize console and watch for the console messages:
 
 ```shell
-textual console
+# textual console
+textual console --exclude SYSTEM --exclude EVENT
 ```
 
 Then on another terminal:
 
 ```shell
-textual run --dev --command eve_log --timestamp '2015-01-01 10:41:21.642899' --formats TABLE test/eve.json
+textual run --dev --command eve_log --timestamp '2015-01-01 10:41:21.642899' test/eve.json
 ```
+That will print even debug messages on the console (you can exclude these if you restart the console with '--exclude DEBUG')
 
 ### Creating a Docker image
 

@@ -2,18 +2,17 @@
 Top user application related code
 """
 from pathlib import Path
-from typing import Type, List
 
+import pyperclip
 from textual import work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Header, RichLog, Footer
-import pyperclip
+from textual.widgets import Footer, Header, RichLog
 
 from suricatalog import BASEDIR
 from suricatalog.clipboard import copy_from_richlog
 from suricatalog.filter import BaseFilter
-from suricatalog.log import get_events_from_eve
+from suricatalog.log import EveLogHandler
 from suricatalog.report import TopUserAgents
 
 
@@ -30,11 +29,11 @@ class TopUserApp(App):
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
             data_filter: BaseFilter = None,
-            eve: List[Path] = None
+            eve: list[Path] = None
     ):
         """
         Constructor
@@ -96,7 +95,8 @@ class TopUserApp(App):
         top_user_agents = TopUserAgents()
         log = self.query_one("#agent", RichLog)
         log.loading = False
-        for event in get_events_from_eve(
+        eve_lh = EveLogHandler()
+        for event in eve_lh.get_events(
                 eve_files=self.eve_files,
                 data_filter=self.data_filter):
             await top_user_agents.ingest_data(event)

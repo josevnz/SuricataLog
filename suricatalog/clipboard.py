@@ -2,14 +2,14 @@
 Common logic to handle copying data to the clipboard.
 Depending on how much data you are displaying, these may can crash the application.
 """
-from typing import Tuple, Any
+from typing import Any
 
-import pyperclip
-from textual.widgets import RichLog, DataTable, Digits
 import orjson
+import pyperclip
+from textual.widgets import DataTable, Digits, RichLog
 
 
-def copy_from_richlog(rich_log: RichLog) -> Tuple[str, int]:
+def copy_from_richlog(rich_log: RichLog) -> tuple[str, int]:
     """
     Extract data from rich log.
     Messages are not properly formatted as JSON, they are copied 'as-is'
@@ -23,7 +23,7 @@ def copy_from_richlog(rich_log: RichLog) -> Tuple[str, int]:
     return text_to_copy, len(text_to_copy)
 
 
-def copy_from_digits(digits: Digits) -> Tuple[str, int]:
+def copy_from_digits(digits: Digits) -> tuple[str, int]:
     """
     Extract data from digits
     :param digits:
@@ -46,7 +46,7 @@ def copy_from_table(data_table: DataTable) -> tuple[list[Any], int] | tuple[str,
         return [], 0
     rows = []
     columns = []
-    for key, column in data_table.columns.items():
+    for _, column in data_table.columns.items():
         columns.append(column.label.plain)
     rows.append(columns)
     for key in data_table.rows:

@@ -1,6 +1,6 @@
-# Run code through Pylint
+# Run code through RUff
 ---
-name: Pylint action
+name: Ruff action
 'on':
   - push
 jobs:
@@ -9,7 +9,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - '3.9'
           - '3.11'
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +20,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --editable .[dev,lint]
-      - name: Analysing the SuricataLog code with pylint
+      - name: Analysing the SuricataLog code with Ruff
         run: |
-          pylint suricatalog --extension-pkg-allow-list orjson
+          ruff check suricatalog
+          ruff check test

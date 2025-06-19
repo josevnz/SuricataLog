@@ -1,14 +1,24 @@
 """
 Unit tests for mini apps
 """
+
 import unittest
 from ipaddress import ip_address
 from pathlib import Path
 
-from textual.widgets import RichLog, DataTable, Digits
+from textual.widgets import DataTable, Digits, RichLog
 
-from suricatalog.canned import get_capture, get_one_shot_flow_table, get_host_data_use, get_agents
-from suricatalog.filter import NXDomainFilter, WithPrintablePayloadFilter, TimestampFilter
+from suricatalog.canned import (
+    get_agents,
+    get_capture,
+    get_host_data_use,
+    get_one_shot_flow_table,
+)
+from suricatalog.filter import (
+    NXDomainFilter,
+    TimestampFilter,
+    WithPrintablePayloadFilter,
+)
 from suricatalog.scripts.eve_json import ALWAYS_TRUE
 from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO
 
@@ -22,6 +32,7 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
     """
     Concrete implementation of unit test for mini apps
     """
+
     async def test_get_capture(self):
         """
         Simulate user iteration with mini apps
@@ -30,7 +41,7 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
         app = get_capture(
             eve=[EVE_FILE],
             data_filter=NXDomainFilter(),
-            title="SuricataLog DNS records with NXDOMAIN"
+            title="SuricataLog DNS records with NXDOMAIN",
         )
         self.assertIsNotNone(app)
         async with app.run_test() as pilot:
@@ -43,7 +54,7 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
             app = get_capture(
                 eve=[EVE_FILE],
                 data_filter=WithPrintablePayloadFilter(),
-                title="SuricataLog Inspect Alert Data (payload)"
+                title="SuricataLog Inspect Alert Data (payload)",
             )
             self.assertIsNotNone(app)
         async with app.run_test() as pilot:
@@ -58,10 +69,7 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
         Test one shot table app
         :return:
         """
-        app = get_one_shot_flow_table(
-            eve=[EVE_FILE],
-            data_filter=ALWAYS_TRUE
-        )
+        app = get_one_shot_flow_table(eve=[EVE_FILE], data_filter=ALWAYS_TRUE)
         self.assertIsNotNone(app)
         async with app.run_test() as pilot:
             table = app.query(DataTable).first()
@@ -83,13 +91,13 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
         app = get_host_data_use(
             eve_files=[EVE_UDP_FILE],
             data_filter=ts,
-            ip_address=ip_address('224.0.0.251')
+            ip_address=ip_address("224.0.0.251"),
         )
         self.assertIsNotNone(app)
         async with app.run_test() as pilot:
             netflow = app.query(Digits).first()
             self.assertIsNotNone(netflow)
-            self.assertEqual('0 bytes', netflow.value)
+            self.assertEqual("0 bytes", netflow.value)
             await pilot.pause()
             await pilot.press("q")
 
@@ -100,10 +108,7 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
         """
         ts = TimestampFilter()
         ts.timestamp = DEFAULT_TIMESTAMP_10Y_AGO
-        app = get_agents(
-            eve_files=[EVE_FILE],
-            data_filter=ts
-        )
+        app = get_agents(eve_files=[EVE_FILE], data_filter=ts)
         self.assertIsNotNone(app)
         async with app.run_test() as pilot:
             log = app.screen.query(RichLog).first()
@@ -113,5 +118,5 @@ class MiniAppsTestCase(unittest.IsolatedAsyncioTestCase):
             await pilot.press("q")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

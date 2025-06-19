@@ -1,13 +1,13 @@
 """
 Common logic to handle timestamps and dates
 """
-from datetime import timedelta, datetime, timezone, tzinfo
-from typing import Union, Any
+from datetime import UTC, datetime, timedelta, tzinfo
 from timeit import default_timer as timer
+from typing import Any
 
 import pytz
 
-DEFAULT_TZ: tzinfo = datetime.now(timezone.utc).astimezone().tzinfo
+DEFAULT_TZ: tzinfo = datetime.now(UTC).astimezone().tzinfo
 
 
 def to_utc(candidate: datetime) -> datetime:
@@ -27,7 +27,7 @@ DEFAULT_TIMESTAMP_10M_AGO: datetime = to_utc(datetime.now(tz=DEFAULT_TZ) - timed
 DEFAULT_TIMESTAMP_10Y_AGO: datetime = to_utc(datetime.now(tz=DEFAULT_TZ) - timedelta(days=365 * 10))
 
 
-def parse_timestamp(candidate: Union[str, Any]) -> datetime:
+def parse_timestamp(candidate: str | Any) -> datetime:
     """
     Expected something like 2022-02-08T16:32:14.900292+0000
     :param candidate:
