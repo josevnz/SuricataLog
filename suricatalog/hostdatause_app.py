@@ -14,7 +14,7 @@ from textual.widgets import Header, Digits, Footer
 from suricatalog import BASEDIR
 from suricatalog.clipboard import copy_from_digits
 from suricatalog.filter import BaseFilter
-from suricatalog.log import get_events_from_eve
+from suricatalog.log import EveLogHandler
 from suricatalog.report import HostDataUseReport
 
 
@@ -98,7 +98,8 @@ class HostDataUse(App):
         :return:
         """
         host_data_user_report = HostDataUseReport()
-        for event in get_events_from_eve(
+        eve_lh = EveLogHandler()
+        for event in eve_lh.get_events(
                 eve_files=self.eve,
                 data_filter=self.data_filter):
             await host_data_user_report.ingest_data(event, self.ip_address)

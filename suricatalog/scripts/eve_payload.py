@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from suricatalog.filter import WithPayloadFilter
-from suricatalog.log import DEFAULT_EVE
+from suricatalog.log import DEFAULT_EVE_JSON
 from suricatalog.payload_app import PayloadApp
 
 
@@ -26,7 +26,7 @@ def main():
         'eve_file',
         type=Path,
         nargs="+",
-        help=f"Path to one or more {DEFAULT_EVE[0]} file to parse."
+        help=f"Path to one or more {DEFAULT_EVE_JSON[0]} file to parse."
     )
     options = parser.parse_args()
     try:

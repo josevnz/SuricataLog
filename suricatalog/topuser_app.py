@@ -13,7 +13,7 @@ import pyperclip
 from suricatalog import BASEDIR
 from suricatalog.clipboard import copy_from_richlog
 from suricatalog.filter import BaseFilter
-from suricatalog.log import get_events_from_eve
+from suricatalog.log import EveLogHandler
 from suricatalog.report import TopUserAgents
 
 
@@ -96,7 +96,8 @@ class TopUserApp(App):
         top_user_agents = TopUserAgents()
         log = self.query_one("#agent", RichLog)
         log.loading = False
-        for event in get_events_from_eve(
+        eve_lh = EveLogHandler()
+        for event in eve_lh.get_events(
                 eve_files=self.eve_files,
                 data_filter=self.data_filter):
             await top_user_agents.ingest_data(event)

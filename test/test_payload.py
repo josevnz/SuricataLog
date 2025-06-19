@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from suricatalog.filter import WithPayloadFilter
-from suricatalog.log import get_events_from_eve
+from suricatalog.log import EveLogHandler
 from suricatalog.payload_app import PayloadApp
 
 BASEDIR = Path(__file__).parent
@@ -33,7 +33,7 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
         :return:
         """
         payload_filter = WithPayloadFilter()
-        payload_events = list(get_events_from_eve(
+        payload_events = list(EveLogHandler().get_events(
             eve_files=EVE_FILES,
             data_filter=payload_filter
         ))
@@ -46,7 +46,7 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
         :return:
         """
         payload_filter = WithPayloadFilter()
-        payload_events = list(get_events_from_eve(
+        payload_events = list(EveLogHandler().get_events(
                 eve_files=EVE_FILES,
                 data_filter=payload_filter
         ))
@@ -66,7 +66,7 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
         :return:
         """
         payload_filter = WithPayloadFilter()
-        payload_events = list(get_events_from_eve(
+        payload_events = list(EveLogHandler().get_events(
                 eve_files=EVE_FILES,
                 data_filter=payload_filter
         ))
@@ -106,7 +106,7 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
         :return:
         """
         payload_filter = WithPayloadFilter()
-        for event_with_payload in get_events_from_eve(eve_files=PAYLOAD_FILES, data_filter=payload_filter):
+        for event_with_payload in EveLogHandler().get_events(eve_files=PAYLOAD_FILES, data_filter=payload_filter):
             self.assertIsNotNone(event_with_payload)
             extracted = await PayloadApp.extract_from_alert(alert=event_with_payload)
             self.assertIsNotNone(extracted)
@@ -127,7 +127,7 @@ class PayloadTestCase(unittest.IsolatedAsyncioTestCase):
         large_eve_compressed = Path(BASEDIR) / "eve_large.json.bz2"
         data = bz2.BZ2File(large_eve_compressed).read()
         huge_eve_file.write(data)
-        for event in get_events_from_eve(eve_files=[Path(huge_eve_file.name)], data_filter=payload_filter):
+        for event in EveLogHandler().get_events(eve_files=[Path(huge_eve_file.name)], data_filter=payload_filter):
             self.fail(f"Not supposed to get any events, yet got this: {event}")
 
 

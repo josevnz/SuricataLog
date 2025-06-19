@@ -14,7 +14,7 @@ from textual.driver import Driver
 from textual.widgets import Header, Footer, ProgressBar, DataTable
 
 from suricatalog.filter import WithPayloadFilter
-from suricatalog.log import get_events_from_eve
+from suricatalog.log import EveLogHandler
 
 
 class PayloadApp(App):
@@ -251,14 +251,15 @@ class PayloadApp(App):
             extract_ids = set([])
             # Need to count the events first. And don't want to store them in memory because the payload may be
             # huge...
-            for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
+            eve_lh = EveLogHandler()
+            for alert_with_payload in eve_lh.get_events(eve_files=self.eve, data_filter=self.data_filter):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                 uid = self.unique_id(extracted=extracted)
                 extract_ids.add(uid)
             progress_bar = self.query_one(ProgressBar)
             if extract_ids:
                 self.loaded = 1
-                for alert_with_payload in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
+                for alert_with_payload in eve_lh.get_events(eve_files=self.eve, data_filter=self.data_filter):
                     extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
                     file_name = PayloadApp.generate_filename(
                         base_dir=self.report_dir,

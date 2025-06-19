@@ -13,7 +13,7 @@ from textual.widgets import Header, DataTable, Footer
 
 from suricatalog.clipboard import copy_from_table
 from suricatalog.filter import BaseFilter
-from suricatalog.log import get_events_from_eve
+from suricatalog.log import EveLogHandler
 from suricatalog.report import AggregatedFlowProtoReport
 
 
@@ -100,7 +100,8 @@ class FlowApp(App):
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
         afr = AggregatedFlowProtoReport()
-        for event in get_events_from_eve(
+        eve_lh = EveLogHandler()
+        for event in eve_lh.get_events(
                 eve_files=self.eve,
                 data_filter=self.data_filter):
             if not self.data_filter.accept(event):

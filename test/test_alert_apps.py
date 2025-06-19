@@ -9,7 +9,7 @@ from pathlib import Path
 
 from suricatalog.alert_apps import TableAlertApp, BaseAlertApp
 from suricatalog.filter import OnlyAlertsFilter, WithPrintablePayloadFilter
-from suricatalog.log import get_events_from_eve
+from suricatalog.log import EveLogHandler
 
 BASEDIR = Path(__file__).parent
 _fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s")
@@ -67,7 +67,7 @@ class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
         """
         for eve_file in AlertAppsTestCase.eve_files:
             with self.subTest(eve_file=eve_file):
-                events = get_events_from_eve(
+                events = EveLogHandler().get_events(
                     data_filter=WithPrintablePayloadFilter(),
                     eve_files=[eve_file]
                 )

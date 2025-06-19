@@ -13,7 +13,7 @@ from textual.driver import Driver
 from textual.widgets import Footer, Header, DataTable
 
 from suricatalog.clipboard import copy_from_table
-from suricatalog.log import get_events_from_eve
+from suricatalog.log import EveLogHandler
 from suricatalog.filter import BaseFilter
 from suricatalog.providers import TableAlertProvider, TableColumns
 from suricatalog.screens import DetailScreen, ErrorScreen
@@ -183,7 +183,8 @@ class TableAlertApp(BaseAlertApp):
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
         try:
-            for event in get_events_from_eve(data_filter=self.filter, eve_files=self.eve_files):
+            eve_lh = EveLogHandler()
+            for event in eve_lh.get_events(data_filter=self.filter, eve_files=self.eve_files):
                 if not self.filter.accept(event):
                     continue
                 brief_data = await BaseAlertApp.extract_from_alert(event)

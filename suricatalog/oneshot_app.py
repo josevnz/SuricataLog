@@ -13,7 +13,7 @@ from textual.widgets import Header, RichLog, Footer
 
 from suricatalog.clipboard import copy_from_richlog
 from suricatalog.filter import BaseFilter
-from suricatalog.log import get_events_from_eve
+from suricatalog.log import EveLogHandler
 from suricatalog.screens import ErrorScreen
 
 
@@ -94,7 +94,8 @@ class OneShotApp(App):
         :return:
         """
         try:
-            for single_alert in get_events_from_eve(eve_files=self.eve, data_filter=self.data_filter):
+            eve_lh = EveLogHandler()
+            for single_alert in eve_lh.get_events(eve_files=self.eve, data_filter=self.data_filter):
                 log.loading = False
                 log.write(single_alert)
                 self.loaded += 1

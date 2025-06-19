@@ -9,7 +9,7 @@ from pathlib import Path
 from suricatalog.filter import BaseFilter, WithPrintablePayloadFilter
 from suricatalog.alert_apps import TableAlertApp
 from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10Y_AGO
-from suricatalog.log import DEFAULT_EVE
+from suricatalog.log import DEFAULT_EVE_JSON
 
 
 def main():
@@ -28,7 +28,7 @@ def main():
         'eve_file',
         type=Path,
         nargs="+",
-        help=f"Path to one or more {DEFAULT_EVE[0]} file to parse."
+        help=f"Path to one or more {DEFAULT_EVE_JSON[0]} file to parse."
     )
     options = parser.parse_args()
     timestamp_filter: BaseFilter = WithPrintablePayloadFilter()
