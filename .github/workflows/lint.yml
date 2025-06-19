@@ -22,5 +22,5 @@ jobs:
           pip install --editable .[dev,lint]
       - name: Analysing the SuricataLog code with pylint
         run: |
-          ruff suricatalog
-          ruff tests
+          ruff check suricatalog
+          ruff check tests
