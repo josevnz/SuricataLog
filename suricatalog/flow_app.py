@@ -1,7 +1,7 @@
 """
 Collection of mini apps, canned reports.
 """
-import textwrap
+import inspect
 from pathlib import Path
 
 import pyperclip
@@ -85,7 +85,7 @@ class FlowApp(App):
         alerts_tbl.zebra_stripes = True
         alerts_tbl.loading = True
         alerts_tbl.cursor_type = 'row'
-        alerts_tbl.tooltip = textwrap.dedent("""
+        alerts_tbl.tooltip = inspect.cleandoc("""
         Network flow details
         """)
         yield alerts_tbl

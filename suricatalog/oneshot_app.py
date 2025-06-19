@@ -112,7 +112,7 @@ class OneShotApp(App):
             )
             await self.push_screen(error_screen)
 
-    @work(exclusive=False)
+    @work(exclusive=False, thread=True)
     async def on_mount(self):
         """
         Place elements on the screen

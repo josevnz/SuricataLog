@@ -176,7 +176,7 @@ class TableAlertApp(BaseAlertApp):
         yield alerts_tbl
         yield Footer()
 
-    @work(exclusive=False)
+    @work(exclusive=False, thread=True)
     async def on_mount(self) -> None:
         """
         Initialize TUI components
