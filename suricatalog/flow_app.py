@@ -5,10 +5,11 @@ import inspect
 from pathlib import Path
 
 import pyperclip
-from textual import on
+from textual import on, work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.widgets import DataTable, Footer, Header
+from textual.worker import get_current_worker
 
 from suricatalog.clipboard import copy_from_table
 from suricatalog.filter import BaseFilter
@@ -91,6 +92,19 @@ class FlowApp(App):
         yield alerts_tbl
         yield Footer()
 
+    @work(exclusive=True, thread=True)
+    async def update_flow_table(self, afr: AggregatedFlowProtoReport):
+        alerts_tbl = self.query_one(DataTable)
+        worker = get_current_worker()
+        for (dest_ip_port, cnt) in afr.port_proto_count.items():
+            if not worker.is_cancelled:
+                self.call_from_thread(
+                    alerts_tbl.add_row,
+                    dest_ip_port[0],
+                    str(dest_ip_port[1]),
+                    str(cnt)
+                )
+
     async def on_mount(self) -> None:
         """
         Populate components of the app on screen with relevant data
@@ -99,19 +113,21 @@ class FlowApp(App):
         alerts_tbl = self.query_one(DataTable)
         afr = AggregatedFlowProtoReport()
         eve_lh = EveLogHandler()
+        cnt = 0
         for event in eve_lh.get_events(
                 eve_files=self.eve,
                 data_filter=self.data_filter):
             if not self.data_filter.accept(event):
                 continue
             await afr.ingest_data(event)
+            cnt += 1
         alerts_tbl.loading = False
-        for (dest_ip_port, cnt) in afr.port_proto_count.items():
-            alerts_tbl.add_row(
-                dest_ip_port[0],
-                str(dest_ip_port[1]),
-                str(cnt)
-            )
+        self.notify(
+            message=f"Aggregated {cnt} events",
+            title="Aggregated events",
+            severity="information" if cnt > 0 else "error",
+        )
+        self.update_flow_table(afr=afr)
 
     def sort_reverse(self, sort_type: str):
         """

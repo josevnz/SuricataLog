@@ -90,7 +90,7 @@ class HostDataUse(App):
         yield digits
         yield Footer()
 
-    @work(exclusive=False, thread=True)
+    @work(exclusive=True, thread=True)
     async def on_mount(self) -> None:
         """
         Initialize TUI components with data

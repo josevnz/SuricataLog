@@ -115,15 +115,14 @@ class OneShotApp(App):
     @work(exclusive=False, thread=True)
     async def on_mount(self):
         """
-        Place elements on the screen
+        Place elements on the screen, pump events
         :return:
         """
         log = self.query_one('#events', RichLog)
         await self.pump_events(log)
-        if self.loaded > 0:
-            self.notify(
-                title="Finished loading events",
-                severity="information",
-                timeout=5,
-                message=f"Number of messages loaded: {self.loaded}"
-            )
+        self.notify(
+            title="Finished loading events",
+            severity="information" if self.loaded > 0 else "warning",
+            timeout=15,
+            message=f"Number of messages loaded: {self.loaded}"
+        )
