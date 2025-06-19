@@ -6,7 +6,7 @@ from functools import partial
 from typing import Any
 
 from rich.style import Style
-from textual.command import Provider, Hits, Hit, DiscoveryHit
+from textual.command import DiscoveryHit, Hit, Hits, Provider
 from textual.screen import Screen
 from textual.widgets import DataTable
 

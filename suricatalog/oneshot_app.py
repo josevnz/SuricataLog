@@ -3,13 +3,12 @@ One shot application related code
 """
 import traceback
 from pathlib import Path
-from typing import Type, List
 
 import pyperclip
 from textual import work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Header, RichLog, Footer
+from textual.widgets import Footer, Header, RichLog
 
 from suricatalog.clipboard import copy_from_richlog
 from suricatalog.filter import BaseFilter
@@ -29,10 +28,10 @@ class OneShotApp(App):
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
-            eve: List[Path] = None,
+            eve: list[Path] = None,
             data_filter: BaseFilter = None
     ):
         """

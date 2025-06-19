@@ -1,6 +1,6 @@
-# Run code through Pylint
+# Run code through RUff
 ---
-name: Pylint action
+name: Ruff action
 'on':
   - push
 jobs:
@@ -22,4 +22,5 @@ jobs:
           pip install --editable .[dev,lint]
       - name: Analysing the SuricataLog code with pylint
         run: |
-          pylint suricatalog --extension-pkg-allow-list orjson
+          ruff suricatalog
+          ruff tests

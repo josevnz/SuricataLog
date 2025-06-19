@@ -1,12 +1,11 @@
 """
 Unit tests for clipboard data copy
 """
-import unittest
-from typing import List
 
-from textual.widgets import Digits, RichLog, DataTable
+import unittest
+
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer
+from textual.widgets import DataTable, Digits, Footer, Header, RichLog
 
 from suricatalog.clipboard import copy_from_digits, copy_from_richlog, copy_from_table
 
@@ -15,14 +14,10 @@ class ClipboardRichLogDemoApp(App):
     """
     Test application to copy data from rich log
     """
-    BINDINGS = [
-        ("c", "copy", "Copy to clipboard")
-    ]
 
-    def __init__(
-            self,
-            log_update: str
-    ):
+    BINDINGS = [("c", "copy", "Copy to clipboard")]
+
+    def __init__(self, log_update: str):
         """
         Constructor
         :param log_update:
@@ -57,14 +52,10 @@ class ClipboardDataTableDemoApp(App):
     """
     Demo application to copy data from data table
     """
-    BINDINGS = [
-        ("c", "copy", "Copy to clipboard")
-    ]
 
-    def __init__(
-            self,
-            table_update: List[List[str]]
-    ):
+    BINDINGS = [("c", "copy", "Copy to clipboard")]
+
+    def __init__(self, table_update: list[list[str]]):
         """
         Constructor
         :param table_update:
@@ -99,6 +90,7 @@ class ClipboardTestCase(unittest.IsolatedAsyncioTestCase):
     """
     Test cases for clipboard data copy
     """
+
     def test_copy_from_digits(self):
         """
         Copy digits
@@ -123,7 +115,7 @@ class ClipboardTestCase(unittest.IsolatedAsyncioTestCase):
             await pilot.pause()
             await pilot.press("c")  # Copy to clipboard
             await pilot.pause()
-        self.assertEqual('Got 1973!\nGot 1973!', app.copied)
+        self.assertEqual("Got 1973!\nGot 1973!", app.copied)
         self.assertEqual(19, app.ln)
 
     async def test_copy_from_table(self):
@@ -132,9 +124,9 @@ class ClipboardTestCase(unittest.IsolatedAsyncioTestCase):
         :return:
         """
         update = [
-            ['Login ID', 'Full Name'],
+            ["Login ID", "Full Name"],
             ["1973", "Jose Vicente Nunez"],
-            ["1973", "Jose Vicente Nunez"]
+            ["1973", "Jose Vicente Nunez"],
         ]
         app = ClipboardDataTableDemoApp(table_update=update)
         self.assertIsNotNone(app)
@@ -145,5 +137,5 @@ class ClipboardTestCase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(86, app.ln)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

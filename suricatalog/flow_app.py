@@ -3,13 +3,12 @@ Collection of mini apps, canned reports.
 """
 import textwrap
 from pathlib import Path
-from typing import Type, List
 
 import pyperclip
 from textual import on
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Header, DataTable, Footer
+from textual.widgets import DataTable, Footer, Header
 
 from suricatalog.clipboard import copy_from_table
 from suricatalog.filter import BaseFilter
@@ -30,11 +29,11 @@ class FlowApp(App):
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
             data_filter: BaseFilter = None,
-            eve: List[Path] = None
+            eve: list[Path] = None
     ):
         """
         Constructor
@@ -98,7 +97,6 @@ class FlowApp(App):
         :return:
         """
         alerts_tbl = self.query_one(DataTable)
-        alert_cnt = 0
         afr = AggregatedFlowProtoReport()
         eve_lh = EveLogHandler()
         for event in eve_lh.get_events(
@@ -114,7 +112,6 @@ class FlowApp(App):
                 str(dest_ip_port[1]),
                 str(cnt)
             )
-            alert_cnt += 1
 
     def sort_reverse(self, sort_type: str):
         """

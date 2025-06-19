@@ -3,13 +3,12 @@ Host data use application
 """
 import textwrap
 from pathlib import Path
-from typing import Type, List
 
 import pyperclip
 from textual import work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Header, Digits, Footer
+from textual.widgets import Digits, Footer, Header
 
 from suricatalog import BASEDIR
 from suricatalog.clipboard import copy_from_digits
@@ -31,12 +30,12 @@ class HostDataUse(App):
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
             ip_address: str = None,
             data_filter: BaseFilter = None,
-            eve: List[Path] = None
+            eve: list[Path] = None
 
     ):
         """

@@ -2,9 +2,9 @@
 Eve log file contents logic
 """
 import json
-from pathlib import Path
 import logging
-from typing import Dict, Union
+from pathlib import Path
+
 import orjson
 from orjson import JSONDecodeError as OJSONDecodeError
 from textual.logging import TextualHandler
@@ -21,7 +21,7 @@ class EveLogHandler:
 
     def __init__(
             self,
-            log_file: Union[Path, str, None] = None
+            log_file: Path | str | None = None
     ):
         """
         :param log_file: If set logs will be written to a file
@@ -48,7 +48,7 @@ class EveLogHandler:
             *,
             eve_files=None,
             data_filter: BaseFilter,
-    ) -> Dict:
+    ) -> dict:
         """
         Get alerts from a JSON even file. Assumed each line is a valid
         JSON document, otherwise reader will crash
@@ -63,7 +63,7 @@ class EveLogHandler:
 
         for eve_file in eve_files:
             try:
-                with open(eve_file, 'rt', encoding='utf-8') as eve:
+                with open(eve_file, encoding='utf-8') as eve:
                     for line in eve:
                         try:
                             data = orjson.loads(

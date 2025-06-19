@@ -6,10 +6,10 @@ Author: Jose Vicente Nunez (kodegeek.com@protonmail.com)
 import argparse
 from pathlib import Path
 
-from suricatalog.filter import BaseFilter, WithPrintablePayloadFilter
 from suricatalog.alert_apps import TableAlertApp
-from suricatalog.time import parse_timestamp, DEFAULT_TIMESTAMP_10Y_AGO
+from suricatalog.filter import BaseFilter, WithPrintablePayloadFilter
 from suricatalog.log import DEFAULT_EVE_JSON
+from suricatalog.time import DEFAULT_TIMESTAMP_10Y_AGO, parse_timestamp
 
 
 def main():

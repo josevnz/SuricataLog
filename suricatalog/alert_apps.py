@@ -4,17 +4,17 @@ Alert applications
 import inspect
 import traceback
 from pathlib import Path
-from typing import Type, List, Any, Dict, Union
+from typing import Any
 
 import pyperclip
 from textual import on, work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Footer, Header, DataTable
+from textual.widgets import DataTable, Footer, Header
 
 from suricatalog.clipboard import copy_from_table
-from suricatalog.log import EveLogHandler
 from suricatalog.filter import BaseFilter
+from suricatalog.log import EveLogHandler
 from suricatalog.providers import TableAlertProvider, TableColumns
 from suricatalog.screens import DetailScreen, ErrorScreen
 
@@ -26,7 +26,7 @@ class BaseAlertApp(App):
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
     ):
@@ -41,7 +41,7 @@ class BaseAlertApp(App):
         self.filter = None
 
     @staticmethod
-    def __get_key_from_map__(data: Dict[str, Any], keys: List[str]) -> Union[str, None]:
+    def __get_key_from_map__(data: dict[str, Any], keys: list[str]) -> str | None:
         """
         Return the first matching key from a map
         :param data:
@@ -56,13 +56,13 @@ class BaseAlertApp(App):
         return val
 
     @staticmethod
-    async def extract_from_alert(alert: Dict[str, Any]) -> Dict[str, Any]:
+    async def extract_from_alert(alert: dict[str, Any]) -> dict[str, Any]:
         """
         Extract alerts from event
         :param alert:
         :return:
         """
-        timestamp = alert.get('timestamp', None)
+        timestamp = alert.get('timestamp')
         if not timestamp:
             return {}
         dest_port = str(BaseAlertApp.__get_key_from_map__(data=alert, keys=['dest_port']))
@@ -98,7 +98,7 @@ class BaseAlertApp(App):
             raise ValueError("Filter is required")
         self.filter = the_filter
 
-    def set_eve_files(self, eve_files: List[Path]):
+    def set_eve_files(self, eve_files: list[Path]):
         """
         Set eve files for application
         :param eve_files:
@@ -123,7 +123,7 @@ class TableAlertApp(BaseAlertApp):
 
     def __init__(
             self,
-            driver_class: Type[Driver] | None = None,
+            driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
     ):
@@ -134,12 +134,12 @@ class TableAlertApp(BaseAlertApp):
         :param watch_css:
         """
         super().__init__(driver_class, css_path, watch_css)
-        self.events: Union[Dict[Dict[str, any]], Dict] = {}
+        self.events: dict[dict[str, any]] | dict = {}
 
     async def show_error(
             self,
-            trace: Union[traceback.StackSummary, None],
-            reason: Union[str, None]
+            trace: traceback.StackSummary | None,
+            reason: str | None
     ) -> None:
         """
         Show error on special screen

@@ -1,18 +1,21 @@
 """
 Unit test for alert applications
 """
+
 import bz2
 import logging
 import tempfile
 import unittest
 from pathlib import Path
 
-from suricatalog.alert_apps import TableAlertApp, BaseAlertApp
+from suricatalog.alert_apps import BaseAlertApp, TableAlertApp
 from suricatalog.filter import OnlyAlertsFilter, WithPrintablePayloadFilter
 from suricatalog.log import EveLogHandler
 
 BASEDIR = Path(__file__).parent
-_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s")
+_fmt = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s"
+)
 _sc = logging.StreamHandler()
 _sc.setFormatter(_fmt)
 LOGGER = logging.getLogger(__name__)
@@ -27,7 +30,7 @@ WANTED_KEYS = [
     "protocol",
     "severity",
     "signature",
-    "payload_printable"
+    "payload_printable",
 ]
 
 
@@ -36,25 +39,22 @@ class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.huge_eve_file = tempfile.NamedTemporaryFile(
-            mode='wb',
-            dir="/var/tmp",
-            prefix="eve_large-",
-            suffix=".json",
-            delete=False
-        )
-        large_eve_compressed = Path(BASEDIR) / "eve_large.json.bz2"
-        data = bz2.BZ2File(large_eve_compressed).read()
-        cls.huge_eve_file.write(data)
-        cls.eve_files = [
-            BASEDIR.joinpath("eve-2.json"),
-            BASEDIR.joinpath("eve.json"),
-            Path(cls.huge_eve_file.name)
-        ]
+        with tempfile.NamedTemporaryFile(
+            mode="wb", dir="/var/tmp", prefix="eve_large-", suffix=".json", delete=False
+        ) as test_temp_file:
+            large_eve_compressed = Path(BASEDIR) / "eve_large.json.bz2"
+            data = bz2.BZ2File(large_eve_compressed).read()
+            cls.huge_eve_file = test_temp_file
+            cls.huge_eve_file.write(data)
+            cls.eve_files = [
+                BASEDIR.joinpath("eve-2.json"),
+                BASEDIR.joinpath("eve.json"),
+                Path(cls.huge_eve_file.name),
+            ]
 
     @classmethod
     def tearDownClass(cls):
-        cls.huge_eve_file.delete
+        Path(cls.huge_eve_file.name).unlink()
 
     """
     Alert app unit test
@@ -68,8 +68,7 @@ class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
         for eve_file in AlertAppsTestCase.eve_files:
             with self.subTest(eve_file=eve_file):
                 events = EveLogHandler().get_events(
-                    data_filter=WithPrintablePayloadFilter(),
-                    eve_files=[eve_file]
+                    data_filter=WithPrintablePayloadFilter(), eve_files=[eve_file]
                 )
                 LOGGER.info("Processing %s", eve_file.as_posix())
 
@@ -100,5 +99,5 @@ class AlertAppsTestCase(unittest.IsolatedAsyncioTestCase):
             await pilot.press("q")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
