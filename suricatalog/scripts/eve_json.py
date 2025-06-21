@@ -37,7 +37,10 @@ def main():
     CLI entry point
     :return:
     """
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawTextHelpFormatter
+    )
     parser.add_argument(
         "--timestamp",
         type=parse_timestamp,

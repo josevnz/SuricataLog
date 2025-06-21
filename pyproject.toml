@@ -62,6 +62,7 @@ eve_json = "suricatalog.scripts.eve_json:main"
 eve_log = "suricatalog.scripts.eve_log:main"
 eve_server = "suricatalog.scripts.eve_server:main"
 eve_payload = "suricatalog.scripts.eve_payload:main"
+eve_bash_auto_complete = "suricatalog.scripts.eve_autocomplete:main"
 
 [tool.ruff.lint]
 select = [

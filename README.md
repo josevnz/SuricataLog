@@ -208,6 +208,14 @@ uvx --from SuricataLog eve_json --useragent /var/log/suricata/eve.json
 uvx --from SuricataLog eve_server --application eve_json -- --flow /var/log/suricata/eve.json
 ```
 
+## Bash Autocomplete
+
+You can install Bash autocomplete for all the SuricataLog scripts. Just run the following and follow directions:
+
+```shell
+eve_autocomplete --help
+```
+
 ## Supported versions
 
 I work on this project on **my spare time** and I cannot support every version of Linux/ Python combination out there.
