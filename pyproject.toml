@@ -26,10 +26,10 @@ authors = [
 maintainers = [
     {name = "Jose Vicente Nunez", email = "kodegeek.com@protonmail.com"},
 ]
+license = "MIT AND (Apache-2.0 OR BSD-2-Clause)"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
-  "Programming Language :: Python",
-  "License :: OSI Approved :: Apache Software License"
+  "Programming Language :: Python"
 ]
 dependencies = [
     "textual==3.4.0",

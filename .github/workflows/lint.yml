@@ -1,6 +1,6 @@
 # Run code through Ruff, Yamllint, Shellcheck
 ---
-name: Code lint action
+name: Suricata log code linting
 'on':
   - push
 jobs:
