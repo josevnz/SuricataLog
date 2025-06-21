@@ -35,4 +35,4 @@ jobs:
           yamllint etc/suricata/suricata.yaml docker-compose.yml
       - name: Analysing the SuricataLog code with Shellcheck
         run: |          
-          shellcheck etc/replay_pcap_file.sh
+          shellcheck scripts/replay_pcap_file.sh
