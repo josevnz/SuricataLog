@@ -1,6 +1,6 @@
 # Run code through RUff
 ---
-name: Ruff action
+name: Code lint action
 'on':
   - push
 jobs:
