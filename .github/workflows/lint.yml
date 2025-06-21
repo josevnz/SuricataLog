@@ -24,3 +24,5 @@ jobs:
         run: |
           ruff check suricatalog
           ruff check test
+          yamllint etc/suricata/suricata.yaml
+          shellcheck etc/replay_pcap_file.sh
