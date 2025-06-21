@@ -50,6 +50,9 @@ exclude = ["test*"]
 
 [tool.setuptools]
 include-package-data = true
+script-files = [
+    "scripts/replay_pcap_file.sh"
+]
 
 [tool.setuptools.package-data]
 "suricatalog" = ["css/*.tcss"]
