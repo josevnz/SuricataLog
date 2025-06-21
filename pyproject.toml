@@ -40,7 +40,7 @@ dependencies = [
 description = "Scripts to display contents of Suricata eve.json log"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.11"
-keywords = ["suricata", "log", "eve"]
+keywords = ["suricata", "log", "eve", "json", "cybersecurity"]
 [project.urls]
 Repository = "https://github.com/josevnz/SuricataLog"
 
