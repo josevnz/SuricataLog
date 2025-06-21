@@ -1,6 +1,8 @@
 # Run code through RUff
 ---
 name: Ruff action
+permissions:
+  contents: read
 'on':
   - push
 jobs:
