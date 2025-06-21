@@ -18,10 +18,10 @@ fi
 for util in tcpreplay ip; do
   if ! type -p "$util" > /dev/null 2>&1; then
     cat<<MSG
-    Please put $util on the PATH and try again!
+    Please put '$util' on the PATH and try again!
 
     Or install it (Example for an RPM based Linux distribution):
-    sudo dnf -y install tcpreplay
+    sudo dnf -y install $util
 MSG
     exit 100
   fi
