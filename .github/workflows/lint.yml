@@ -24,5 +24,9 @@ jobs:
         run: |
           ruff check suricatalog
           ruff check test
+      - name: Analysing the SuricataLog code with Yamllint
+        run: |          
           yamllint etc/suricata/suricata.yaml
+      - name: Analysing the SuricataLog code with Shellcheck
+        run: |          
           shellcheck etc/replay_pcap_file.sh
