@@ -12,6 +12,7 @@ from textual.app import App, ComposeResult, CSSPathType
 from textual.containers import Center, Middle
 from textual.driver import Driver
 from textual.widgets import DataTable, Footer, Header, ProgressBar
+from textual.worker import get_current_worker
 
 from suricatalog.filter import WithPayloadFilter
 from suricatalog.log import EveLogHandler
@@ -160,13 +161,12 @@ class PayloadApp(App):
             yield ProgressBar(total=100, show_eta=False)
         yield Footer()
 
-    @work(exclusive=False)
     async def on_mount(self) -> None:
         """
         Initialize TUI components
         :return:
         """
-        await self.pump_events()
+        self.pump_events()
         if self.loaded > 0:
             self.notify(
                 title="Finished extracting payloads from events",
@@ -240,6 +240,7 @@ class PayloadApp(App):
         uid = extracted['signature'] + str(extracted['timestamp'])
         return uid
 
+    @work(exclusive=True, thread=True)
     async def pump_events(self):
         """
         Get events from eve log and send them to the application log
@@ -247,6 +248,7 @@ class PayloadApp(App):
         :return:
         """
         try:
+            worker = get_current_worker()
             extract_ids = set([])
             # Need to count the events first. And don't want to store them in memory because the payload may be
             # huge...
@@ -266,17 +268,28 @@ class PayloadApp(App):
                     )
                     await self.save_payload(payload_file=file_name, payload=extracted)
                     progress = (self.loaded / len(extract_ids)) * 100.0
-                    progress_bar.update(total=len(extract_ids), progress=progress)
-                    self.loaded += 1
+                    if not worker.is_cancelled:
+                        self.call_from_thread(
+                            progress_bar.update,
+                            total=len(extract_ids),
+                            progress=progress
+                        )
+                        self.loaded += 1
             else:
-                self.notify(
-                    message="There are no payloads to extract!",
-                    timeout=30,
-                    title="Provided files do not have a single payload.",
-                    severity="warning",
-                )
-                progress = 100.0
-                progress_bar.update(total=len(extract_ids), progress=progress)
+                if not worker.is_cancelled:
+                    self.call_from_thread(
+                        self.notify,
+                        message="There are no payloads to extract!",
+                        timeout=30,
+                        title="Provided files do not have a single payload.",
+                        severity="warning"
+                    )
+                    progress = 100.0
+                    self.call_from_thread(
+                        progress_bar.update,
+                        total=len(extract_ids),
+                        progress=progress
+                    )
 
         except ValueError as ve:
             if hasattr(ve, 'message'):

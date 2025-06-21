@@ -1,6 +1,6 @@
-# Run code through RUff
+# Run code through Ruff, Yamllint, Shellcheck
 ---
-name: Ruff action
+name: Suricata log code linting
 permissions:
   contents: read
 'on':
@@ -22,7 +22,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --editable .[dev,lint]
+      - name: Check packaging with twine
+        run: |
+          python -m build .
+          twine check dist/suricatalog-*.whl
       - name: Analysing the SuricataLog code with Ruff
         run: |
           ruff check suricatalog
           ruff check test
+      - name: Analysing the SuricataLog code with Yamllint
+        run: |          
+          yamllint etc/suricata/suricata.yaml docker-compose.yml
+      - name: Analysing the SuricataLog code with Shellcheck
+        run: |          
+          shellcheck etc/replay_pcap_file.sh

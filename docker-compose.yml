@@ -13,16 +13,16 @@
 ---
 services:
   suricatalog:
-    container_name: suricatalog
-    image: suricatalog:latest
+    container_name: "suricatalog"
+    image: "suricatalog:latest"
     volumes:
       - type: bind
-        source: /var/log/suricata
-        target: /suricatalog
+        source: "/var/log/suricata"
+        target: "/suricatalog"
         read_only: true
-    restart: no
+    restart: "no"
     tty: true
     build:
       context: "."
-      dockerfile: Dockerfile
-      network: host
+      dockerfile: "Dockerfile"
+      network: "host"

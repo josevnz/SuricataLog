@@ -12,6 +12,7 @@ from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
 from textual.reactive import Reactive
 from textual.widgets import DataTable, Footer, Header
+from textual.worker import get_current_worker
 
 from suricatalog.clipboard import copy_from_table
 from suricatalog.filter import BaseFilter
@@ -176,25 +177,24 @@ class TableAlertApp(BaseAlertApp):
         yield alerts_tbl
         yield Footer()
 
-    @work(exclusive=False)
-    async def on_mount(self) -> None:
-        """
-        Initialize TUI components
-        :return:
-        """
+    @work(exclusive=True, thread=True)
+    async def update_alert_table(self):
         alerts_tbl = self.query_one(DataTable)
         alert_cnt = 0
-        try:
-            eve_lh = EveLogHandler()
-            for event in eve_lh.get_events(data_filter=self.filter, eve_files=self.eve_files):
-                self.log.debug(f"Got event (filter={self.filter}): {event}")
-                if not self.filter.accept(event):
-                    continue
-                brief_data = await BaseAlertApp.extract_from_alert(event)
-                if not brief_data:
-                    self.log.warning("Skipping malformed event: %s", event)
-                timestamp = brief_data['timestamp']
-                alerts_tbl.add_row(
+        eve_lh = EveLogHandler()
+        worker = get_current_worker()
+
+        for event in eve_lh.get_events(data_filter=self.filter, eve_files=self.eve_files):
+            self.log.debug(f"Got event (filter={self.filter}): {event}")
+            if not self.filter.accept(event):
+                continue
+            brief_data = await BaseAlertApp.extract_from_alert(event)
+            if not brief_data:
+                self.log.warning("Skipping malformed event: %s", event)
+            timestamp = brief_data['timestamp']
+            if not worker.is_cancelled:
+                self.call_from_thread(
+                    alerts_tbl.add_row,
                     timestamp,
                     brief_data['severity'],
                     brief_data['signature'],
@@ -203,21 +203,39 @@ class TableAlertApp(BaseAlertApp):
                     f"{brief_data['src_ip']}:{brief_data['src_port']}",
                     brief_data['payload_printable']
                 )
-                alert_cnt += 1
-                self.events[timestamp] = event
-            alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
-            self.notify(
+            alert_cnt += 1
+            self.events[timestamp] = event
+        alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
+        if not worker.is_cancelled:
+            self.call_from_thread(
+                self.notify,
                 title="Finish loading events",
                 timeout=5,
                 severity="information" if alert_cnt > 0 else "error",
                 message=inspect.cleandoc(f"""
-                Loaded {alert_cnt} messages.
-                Click on a row to get more details, CTR+\\ to search
-                """) if alert_cnt > 0 else "Nothing to display."
+                        Loaded {alert_cnt} messages.
+                        Click on a row to get more details, CTR+\\ to search
+                        """) if alert_cnt > 0 else "Nothing to display."
             )
-            alerts_tbl.loading = False
-            if not alert_cnt:
-                await self.show_error(reason="Could not recover a single alert.", trace=None)
+
+        if not alert_cnt:
+            val = self.call_from_thread(
+                self.show_error,
+                reason="Could not recover a single alert.",
+                trace=None
+            )
+            if val:
+                await val
+
+    async def on_mount(self) -> None:
+        """
+        Initialize TUI components
+        :return:
+        """
+        alerts_tbl = self.query_one(DataTable)
+        alerts_tbl.loading = False
+        try:
+            self.update_alert_table()
         except ValueError as ve:
             if hasattr(ve, 'reason'):
                 reason = f"{ve}"

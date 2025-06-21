@@ -1,7 +1,7 @@
 """
 Host data use application
 """
-import textwrap
+import inspect
 from pathlib import Path
 
 import pyperclip
@@ -84,13 +84,13 @@ class HostDataUse(App):
         yield Header()
         digits = Digits(id="netflow")
         digits.loading = True
-        digits.tooltip = textwrap.dedent("""
+        digits.tooltip = inspect.cleandoc("""
             Net FLow in bytes.
             """)
         yield digits
         yield Footer()
 
-    @work(exclusive=False)
+    @work(exclusive=True, thread=True)
     async def on_mount(self) -> None:
         """
         Initialize TUI components with data

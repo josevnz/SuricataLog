@@ -6,7 +6,7 @@ This is probably the most consuming part. Using the regular Python JSON library 
 
 ```python
 import timeit
-timeit.timeit(setup="from suricatalog.filter import TimestampFilter;from suricatalog.log import get_events_from_eve; files=['/home/josevnz/SuricataLog/master/test/eve.json']; filter=TimestampFilter()", stmt="[x for x in get_events_from_eve(eve_files=files, data_filter=filter)]", number=1000)
+timeit.timeit(setup="from suricatalog.filter import TimestampFilter;from suricatalog.log import EveLogHandler; files=['/home/josevnz/Downloads/eve_large.json']; filter=TimestampFilter()", stmt="[x for x in EveLogHandler().get_events(eve_files=files, data_filter=filter)]", number=1000)
 ```
 
 

@@ -86,7 +86,7 @@ class TopUserApp(App):
         yield pretty
         yield Footer()
 
-    @work(exclusive=False)
+    @work(exclusive=False, thread=True)
     async def on_mount(self) -> None:
         """
         Populate TUI components with data

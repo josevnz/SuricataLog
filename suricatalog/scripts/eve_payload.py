@@ -31,7 +31,7 @@ def main():
     options = parser.parse_args()
     try:
         if not options.report_dir.exists():
-            raise ValueError(f"Please continue {options.report_dir} before we can proceed to extract the payloads.")
+            raise ValueError(f"'{options.report_dir}' doesn't exist, please fix and try again.")
         app = PayloadApp(
             eve=options.eve_file,
             data_filter=WithPayloadFilter(),
