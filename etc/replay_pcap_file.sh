@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eu
+set -o pipefail
 :<<DOC
 Script to replay a PCAP file at accelerated pace on the default network interface
 This script is meant to be used for testing; Also you can tell Suricata to replay any pcap file by itself using the
