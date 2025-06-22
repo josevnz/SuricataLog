@@ -51,7 +51,8 @@ exclude = ["test*"]
 [tool.setuptools]
 include-package-data = true
 script-files = [
-    "scripts/replay_pcap_file.sh"
+    "scripts/replay_pcap_file.sh",
+    "scripts/suricata_log_bash_auto_complete.sh",
 ]
 
 [tool.setuptools.package-data]

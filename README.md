@@ -210,7 +210,10 @@ uvx --from SuricataLog eve_server --application eve_json -- --flow /var/log/suri
 
 ## Bash Autocomplete
 
-You can install Bash autocomplete for all the SuricataLog scripts. Just run the following and follow directions:
+I tried my best to follow [8.6 Programmable Completion](https://www.gnu.org/software/bash/manual/html_node/Programmable-Completion.html#Programmable-Completion)
+
+### Installation of auto complete commands
+You can install Bash autocomplete for all the SuricataLog scripts. Just run the 'eve_autocomplete' and follow directions:
 
 ```shell
 eve_autocomplete --help
