@@ -37,10 +37,40 @@ if [[ -n $BASH_VERSION && -n $VIRTUAL_ENV ]]; then
     _eve_json() {
       local current_word="${COMP_WORDS[$COMP_CWORD]}"
       local previous_word="${COMP_WORDS[$COMP_CWORD - 1]}"
-      words="--timestamp --nxdomain --payload --flow --netflow --useragent --help"
-
-      mapfile -t COMPREPLY< <(compgen -W "$words" -- "$current_word")
-      return 0
+      local options="--help --timestamp --nxdomain --payload --flow --netflow --useragent"
+      local json_files=(/var/log/suricata/*.json)
+      # First argument
+      if [[ ${COMP_CWORD} -eq 1 ]]; then
+        if [[ "${#json_files[@]}" -gt 0 ]]; then
+          mapfile -t COMPREPLY< <(compgen -W "$options ${json_files[*]}" -- "$current_word")
+        else
+          mapfile -t COMPREPLY< <(compgen -W "$options" -- "$current_word")
+        fi
+        return 0
+      fi
+      # Previous word is an option
+      case "$previous_word" in
+        "--timestamp")
+          local completions
+          completions=$(eve_bash_auto_complete --timestamp)
+          completions="${completions//[[:space:]]/\\ }"
+          mapfile -t COMPREPLY < <(compgen -W "$completions" -- "$current_word")
+          return 0
+          ;;
+        "--netflow")
+          mapfile -t COMPREPLY< <(compgen -W "127.0.0.1" -- "$current_word")
+          return 0
+          ;;
+        "--help" | "--nxdomain" | "--payload" | "--flow" | "--useragent")
+          return 0
+          ;;
+      esac
+      # All options have been provided
+      if [[ "${#COMP_WORDS[@]}" -gt $((COMP_CWORD + 1)) ]]; then
+        mapfile -t COMPREPLY< <(compgen -f /var/log/suricata/*.json -- "$current_word")
+        return 0
+      fi
+      COMPREPLY=()
     } && complete -o filenames -F _eve_json eve_json
 
     _eve_log() {
@@ -69,7 +99,7 @@ if [[ -n $BASH_VERSION && -n $VIRTUAL_ENV ]]; then
       fi
       # All options have been provided
       if [[ "${#COMP_WORDS[@]}" -gt $((COMP_CWORD + 1)) ]]; then
-        mafile -t COMPREPLY< <(compgen -f /var/log/suricatalog/*.json -- "$current_word")
+        mafile -t COMPREPLY< <(compgen -f /var/log/suricata/*.json -- "$current_word")
         return 0
       fi
       COMPREPLY=()
