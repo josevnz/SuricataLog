@@ -8,10 +8,13 @@ SuricataLog Bash completion (double tab key) for the following scripts:
   - eve_payload
   - eve_bash_auto_complete
 
-To enable auto-completion, this file should be copied to the following location:
+To enable auto-completion, this file will be copied to the following location:
 - $HOME/.local/share/bash-completion/completions
 
-More details at: https://github.com/scop/bash-completion/blob/main/README.md
+Bash auto completion is a complicated subject:
+  - https://www.gnu.org/software/bash/manual/html_node/A-Programmable-Completion-Example.html#A-Programmable-Completion-Example
+
+Note than I only generate auto completion for the most common flags. User can figure out the rest by calling '--help'.
 
 DOC
 if [[ -n $BASH_VERSION && -n $VIRTUAL_ENV ]]; then
@@ -21,9 +24,10 @@ if [[ -n $BASH_VERSION && -n $VIRTUAL_ENV ]]; then
     _default_suricata_eve_log_timestamp="$(eve_bash_auto_complete --timestamp)"
 
     _eve_bash_auto_complete() {
-      if [[ "${#COMP_WORDS[@]}" == "2" ]]; then
+      local current_word="${COMP_WORDS[$COMP_CWORD]}"
+      local previous_word="${COMP_WORDS[$COMP_CWORD - 1]}"
+      if [[ ${COMP_CWORD} -eq 1 ]]; then
         local words="--install --remove --timestamp --help"
-        local current_word="${COMP_WORDS[$COMP_CWORD]}"
         mapfile -t COMPREPLY< <(compgen -W "$words" -- "$current_word")
         return 0
       fi
@@ -42,39 +46,39 @@ if [[ -n $BASH_VERSION && -n $VIRTUAL_ENV ]]; then
     _eve_log() {
       local current_word="${COMP_WORDS[$COMP_CWORD]}"
       local previous_word="${COMP_WORDS[$COMP_CWORD - 1]}"
-      if [[ "${#COMP_WORDS[@]}" -eq 2 ]]; then
-        case "$current_word" in
-          -*)
-            words="--timestamp --help"
-            mapfile -t COMPREPLY< <(compgen -W "$words" -- "$current_word")
-            ;;
-        esac
-      elif [[ "${#COMP_WORDS[@]}" -eq 4 ]]; then
-        case "$previous_word" in
-          --timestamp)
-            local completions
-            # Timestamps have spaces, prevent them from being broken
-            local old_ifs=$IFS
-            IFS="*"
-            completions="$(eve_bash_auto_complete --timestamp)"
-            mapfile -t COMPREPLY < <(compgen -W "$completions" -- "$current_word")
-            IFS=$old_ifs
-            ;;
-        esac
-      elif [[ "${#COMP_WORDS[@]}" -gt 4 ]]; then
-        local eve_files
-        eve_files=$(compgen -f /var/log/suricata/eve*.json)
-        if [[ -n $eve_files ]]; then
-          mapfile -t COMPREPLY < <(compgen -W "$eve_files" -- "$current_word")
+      local options="--help --timestamp"
+      local json_files=(/var/log/suricata/*.json)
+      # First argument
+      if [[ ${COMP_CWORD} -eq 1 ]]; then
+        if [[ "${#json_files[@]}" -gt 0 ]]; then
+          mapfile -t COMPREPLY< <(compgen -W "$options ${json_files[*]}" -- "$current_word")
+        else
+          mapfile -t COMPREPLY< <(compgen -W "$options" -- "$current_word")
         fi
+        return 0
       fi
-      return 0
+      # Previous word is an option
+      if [[ "$previous_word" == "--timestamp" ]]; then
+        local completions
+        completions=$(eve_bash_auto_complete --timestamp)
+        completions="${completions//[[:space:]]/\\ }"
+        mapfile -t COMPREPLY < <(compgen -W "$completions" -- "$current_word")
+        return 0
+      elif [[ "$previous_word" == "--help" ]]; then
+        return 0
+      fi
+      # All options have been provided
+      if [[ "${#COMP_WORDS[@]}" -gt $((COMP_CWORD + 1)) ]]; then
+        mafile -t COMPREPLY< <(compgen -f /var/log/suricatalog/*.json -- "$current_word")
+        return 0
+      fi
+      COMPREPLY=()
     } && complete -o filenames -F _eve_log eve_log
 
     _eve_server() {
       local current_word="${COMP_WORDS[$COMP_CWORD]}"
       local previous_word="${COMP_WORDS[$COMP_CWORD - 1]}"
-
+      # First time
       if [[ ${COMP_CWORD} -eq 1 ]]; then
         mapfile -t COMPREPLY < <(compgen -W "--application --port" -- "$current_word")
         return 0
@@ -85,13 +89,13 @@ if [[ -n $BASH_VERSION && -n $VIRTUAL_ENV ]]; then
         mapfile -t COMPREPLY< <(compgen -W "$applications" -- "$current_word")
         return 0
       fi
-      # Check if the previous word is --port
+      # Previous word is --port
       if [[ "$previous_word" == "--port" ]]; then
         local ports="8000 8080 8001"
         mapfile -t COMPREPLY< <(compgen -W "$ports" -- "$current_word")
         return 0
       fi
-      # Check if the previous word is the application name
+      # Previous word is the application name or the port number
       if [[ "$previous_word" == "eve_log" || "$previous_word" == "eve_json" || "$previous_word" =~ ^[0-9]+$ ]]; then
         mapfile -t COMPREPLY< <(compgen -f /var/log/suricata/*.json -- "$current_word")
         return 0
