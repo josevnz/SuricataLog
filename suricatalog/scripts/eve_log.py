@@ -17,17 +17,15 @@ def main():
     CLI entry point
     :return:
     """
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawTextHelpFormatter
+    )
     parser.add_argument(
         "--timestamp",
         type=parse_timestamp,
         default=DEFAULT_TIMESTAMP_10Y_AGO,
         help=f"Minimum timestamp in the past to use when filtering events ({DEFAULT_TIMESTAMP_10Y_AGO})"
-    )
-    parser.add_argument(
-        "--warnings",
-        action="store_true",
-        help="If passed, enable developer warnings for some events"
     )
     parser.add_argument(
         'eve_file',
@@ -43,8 +41,6 @@ def main():
         app.title = f"SuricataLog Alerts (filter='>={options.timestamp}') for {','.join([eve.name for eve in options.eve_file])}"
         app.set_filter(timestamp_filter)
         app.set_eve_files(options.eve_file)
-        if options.warnings:
-            app.enable_developer_warnings = True
         app.run()
     except KeyboardInterrupt:
         pass

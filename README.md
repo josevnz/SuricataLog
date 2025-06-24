@@ -100,6 +100,15 @@ Please check [DOCKER.md](DOCKER.md) for more details.
 
 Once everything is installed in  your virtual environment you should be able to call the scripts
 
+You can find out what applications got installed by using auto complete, after activating your virtual environment:
+
+```shell
+eve_[tab][tab]
+```
+
+And if you install the Bash auto complete extension you will also get some suggestions for the flags.
+
+
 ### Simple EVE log parser
 
 Better see it by yourself (remember, use --help to learn what options are supported)
@@ -206,6 +215,21 @@ If you have uv, you can just do this:
 uvx --from SuricataLog eve_log /var/log/suricata/eve.json
 uvx --from SuricataLog eve_json --useragent /var/log/suricata/eve.json
 uvx --from SuricataLog eve_server --application eve_json -- --flow /var/log/suricata/eve.json
+```
+
+You get the idea.
+
+## Bash Auto complete
+
+I tried my best to follow [8.6 Programmable Completion](https://www.gnu.org/software/bash/manual/html_node/Programmable-Completion.html#Programmable-Completion)
+
+I provided auto complete for the most common flags. You can figure out all the flags by passing '--help' to any of the scripts.
+
+### Installation of auto complete commands
+You can install Bash autocomplete for all the SuricataLog scripts. Just run the 'eve_autocomplete' and follow directions:
+
+```shell
+eve_autocomplete --help
 ```
 
 ## Supported versions

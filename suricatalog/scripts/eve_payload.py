@@ -1,6 +1,6 @@
 """
 Application to extract payloads from Suricata eve log files.
-:return:
+
 """
 import argparse
 from pathlib import Path
@@ -15,7 +15,10 @@ def main():
     CLI entry point
     :return:
     """
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawTextHelpFormatter
+    )
     parser.add_argument(
         '--report_dir',
         type=Path,

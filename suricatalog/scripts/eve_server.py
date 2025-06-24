@@ -29,7 +29,8 @@ def main():
     """
     parser = argparse.ArgumentParser(
         description=__doc__,
-        exit_on_error=False
+        exit_on_error=False,
+        formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument(
         "--application",
@@ -42,6 +43,7 @@ def main():
         "--port",
         action='store',
         default=PORT,
+        type=int,
         required=False,
         help=f"Override port: {PORT}"
     )
