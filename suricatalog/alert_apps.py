@@ -211,13 +211,13 @@ class TableAlertApp(BaseAlertApp):
                 payload_printable
             ])
             if len(batch_of_events) == chunk and not worker.is_cancelled:
-                self.call_from_thread(alerts_tbl.add_rows,batch_of_events)
+                self.call_from_thread(alerts_tbl.add_rows, batch_of_events)
                 batch_of_events = []
                 await asyncio.sleep(0.05)
             alert_cnt += len(batch_of_events)
             self.events[timestamp] = event
         if batch_of_events and not worker.is_cancelled:
-            self.call_from_thread(alerts_tbl.add_rows,batch_of_events)
+            self.call_from_thread(alerts_tbl.add_rows, batch_of_events)
         del batch_of_events
         alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
         if not worker.is_cancelled:
