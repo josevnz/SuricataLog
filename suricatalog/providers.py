@@ -68,11 +68,11 @@ class TableAlertProvider(Provider):
             for column in PROVIDER_COLS:
                 searchable = row[column.value]
                 matcher = self.matcher(searchable)
-                runner_detail = DetailScreen(data=row)
+                event_detail = DetailScreen(data=row)
                 yield DiscoveryHit(
                     display=matcher.highlight(f"{searchable}"),
                     text=f"{column.name}: {searchable}",
-                    command=partial(my_app.push_screen, runner_detail),
+                    command=partial(my_app.push_screen, event_detail),
                     help=f"Select by {column.name}"
                 )
             break  # Only care about the first result
@@ -92,11 +92,11 @@ class TableAlertProvider(Provider):
                 searchable = row[column.value]
                 score = matcher.match(searchable)
                 if score > 0:
-                    runner_detail = DetailScreen(data=row)
+                    event_detail = DetailScreen(data=row)
                     yield Hit(
                         score=score,
                         match_display=matcher.highlight(f"{searchable}"),
-                        command=partial(my_app.push_screen, runner_detail),
+                        command=partial(my_app.push_screen, event_detail),
                         text=f"{column.name}: {searchable}",
                         help=f"Select by {column.name}"
                     )

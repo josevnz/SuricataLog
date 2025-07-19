@@ -1,6 +1,7 @@
 """
 Alert applications
 """
+import asyncio
 import inspect
 import traceback
 from pathlib import Path
@@ -184,6 +185,8 @@ class TableAlertApp(BaseAlertApp):
         eve_lh = EveLogHandler()
         worker = get_current_worker()
 
+        batch_of_events = []
+        chunk = 100
         for event in eve_lh.get_events(data_filter=self.filter, eve_files=self.eve_files):
             self.log.debug(f"Got event (filter={self.filter}): {event}")
             if not self.filter.accept(event):
@@ -192,28 +195,39 @@ class TableAlertApp(BaseAlertApp):
             if not brief_data:
                 self.log.warning("Skipping malformed event: %s", event)
             timestamp = brief_data['timestamp']
-            if not worker.is_cancelled:
-                self.call_from_thread(
-                    alerts_tbl.add_row,
-                    timestamp,
-                    brief_data['severity'],
-                    brief_data['signature'],
-                    brief_data['protocol'],
-                    f"{brief_data['dest_ip']}:{brief_data['dest_port']}",
-                    f"{brief_data['src_ip']}:{brief_data['src_port']}",
-                    brief_data['payload_printable']
-                )
-            alert_cnt += 1
+            severity = brief_data['severity']
+            signature = brief_data['signature']
+            protocol = brief_data['protocol']
+            dest_ip_port = f"{brief_data['dest_ip']}:{brief_data['dest_port']}"
+            src_ip_port = f"{brief_data['src_ip']}:{brief_data['src_port']}"
+            payload_printable = brief_data['payload_printable']
+            batch_of_events.append([
+                timestamp,
+                severity,
+                signature,
+                protocol,
+                dest_ip_port,
+                src_ip_port,
+                payload_printable
+            ])
+            if len(batch_of_events) == chunk and not worker.is_cancelled:
+                self.call_from_thread(alerts_tbl.add_rows, batch_of_events)
+                batch_of_events = []
+                await asyncio.sleep(0.05)
+            alert_cnt += len(batch_of_events)
             self.events[timestamp] = event
+        if batch_of_events and not worker.is_cancelled:
+            self.call_from_thread(alerts_tbl.add_rows, batch_of_events)
+        del batch_of_events
         alerts_tbl.sub_title = f"Total alerts: {alert_cnt}"
         if not worker.is_cancelled:
             self.call_from_thread(
                 self.notify,
-                title="Finish loading events",
+                title="Finished loading events",
                 timeout=5,
                 severity="information" if alert_cnt > 0 else "error",
                 message=inspect.cleandoc(f"""
-                        Loaded {alert_cnt} messages.
+                        Loaded {alert_cnt:,} messages.
                         Click on a row to get more details, CTR+\\ to search
                         """) if alert_cnt > 0 else "Nothing to display."
             )
@@ -284,8 +298,8 @@ class TableAlertApp(BaseAlertApp):
         row_key = event.row_key
         row = table.get_row(row_key)
         data = self.events[row[0]]
-        runner_detail = DetailScreen(data=data)
-        self.push_screen(runner_detail)
+        event_detail = DetailScreen(data=data)
+        self.push_screen(event_detail)
 
     def action_quit_app(self) -> None:
         """
