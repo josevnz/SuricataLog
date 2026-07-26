@@ -23,20 +23,12 @@ so I wrote few scripts with the features I tough would be more useful for my hom
 
 As a bonus, I wrote my learning experience as a [tutorial](TUTORIAL.md) that you can use to learn about Suricata and also how to test it.
 
-## Installing from PIP
-
-Before you do anything else, make sure your environment is good to go:
-
-```shell
-python3 -m venv ~/virtualenv/suricatalog
-. ~/virtualenv/suricatalog/bin/activate
-python3 -m pip install --upgrade pip setuptools wheel
-```
+## Installing from Pypi
 
 ### Installing from Pypi.org
 
 ```shell
-pip3 install --upgrade SuricataLog
+uv pip install SuricataLog
 ```
 
 ### Installing from source
@@ -44,11 +36,8 @@ pip3 install --upgrade SuricataLog
 ```shell
 git clone git@github.com:josevnz/SuricataLog.git
 cd SuricataLog
-python3 -m venv ~/virtualenv/suricatalog
-. ~/virtualenv/suricatalog/bin/activate
-python3 -m pip install --upgrade build
-python3 -m build
-pip3 install dist/SuricataLog-X.Y.Z-py3-none-any.whl
+uv build
+uv pip install dist/suricatalog-1.1.6-py3-none-any.whl
 ```
 
 ### Developer installation
@@ -58,12 +47,9 @@ So you want to contribute? Or found a bug and think you can submit a patch? Nice
 ```shell
 git clone git@github.com:josevnz/SuricataLog.git
 cd SuricataLog
-python3 -m venv ~/virtualenv/suricatalog
-. ~/virtualenv/suricatalog/bin/activate
-pip install --upgrade pip
-python -m pip install --upgrade build
-pip install textual-dev
-pip install --editable .
+uv build
+uv sync --dev
+uv pip install --editable .
 ```
 
 Running unit tests is very easy after that:
