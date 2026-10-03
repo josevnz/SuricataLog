@@ -14,6 +14,7 @@ from textual.driver import Driver
 from textual.widgets import DataTable, Footer, Header, ProgressBar
 from textual.worker import get_current_worker
 
+from suricatalog import get_key_from_map
 from suricatalog.filter import WithPayloadFilter
 from suricatalog.log import EveLogHandler
 
@@ -57,21 +58,6 @@ class PayloadApp(App):
             raise ValueError("Destination report is missing")
         self.report_dir = report_dir
         self.loaded = 0
-
-    @staticmethod
-    def get_key_from_map(map1: dict[str, Any], keys: list[str]):
-        """
-        Return the first matching key from a map
-        :param map1:
-        :param keys:
-        :return: Nothing ig none of the keys are in the map
-        """
-        val = ""
-        for key in keys:
-            if key in map1:
-                val = map1[key]
-                break
-        return val
 
     @staticmethod
     def convert_to_filename(orig: str | None) -> str:
@@ -129,10 +115,10 @@ class PayloadApp(App):
             return None
         try:
             timestamp = alert['timestamp']
-            dest_port = str(PayloadApp.get_key_from_map(alert, ['dest_port']))
-            dest_ip = PayloadApp.get_key_from_map(alert, ['dest_ip'])
-            src_ip = PayloadApp.get_key_from_map(alert, ['src_ip'])
-            src_port = str(PayloadApp.get_key_from_map(alert, ['src_port']))
+            dest_port = str(get_key_from_map(alert, ['dest_port']))
+            dest_ip = get_key_from_map(alert, ['dest_ip'])
+            src_ip = get_key_from_map(alert, ['src_ip'])
+            src_port = str(get_key_from_map(alert, ['src_port']))
             payload = alert['payload']
             if 'signature' in alert:
                 signature = alert['signature']
@@ -244,38 +230,24 @@ class PayloadApp(App):
     async def pump_events(self):
         """
         Get events from eve log and send them to the application log
-        :param
-        :return:
+        Single-pass implementation: collect UIDs first (lightweight), then process in same loop
         """
         try:
             worker = get_current_worker()
-            extract_ids = set([])
-            # Need to count the events first. And don't want to store them in memory because the payload may be
-            # huge...
             eve_lh = EveLogHandler()
+
+            # First pass: collect UIDs only (lightweight, no payload storage)
+            extract_ids = set()
             for alert_with_payload in eve_lh.get_events(eve_files=self.eve, data_filter=self.data_filter):
                 extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
-                uid = self.unique_id(extracted=extracted)
-                extract_ids.add(uid)
+                if extracted:
+                    uid = self.unique_id(extracted=extracted)
+                    extract_ids.add(uid)
+
             progress_bar = self.query_one(ProgressBar)
-            if extract_ids:
-                self.loaded = 1
-                for alert_with_payload in eve_lh.get_events(eve_files=self.eve, data_filter=self.data_filter):
-                    extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
-                    file_name = PayloadApp.generate_filename(
-                        base_dir=self.report_dir,
-                        payload_data=extracted
-                    )
-                    await self.save_payload(payload_file=file_name, payload=extracted)
-                    progress = (self.loaded / len(extract_ids)) * 100.0
-                    if not worker.is_cancelled:
-                        self.call_from_thread(
-                            progress_bar.update,
-                            total=len(extract_ids),
-                            progress=progress
-                        )
-                        self.loaded += 1
-            else:
+            total_count = len(extract_ids)
+
+            if total_count == 0:
                 if not worker.is_cancelled:
                     self.call_from_thread(
                         self.notify,
@@ -284,12 +256,34 @@ class PayloadApp(App):
                         title="Provided files do not have a single payload.",
                         severity="warning"
                     )
-                    progress = 100.0
-                    self.call_from_thread(
-                        progress_bar.update,
-                        total=len(extract_ids),
-                        progress=progress
-                    )
+                self.call_from_thread(progress_bar.update, total=0, progress=100.0)
+                return
+
+            # Second pass: process and save payloads
+            self.loaded = 0
+            for alert_with_payload in eve_lh.get_events(eve_files=self.eve, data_filter=self.data_filter):
+                if worker.is_cancelled:
+                    break
+                extracted = await PayloadApp.extract_from_alert(alert=alert_with_payload)
+                if not extracted:
+                    continue
+                uid = self.unique_id(extracted=extracted)
+                if uid not in extract_ids:
+                    continue  # Already processed or not in our set
+                extract_ids.discard(uid)  # Remove to avoid reprocessing if duplicate
+
+                file_name = PayloadApp.generate_filename(
+                    base_dir=self.report_dir,
+                    payload_data=extracted
+                )
+                await self.save_payload(payload_file=file_name, payload=extracted)
+                self.loaded += 1
+                progress = (self.loaded / total_count) * 100.0
+                self.call_from_thread(
+                    progress_bar.update,
+                    total=total_count,
+                    progress=progress
+                )
 
         except ValueError as ve:
             if hasattr(ve, 'message'):

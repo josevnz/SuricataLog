@@ -65,9 +65,9 @@ class TableAlertProvider(Provider):
         for row_key in self.alerts_tbl.rows:
             row = self.alerts_tbl.get_row(row_key)
             my_app.log.info(f"Searching {row_key}:{row}")
+            matcher = self.matcher("")  # Create matcher once per row
             for column in PROVIDER_COLS:
                 searchable = row[column.value]
-                matcher = self.matcher(searchable)
                 event_detail = DetailScreen(data=row)
                 yield DiscoveryHit(
                     display=matcher.highlight(f"{searchable}"),

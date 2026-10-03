@@ -99,5 +99,5 @@ class TopUserApp(App):
         for event in eve_lh.get_events(
                 eve_files=self.eve_files,
                 data_filter=self.data_filter):
-            await top_user_agents.ingest_data(event)
+            top_user_agents.ingest_data(event)
         log.write(top_user_agents.agents)

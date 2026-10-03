@@ -117,9 +117,7 @@ class FlowApp(App):
         for event in eve_lh.get_events(
                 eve_files=self.eve,
                 data_filter=self.data_filter):
-            if not self.data_filter.accept(event):
-                continue
-            await afr.ingest_data(event)
+            afr.ingest_data(event)
             cnt += 1
         alerts_tbl.loading = False
         self.notify(
