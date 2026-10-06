@@ -28,7 +28,7 @@ jobs:
           twine check dist/suricatalog-*.whl
       - name: Analysing the SuricataLog code with Ruff
         run: |
-          ruff check suricatalog
+          ruff check src/suricatalog
           ruff check test
       - name: Analysing the SuricataLog code with Yamllint
         run: |
