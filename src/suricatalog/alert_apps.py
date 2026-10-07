@@ -1,7 +1,6 @@
 """
 Alert applications
 """
-import asyncio
 import inspect
 import traceback
 from pathlib import Path
@@ -15,6 +14,7 @@ from textual.reactive import Reactive
 from textual.widgets import DataTable, Footer, Header
 from textual.worker import get_current_worker
 
+from suricatalog import get_key_from_map
 from suricatalog.clipboard import copy_from_table
 from suricatalog.filter import BaseFilter
 from suricatalog.log import EveLogHandler
@@ -44,21 +44,6 @@ class BaseAlertApp(App):
         self.filter = None
 
     @staticmethod
-    def __get_key_from_map__(data: dict[str, Any], keys: list[str]) -> str | None:
-        """
-        Return the first matching key from a map
-        :param data:
-        :param keys:
-        :return: Nothing if none of the keys are in the map
-        """
-        val = ""
-        for key in keys:
-            if key in data:
-                val = data[key]
-                break
-        return val
-
-    @staticmethod
     async def extract_from_alert(alert: dict[str, Any]) -> dict[str, Any]:
         """
         Extract alerts from event
@@ -68,11 +53,11 @@ class BaseAlertApp(App):
         timestamp = alert.get('timestamp')
         if not timestamp:
             return {}
-        dest_port = str(BaseAlertApp.__get_key_from_map__(data=alert, keys=['dest_port']))
-        dest_ip = BaseAlertApp.__get_key_from_map__(data=alert, keys=['dest_ip'])
-        src_ip = BaseAlertApp.__get_key_from_map__(data=alert, keys=['src_ip'])
-        src_port = str(BaseAlertApp.__get_key_from_map__(data=alert, keys=['src_port']))
-        protocol = BaseAlertApp.__get_key_from_map__(data=alert, keys=['app_proto', 'proto'])
+        dest_port = str(get_key_from_map(alert, ['dest_port']))
+        dest_ip = get_key_from_map(alert, ['dest_ip'])
+        src_ip = get_key_from_map(alert, ['src_ip'])
+        src_port = str(get_key_from_map(alert, ['src_port']))
+        protocol = get_key_from_map(alert, ['app_proto', 'proto'])
         severity = alert['alert']['severity']
         if 'signature' in alert:
             signature = alert.get('signature', '')
@@ -186,14 +171,13 @@ class TableAlertApp(BaseAlertApp):
         worker = get_current_worker()
 
         batch_of_events = []
-        chunk = 100
+        chunk = 1000  # Larger batch size for better throughput
         for event in eve_lh.get_events(data_filter=self.filter, eve_files=self.eve_files):
             self.log.debug(f"Got event (filter={self.filter}): {event}")
-            if not self.filter.accept(event):
-                continue
             brief_data = await BaseAlertApp.extract_from_alert(event)
             if not brief_data:
                 self.log.warning("Skipping malformed event: %s", event)
+                continue
             timestamp = brief_data['timestamp']
             severity = brief_data['severity']
             signature = brief_data['signature']
@@ -201,6 +185,8 @@ class TableAlertApp(BaseAlertApp):
             dest_ip_port = f"{brief_data['dest_ip']}:{brief_data['dest_port']}"
             src_ip_port = f"{brief_data['src_ip']}:{brief_data['src_port']}"
             payload_printable = brief_data['payload_printable']
+            # Store full event for detail view, keyed by timestamp
+            self.events[timestamp] = event
             batch_of_events.append([
                 timestamp,
                 severity,
@@ -210,12 +196,10 @@ class TableAlertApp(BaseAlertApp):
                 src_ip_port,
                 payload_printable
             ])
-            if len(batch_of_events) == chunk and not worker.is_cancelled:
+            alert_cnt += 1
+            if len(batch_of_events) >= chunk and not worker.is_cancelled:
                 self.call_from_thread(alerts_tbl.add_rows, batch_of_events)
                 batch_of_events = []
-                await asyncio.sleep(0.05)
-            alert_cnt += len(batch_of_events)
-            self.events[timestamp] = event
         if batch_of_events and not worker.is_cancelled:
             self.call_from_thread(alerts_tbl.add_rows, batch_of_events)
         del batch_of_events
@@ -233,13 +217,16 @@ class TableAlertApp(BaseAlertApp):
             )
 
         if not alert_cnt:
-            val = self.call_from_thread(
-                self.show_error,
-                reason="Could not recover a single alert.",
-                trace=None
+            self.call_from_thread(
+                self.notify,
+                title="No alerts found",
+                timeout=10,
+                severity="warning",
+                message=inspect.cleandoc("""
+                    No alerts matched the current filter.
+                    The table will remain empty.
+                    """)
             )
-            if val:
-                await val
 
     async def on_mount(self) -> None:
         """

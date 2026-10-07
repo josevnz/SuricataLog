@@ -11,9 +11,9 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - '3.11'
+          - '3.14'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: 'Set up Python ${{ matrix.python-version }}'
         uses: actions/setup-python@v7
         with:
@@ -28,7 +28,7 @@ jobs:
           twine check dist/suricatalog-*.whl
       - name: Analysing the SuricataLog code with Ruff
         run: |
-          ruff check suricatalog
+          ruff check src/suricatalog
           ruff check test
       - name: Analysing the SuricataLog code with Yamllint
         run: |

@@ -1,7 +1,6 @@
 """
 Screen logic
 """
-import sys
 from traceback import StackSummary
 
 from textual import on
@@ -118,4 +117,4 @@ class ErrorScreen(ModalScreen):
         :param _:
         :return:
         """
-        sys.exit(100)
+        self.app.pop_screen()

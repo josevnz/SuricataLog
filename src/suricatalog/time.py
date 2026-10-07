@@ -5,8 +5,7 @@ from datetime import UTC, datetime, timedelta, tzinfo
 from timeit import default_timer as timer
 from typing import Any
 
-import pytz
-
+# Use built-in UTC instead of pytz for better performance
 DEFAULT_TZ: tzinfo = datetime.now(UTC).astimezone().tzinfo
 
 
@@ -16,11 +15,9 @@ def to_utc(candidate: datetime) -> datetime:
     :param candidate:
     :return:
     """
-    try:
-        converted = candidate.astimezone(pytz.utc)
-    except (ValueError, TypeError):
-        converted = candidate.replace(tzinfo=pytz.utc)
-    return converted
+    if candidate.tzinfo is None:
+        return candidate.replace(tzinfo=UTC)
+    return candidate.astimezone(UTC)
 
 
 DEFAULT_TIMESTAMP_10M_AGO: datetime = to_utc(datetime.now(tz=DEFAULT_TZ) - timedelta(minutes=10))
@@ -30,14 +27,19 @@ DEFAULT_TIMESTAMP_10Y_AGO: datetime = to_utc(datetime.now(tz=DEFAULT_TZ) - timed
 
 def parse_timestamp(candidate: str | Any) -> datetime:
     """
-    Expected something like 2022-02-08T16:32:14.900292+0000
+    Expected something like 2022-02-08T16:32:14.900292+0000 or 2022-02-08T16:32:14.900292+00:00
+    Python 3.11+ fromisoformat handles timezone offsets natively.
     :param candidate:
     :return:
     """
     if isinstance(candidate, str):
         try:
-            iso_candidate = candidate.split('+', 1)[0]
-            return to_utc(datetime.fromisoformat(iso_candidate))
+            # Python 3.11+ fromisoformat handles +0000 and +00:00 formats
+            # For older Python versions, we normalize the timezone suffix
+            if (candidate[-5] == '+' or candidate[-5] == '-') and candidate[-3] != ':':
+                # Format like +0000 -> +00:00
+                candidate = candidate[:-2] + ':' + candidate[-2:]
+            return to_utc(datetime.fromisoformat(candidate))
         except ValueError as ex:
             raise ValueError(f"Invalid date passed: {candidate}") from ex
     else:

@@ -1,29 +1,28 @@
 """
-Host data use application
+Top user application related code
 """
-import inspect
 from pathlib import Path
 
 import pyperclip
 from textual import work
 from textual.app import App, ComposeResult, CSSPathType
 from textual.driver import Driver
-from textual.widgets import Digits, Footer, Header
+from textual.widgets import Footer, Header, RichLog
 
 from suricatalog import BASEDIR
-from suricatalog.clipboard import copy_from_digits
+from suricatalog.clipboard import copy_from_richlog
 from suricatalog.filter import BaseFilter
 from suricatalog.log import EveLogHandler
-from suricatalog.report import HostDataUseReport
+from suricatalog.report import TopUserAgents
 
 
-class HostDataUse(App):
+class TopUserApp(App):
     """
-    Host data usage application
+    Show top users
     """
     BINDINGS = [
         ("q", "quit_app", "Quit"),
-        ("y,c", "copy_digits", "Copy to clipboard")
+        ("y,c", "copy_log", "Copy to clipboard")
     ]
     CSS_PATH = BASEDIR.joinpath('css').joinpath('canned.tcss')
     ENABLE_COMMAND_PALETTE = False
@@ -33,40 +32,36 @@ class HostDataUse(App):
             driver_class: type[Driver] | None = None,
             css_path: CSSPathType | None = None,
             watch_css: bool = False,
-            ip_address: str = None,
             data_filter: BaseFilter = None,
             eve: list[Path] = None
-
     ):
         """
         Constructor
         :param driver_class:
         :param css_path:
         :param watch_css:
-        :param ip_address:
         :param data_filter:
         :param eve:
         """
         super().__init__(driver_class, css_path, watch_css)
-        self.ip_address = ip_address
-        self.data_filter: BaseFilter = data_filter
-        self.eve = eve
+        self.data_filter = data_filter
+        self.eve_files = eve
 
     def action_quit_app(self) -> None:
         """
-        Quit application
+        Exit app
         :return:
         """
-        self.exit("Exiting Net-Flow now...")
+        self.exit("Exiting Top user now...")
 
-    def action_copy_digits(self) -> None:
+    def action_copy_log(self) -> None:
         """
         Copy contents to the clipboard
         :return:
         """
-        digits = self.query_one(Digits)
+        rich_log = self.query_one(RichLog)
         try:
-            _, ln = copy_from_digits(digits)
+            _, ln = copy_from_richlog(rich_log)
             self.notify(f"Copied {ln} characters!", title="Copied selection")
         except pyperclip.PyperclipException as exc:
             # Show a toast popup if we fail to copy.
@@ -78,30 +73,31 @@ class HostDataUse(App):
 
     def compose(self) -> ComposeResult:
         """
-        Place components of the app on screen
+        Component placement
         :return:
         """
         yield Header()
-        digits = Digits(id="netflow")
-        digits.loading = True
-        digits.tooltip = inspect.cleandoc("""
-            Net FLow in bytes.
-            """)
-        yield digits
+        pretty = RichLog(
+            id="agent",
+            highlight=True,
+            auto_scroll=True
+        )
+        pretty.loading = True
+        yield pretty
         yield Footer()
 
-    @work(exclusive=True, thread=True)
+    @work(exclusive=False, thread=True)
     async def on_mount(self) -> None:
         """
-        Initialize TUI components with data
+        Populate TUI components with data
         :return:
         """
-        host_data_user_report = HostDataUseReport()
+        top_user_agents = TopUserAgents()
+        log = self.query_one("#agent", RichLog)
+        log.loading = False
         eve_lh = EveLogHandler()
         for event in eve_lh.get_events(
-                eve_files=self.eve,
+                eve_files=self.eve_files,
                 data_filter=self.data_filter):
-            await host_data_user_report.ingest_data(event, self.ip_address)
-        digits = self.query_one('#netflow', Digits)
-        digits.update(f"{host_data_user_report.bytes:n} bytes")
-        digits.loading = False
+            top_user_agents.ingest_data(event)
+        log.write(top_user_agents.agents)
