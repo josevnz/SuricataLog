@@ -118,4 +118,4 @@ class ErrorScreen(ModalScreen):
         :param _:
         :return:
         """
-        sys.exit(100)
+        self.app.pop_screen()

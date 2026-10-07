@@ -185,6 +185,8 @@ class TableAlertApp(BaseAlertApp):
             dest_ip_port = f"{brief_data['dest_ip']}:{brief_data['dest_port']}"
             src_ip_port = f"{brief_data['src_ip']}:{brief_data['src_port']}"
             payload_printable = brief_data['payload_printable']
+            # Store full event for detail view, keyed by timestamp
+            self.events[timestamp] = event
             batch_of_events.append([
                 timestamp,
                 severity,
@@ -195,7 +197,6 @@ class TableAlertApp(BaseAlertApp):
                 payload_printable
             ])
             alert_cnt += 1
-            # Don't store full event to save memory - only store if needed for detail view
             if len(batch_of_events) >= chunk and not worker.is_cancelled:
                 self.call_from_thread(alerts_tbl.add_rows, batch_of_events)
                 batch_of_events = []
@@ -216,13 +217,16 @@ class TableAlertApp(BaseAlertApp):
             )
 
         if not alert_cnt:
-            val = self.call_from_thread(
-                self.show_error,
-                reason="Could not recover a single alert.",
-                trace=None
+            self.call_from_thread(
+                self.notify,
+                title="No alerts found",
+                timeout=10,
+                severity="warning",
+                message=inspect.cleandoc(f"""
+                    No alerts matched the current filter.
+                    The table will remain empty.
+                    """)
             )
-            if val:
-                await val
 
     async def on_mount(self) -> None:
         """
