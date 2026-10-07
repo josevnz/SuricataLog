@@ -222,7 +222,7 @@ class TableAlertApp(BaseAlertApp):
                 title="No alerts found",
                 timeout=10,
                 severity="warning",
-                message=inspect.cleandoc(f"""
+                message=inspect.cleandoc("""
                     No alerts matched the current filter.
                     The table will remain empty.
                     """)

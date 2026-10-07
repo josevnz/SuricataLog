@@ -1,7 +1,6 @@
 """
 Screen logic
 """
-import sys
 from traceback import StackSummary
 
 from textual import on
